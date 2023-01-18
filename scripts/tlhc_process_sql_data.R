@@ -40,9 +40,10 @@ convert_string_to_date <- function(str_date) {
     '%d/%m/%Y',                 #e.g. 01/01/2022
     '%d/%m/%Y %H:%M',           #e.g. 01/02/2022 10:30
     '%b %d %Y %H:%M',           #e.g. Mar 1 2022 11:30
-    '%d-%b-%y',                 #e.g. 01-04-22
+    '%d-%m-%y',                 #e.g. 01-04-22
     '%Y-%m-%d %H:%M:%S',        #e.g. 2022-05-01 00:00:00
-    '%Y%m%d'                    #e.g. 20220101
+    '%Y%m%d',                   #e.g. 20220101
+    '%d-%b-%y'                  #e.g. 25-Aug-21
   )
   
   # convert the date
