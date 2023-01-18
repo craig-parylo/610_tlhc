@@ -680,7 +680,7 @@ manage_table_processing <- function(str_table) {
   # save the new file
   saveRDS(
     object = df_calc,
-    file = here('mi_data', 'tlhc', paste0('calc_', str_table, '.Rds'))
+    file = here('data', 'tlhc', paste0('calc_', str_table, '.Rds'))
   )
   
   # update the user
@@ -701,10 +701,10 @@ cat(paste('⏱️', Sys.time(), 'Processing SQL tables, please wait ...\n', sep 
 df_projectlu <- readRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
 df_lsoalu <- readRDS(file = here('data', 'tlhc', 'lkp_LSOADeprivation2019.Rds')) |> ungroup()
 df_ruralitylu <- readRDS(file = here('data', 'tlhc', 'Rural_Urban_Classification.Rds')) |> ungroup()
-df_marital_status <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'marital_status.xlsx')) |> ungroup()
+df_marital_status <- read.xlsx(xlsxFile = here('data', 'reference', 'marital_status.xlsx')) |> ungroup()
 #df_ethnicitylu <- readRDS(file = here('mi_data', 'tlhc', 'EthnicityLookup.Rds')) |> ungroup() # NB, this one is faulty.
-df_ethnicitylu <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'ethnicity.xlsx')) |> ungroup() |> unique()
-df_languagelu <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'language.xlsx')) |> ungroup() |> unique()
+df_ethnicitylu <- read.xlsx(xlsxFile = here('data', 'reference', 'ethnicity.xlsx')) |> ungroup() |> unique()
+df_languagelu <- read.xlsx(xlsxFile = here('data', 'reference', 'language.xlsx')) |> ungroup() |> unique()
 
 ## list tables to process
 df_table_details <- tibble(
