@@ -14,7 +14,7 @@ library(progressr)     # progress bar
 library(tictoc)        # timing monitor
 library(fuzzyjoin)     # joining on fuzzy word matches
 source(here('scripts', 'func_name_projects.R')) # naming projects
-source(here('scripts', 'tlhc_metrics_functions.R')) # functions for loading metric data
+source(here('scripts', 'tlhc_metric_functions.R')) # functions for loading metric data
 
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
