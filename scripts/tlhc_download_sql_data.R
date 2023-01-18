@@ -27,6 +27,7 @@ library(tictoc)        # timing processes
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
 cat('== tlhc_download_sql_data.R ===============================================\n')
+cat(paste('⚠️', Sys.time(), 'Please allow up to 20 minutes for this process to run...\n'))
 tic()
 
 # Setup ------------------------------------------------------------------------
@@ -112,7 +113,7 @@ download_tlhc_table <- function(str_table = '') {
   )
   
   # housekeeping
-  dbDisconnect(con)
+  #dbDisconnect(con)
   rm(df)
 }
 
@@ -129,28 +130,28 @@ df_projectlu <- tbl(con, in_schema('dbo', 'dboProjectLookup')) |>
   collect() 
 
 df_projectlu |> 
-  saveRDS(file = here('mi_data', 'tlhc', 'dboProjectLookup.Rds'))
+  saveRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds'))
 
 # lsoa lookup ----
 df_lsoalu <- tbl(con2, in_schema('REF','lkp_LSOADeprivation2019')) |> 
   collect()
 
 df_lsoalu |> 
-  saveRDS(file = here('mi_data', 'tlhc', 'lkp_LSOADeprivation2019.Rds'))
+  saveRDS(file = here('data', 'tlhc', 'lkp_LSOADeprivation2019.Rds'))
 
 # rurality lookup ----
 df_ruralitylu <- tbl(con, in_schema('dbo', 'Rural_Urban_Classification')) |> 
   collect()
 
 df_ruralitylu |> 
-  saveRDS(file = here('mi_data', 'tlhc', 'Rural_Urban_Classification.Rds'))
+  saveRDS(file = here('data', 'tlhc', 'Rural_Urban_Classification.Rds'))
 
 # ethnicity lookup ----
 df_ethnicitylu <- tbl(con, in_schema('dbo', 'EthnicityLookup')) |> 
   collect()
 
 df_ethnicitylu |> 
-  saveRDS(file = here('mi_data', 'tlhc', 'EthnicityLookup.Rds'))
+  saveRDS(file = here('data', 'tlhc', 'EthnicityLookup.Rds'))
 
 # Download data ----------------------------------------------------------------
 
