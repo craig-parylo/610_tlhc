@@ -667,7 +667,7 @@ process_tlhc_table <- function(df, str_table = '') {
 manage_table_processing <- function(str_table) {
   
   # read the file
-  df <- readRDS(file = here('mi_data', 'tlhc', paste0(str_table, '.Rds'))) |> ungroup()
+  df <- readRDS(file = here('data', 'tlhc', paste0(str_table, '.Rds'))) |> ungroup()
   
   # process the file
   df_calc <- process_tlhc_table(df, str_table = str_table)
@@ -698,13 +698,13 @@ cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
 cat(paste('⏱️', Sys.time(), 'Processing SQL tables, please wait ...\n', sep = ' '))
 
 ## project lookups (used as reference) ----
-df_projectlu <- readRDS(file = here('mi_data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
-df_lsoalu <- readRDS(file = here('mi_data', 'tlhc', 'lkp_LSOADeprivation2019.Rds')) |> ungroup()
-df_ruralitylu <- readRDS(file = here('mi_data', 'tlhc', 'Rural_Urban_Classification.Rds')) |> ungroup()
-df_marital_status <- read.xlsx(xlsxFile = here('mi_data', 'tlhc', 'reference', 'marital_status.xlsx')) |> ungroup()
+df_projectlu <- readRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
+df_lsoalu <- readRDS(file = here('data', 'tlhc', 'lkp_LSOADeprivation2019.Rds')) |> ungroup()
+df_ruralitylu <- readRDS(file = here('data', 'tlhc', 'Rural_Urban_Classification.Rds')) |> ungroup()
+df_marital_status <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'marital_status.xlsx')) |> ungroup()
 #df_ethnicitylu <- readRDS(file = here('mi_data', 'tlhc', 'EthnicityLookup.Rds')) |> ungroup() # NB, this one is faulty.
-df_ethnicitylu <- read.xlsx(xlsxFile = here('mi_data', 'tlhc', 'reference', 'ethnicity.xlsx')) |> ungroup() |> unique()
-df_languagelu <- read.xlsx(xlsxFile = here('mi_data', 'tlhc', 'reference', 'language.xlsx')) |> ungroup() |> unique()
+df_ethnicitylu <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'ethnicity.xlsx')) |> ungroup() |> unique()
+df_languagelu <- read.xlsx(xlsxFile = here('data', 'tlhc', 'reference', 'language.xlsx')) |> ungroup() |> unique()
 
 ## list tables to process
 df_table_details <- tibble(
