@@ -1,0 +1,67 @@
+Marital_Status,n
+     ,3501
+ unknown,545
+(1334.) Divorced,216
+(1335.) Widowed,17
+(1336.) Cohabiting,12
+(133C.) Widower,85
+(133F.) Marital state unknown,130
+(13HE.) Engaged to be married,1
+(Ua0HZ) Common law partnership,4
+(Xa0rc) Remarried,1
+(XaMz3) Married/civil partner,707
+(XaMz4) Divorced/person whose civil part,3
+(XaMz6) Widowed/surviving civil partner,5
+(XaMz7) Marital/civil state not disclose,2
+(XE0oa) Married,272
+(XE0ob) Separated,57
+(XE0oZ) Single person,209
+(XM1bG) Husband left home,1
+(XM1bH) Wife left home,1
+(Y0673) Married/Civil Partner,3
+(Y0674) Divorced/Person whose Civil Part,1
+(Y2771) Single - living alone,2
+CHECK,2
+Civil partnership has been dissolved,5
+Civil state unknown,1
+Cohabiting,75
+Common law partnership,42
+Common Law Relationship,5
+Commonlawpartnership,12
+Divorced,13763
+Divorced/person,12
+Husband left home,1
+Husbandlefthome,1
+Marital state not disclosed,2
+Marital state unknown,2274
+Marital/civil state not disclosed,4
+Marital/civilstatenotdisclosed,5
+Maritalstateunknown,885
+Married,2594
+Married or civil partner,53229
+Married or Civil Partner,99
+Married/civil partner,6488
+Married/Civil Partner,42
+Married/civilpartner,59
+not disclosed,6
+NULL,99684
+Null ,11
+Prefer not to say,79080
+Remarried,2
+Separated,2776
+Seperated,3
+Single,25583
+Single (& [unmarried]),38
+Single person,540
+Single(&[unmarried]),15
+Singleperson,169
+unknown,541
+Unknown,30
+Widow(er),6108
+Widowed,1247
+Widowed/surviving civil partner,11
+Widowed/survivingcivilpartner,5
+Widower,24
+Wife left home,3
+Wifelefthome,1
+NA,163699
