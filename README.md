@@ -1,4 +1,5 @@
-# 610 Targeted Lung Health Check Programme
+# 610 Targeted Lung Health Check Programme [<img src="https://www.strategyunitwm.nhs.uk/themes/custom/ie_bootstrap/logo.svg" title="The Strategy Unit" alt="The Strategy Unit Logo" align="right" height="80"/>](https://www.strategyunitwm.nhs.uk/)
+
 This project contains the R code to produce metric reports as part of the [Targeted Lung Health Check Programme](https://www.england.nhs.uk/contact-us/privacy-notice/how-we-use-your-information/our-services/evaluation-of-the-targeted-lung-health-check-programme/).
 
 To run this code you need to clone the repository in Rstudio.
