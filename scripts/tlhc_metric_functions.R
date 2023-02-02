@@ -368,8 +368,8 @@ identify_eligible_participants <- function(df) {
 
 #' Identify risk group of participants based on their lhc screening scores
 #' 
-#' For participants of a given df identify their risk status based on the the 
-#' two risk scores, (PLCOm2012 or LLPv2).
+#' For participants of a given df identify their risk status based on either of
+#' the two risk scores, (PLCOm2012 or LLPv2).
 #' 
 #' @param df Tibble of data to add risk status to
 #' 
