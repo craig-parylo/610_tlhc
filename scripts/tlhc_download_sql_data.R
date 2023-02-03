@@ -19,8 +19,10 @@ library(DBI)           # database connections
 library(dbplyr)        # tidy database processing
 library(lubridate)     # date functions
 library(zoo)           # date functions (yearmonths)
-library(furrr)         # parallel processing
-library(future)        # parallel processing
+# library(purrr)         # processing
+# library(future.apply)
+# library(furrr)         # parallel processing
+# library(future)        # parallel processing
 library(progressr)     # progress bars
 library(tictoc)        # timing processes
 
@@ -58,6 +60,10 @@ download_tlhc_table <- function(str_table = '') {
   # create a connection
   con <- dbConnect(
     odbc::odbc(),
+    # Driver = 'SQL Server',
+    # Server = 'MLCSU-BI-SQL',
+    # Database = 'TLHC_Reporting',
+    # Port = 1433
     .connection_string = "Driver={SQL Server};SERVER=MLCSU-BI-SQL;DATABASE=TLHC_Reporting"
   )
   
@@ -69,10 +75,11 @@ download_tlhc_table <- function(str_table = '') {
       #head(n=100000) |> # temporary - for testing
       group_by(ParticipantID, LDCT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      slice_max(FileId) |> # get record(s) with the latest file id
+      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
+      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
+      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
       collect() # download the data
     
   } else if (str_table == 'tbTLHCTLHC_Pathway_Diagnostics'){
@@ -82,10 +89,11 @@ download_tlhc_table <- function(str_table = '') {
       #head(n=100000) |> # temporary - for testing
       group_by(ParticipantID, Full_Dose_CT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      slice_max(FileId) |> # get record(s) with the latest file id
+      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
+      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
+      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
       collect() # download the data
     
   } else {
@@ -95,10 +103,12 @@ download_tlhc_table <- function(str_table = '') {
       #head(n=100000) |> # temporary - for testing
       group_by(ParticipantID) |> # get one record for each participant:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      slice_max(FileId) |> # get record(s) with the latest file id
+      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
+      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
+      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      #slice_max(ParticipantID, n = 1) |> # get the last record in the group (handles any possible remaining duplicates)
+      filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
       collect() # download the data
   }
   
@@ -113,7 +123,7 @@ download_tlhc_table <- function(str_table = '') {
   )
   
   # housekeeping
-  #dbDisconnect(con)
+  dbDisconnect(con)
   rm(df)
 }
 
@@ -153,6 +163,10 @@ df_ethnicitylu <- tbl(con, in_schema('dbo', 'EthnicityLookup')) |>
 df_ethnicitylu |> 
   saveRDS(file = here('data', 'tlhc', 'EthnicityLookup.Rds'))
 
+# housekeeping
+dbDisconnect(con)
+dbDisconnect(con2)
+
 # Download data ----------------------------------------------------------------
 
 ## list tables to download
@@ -169,7 +183,34 @@ df_table_details <- tibble(
   )
 )
 
+# NOTE: repeated error messages referring to 'general network error' means the 
+# parallel processing approach seems to be failing, so have worked out that lapply
+# in a serial process is more reliable.
+
 # Set up the progress bar and parallel processing
+# handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the progress indicator
+# plan('multisession') # set up the future.apply package
+# 
+# # begin parallel processes
+# with_progress({
+#   
+#   # set up progress bar  
+#   p <- progressor(steps = length(df_table_details$table))
+#   
+#   # call function to download table data
+#   df_table_details <- df_table_details |>
+#     mutate(
+#       data = future_pmap(
+#         .l = list(table),
+#         .f = download_tlhc_table,
+#         .options = furrr_options(seed=NULL)
+#       )
+#     )
+#   
+# })
+
+
+# not parallel processed
 handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the progress indicator
 plan('multisession') # set up the future.apply package
 
@@ -180,16 +221,16 @@ with_progress({
   p <- progressor(steps = length(df_table_details$table))
   
   # call function to download table data
-  df_table_details <- df_table_details |>
-    mutate(
-      data = future_pmap(
-        .l = list(table),
-        .f = download_tlhc_table,
-        .options = furrr_options(seed=NULL)
-      )
-    )
+  # this works but it quite slow ------------------------
+  lapply(
+    X = df_table_details$table,
+    FUN = download_tlhc_table
+  )
   
 })
+
+
+
 
 # notify the user
 cat(paste('☑️', Sys.time(), 'SQL tables loaded\n', sep = ' '))
