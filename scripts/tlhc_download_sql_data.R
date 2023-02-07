@@ -212,9 +212,8 @@ df_table_details <- tibble(
 
 # not parallel processed
 handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the progress indicator
-plan('multisession') # set up the future.apply package
 
-# begin parallel processes
+# begin serial download processes
 with_progress({
   
   # set up progress bar  
