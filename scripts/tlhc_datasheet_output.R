@@ -13,6 +13,7 @@ library(here)        # localised filepaths
 library(furrr)       # parallel processing
 library(progressr)   # progress bar
 library(lubridate)   # working with dates
+library(zoo)         # working with dates (yearmon)
 library(janitor)     #
 
 # config -----------------------------------------------------------------------
