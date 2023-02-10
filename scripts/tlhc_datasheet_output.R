@@ -16,7 +16,7 @@ library(lubridate)   # working with dates
 library(janitor)     #
 
 # config -----------------------------------------------------------------------
-months_backwards <- 2 # the number of months backwards to generate reports
+months_backwards <- 12 # the number of months backwards to generate reports
 
 # use this if refreshing from the start of the programme:
 #months_backwards <- abs(interval(as.Date('2019-04-01'), floor_date(today(), unit = 'month') %m-% months(2)) %/% months(1))
@@ -274,7 +274,7 @@ cat(paste('☑️', Sys.time(), 'Data prepared\n', sep = ' '))
 cat(paste('⏱️', Sys.time(), 'Generating datasheets, please wait ...\n', sep = ' '))
 
 # open the folder (or create if it doesn't exist)
-if(!file.exists(here('data', 'datasheets')){dir.create(path = here('data', 'datasheets'))})
+if(!file.exists(here('data', 'datasheets'))){dir.create(path = here('data', 'datasheets'))}
 browseURL(url = here('data', 'datasheets'))
 
 # generate datasheet files for these projects for these months
