@@ -88,11 +88,21 @@ process_alltables <- function(df) {
     # flag valid transaction ids (only applicable for C&M at the moment)
     group_by(calc_submitting_organisation_code) |> 
     mutate(
-      calc_valid_transactionid = ifelse(
+      # calc_valid_transactionid = ifelse(
+      #   # C&M submission which is not the latest one
+      #   (calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)),
+      #   'Invalid',
+      #   'Valid'
+      # )
+      calc_valid_transactionid = case_when(
         # C&M submission which is not the latest one
-        (calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)),
-        'Invalid',
-        'Valid'
+        (calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)) ~ 'Invalid',
+        
+        # North Kirklees / Bradford errant LDCT submission with all records on the same date
+        TransactionId == 187617 ~ 'Invalid',
+        
+        # Else mark as valid
+        TRUE ~ 'Valid'
       )
     ) |> 
     ungroup()
