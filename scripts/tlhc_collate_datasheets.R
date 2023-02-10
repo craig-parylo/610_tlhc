@@ -261,7 +261,7 @@ rm(p)
 
 # Display a list of excluded files (ignore archived files)
 cat(paste('⚠️', Sys.time(), '...', length(files_excluded$folder_file), 'files excluded - displaying for review\n', sep = ' '))
-view(files_excluded |> filter(str_detect(folder_file, 'archive|Archived', negate = T)))
+view(files_excluded |> filter(str_detect(folder_file, 'archive|Archive', negate = T)))
 
 
 ## Extract data ----
