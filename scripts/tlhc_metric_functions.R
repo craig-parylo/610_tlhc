@@ -1122,7 +1122,7 @@ get_df_metric_5b_ldct_initial_dna <- function() {
   return(df_ldct)
 }
 
-#' Get a dataframe for metric 5c - participants who had a 3 month follow-up Low Dose CT scan performed
+#' Get a dataframe for metric 5d - participants who had a 3 month follow-up Low Dose CT scan performed
 #' 
 #' Return a record-level tibble in support of calculating the metric for 
 #' 3 month follow-up low dose CT scans performed
@@ -1131,9 +1131,9 @@ get_df_metric_5b_ldct_initial_dna <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_5c_ldct_3_month <- function() {
+get_df_metric_5d_ldct_3_month <- function() {
   
-  p('df for metric 5c')
+  p('df for metric 5d')
   
   # load the data if not already loaded
   if(!exists('df_ldct')){df_ldct <- load_df_ldct()}
@@ -1142,7 +1142,7 @@ get_df_metric_5c_ldct_3_month <- function() {
   df_ldct <- df_ldct |> 
     # add fields identifying the metric
     mutate(
-      metric_id = '5c',
+      metric_id = '5d',
       metric_name = 'Number of participants who had a 3 month follow-up Low Dose CT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
@@ -1161,7 +1161,7 @@ get_df_metric_5c_ldct_3_month <- function() {
   return(df_ldct)
 }
 
-#' Get a dataframe for metric 5d - participants who had a 12 month follow-up Low Dose CT scan performed
+#' Get a dataframe for metric 5e - participants who had a 12 month follow-up Low Dose CT scan performed
 #' 
 #' Return a record-level tibble in support of calculating the metric for 
 #' 12 month follow-up low dose CT scans performed
@@ -1170,9 +1170,9 @@ get_df_metric_5c_ldct_3_month <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_5d_ldct_12_month <- function() {
+get_df_metric_5e_ldct_12_month <- function() {
   
-  p('df for metric 5d')
+  p('df for metric 5e')
   
   # load the data if not already loaded
   if(!exists('df_ldct')){df_ldct <- load_df_ldct()}
@@ -1181,7 +1181,7 @@ get_df_metric_5d_ldct_12_month <- function() {
   df_ldct <- df_ldct |> 
     # add fields identifying the metric
     mutate(
-      metric_id = '5d',
+      metric_id = '5e',
       metric_name = 'Number of participants who had a 12 month follow-up Low Dose CT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
@@ -1200,7 +1200,7 @@ get_df_metric_5d_ldct_12_month <- function() {
   return(df_ldct)
 }
 
-#' Get a dataframe for metric 5e - participants who had a 24 month follow-up Low Dose CT scan performed
+#' Get a dataframe for metric 5f - participants who had a 24 month follow-up Low Dose CT scan performed
 #' 
 #' Return a record-level tibble in support of calculating the metric for 
 #' 12 month follow-up low dose CT scans performed
@@ -1209,9 +1209,9 @@ get_df_metric_5d_ldct_12_month <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_5e_ldct_24_month <- function() {
+get_df_metric_5f_ldct_24_month <- function() {
   
-  p('df for metric 5e')
+  p('df for metric 5f')
   
   # load the data if not already loaded
   if(!exists('df_ldct')){df_ldct <- load_df_ldct()}
@@ -1220,7 +1220,7 @@ get_df_metric_5e_ldct_24_month <- function() {
   df_ldct <- df_ldct |> 
     # add fields identifying the metric
     mutate(
-      metric_id = '5e',
+      metric_id = '5f',
       metric_name = 'Number of participants who had a 24 month follow-up Low Dose CT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
@@ -1239,7 +1239,7 @@ get_df_metric_5e_ldct_24_month <- function() {
   return(df_ldct)
 }
 
-#' Get a dataframe for metric 5f - participants who had a 48 month follow-up Low Dose CT scan performed
+#' Get a dataframe for metric 5g - participants who had a 48 month follow-up Low Dose CT scan performed
 #' 
 #' Return a record-level tibble in support of calculating the metric for 
 #' 48 month follow-up low dose CT scans performed
@@ -1248,9 +1248,9 @@ get_df_metric_5e_ldct_24_month <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_5f_ldct_48_month <- function() {
+get_df_metric_5g_ldct_48_month <- function() {
   
-  p('df for metric 5f')
+  p('df for metric 5g')
   
   # load the data if not already loaded
   if(!exists('df_ldct')){df_ldct <- load_df_ldct()}
@@ -1259,7 +1259,7 @@ get_df_metric_5f_ldct_48_month <- function() {
   df_ldct <- df_ldct |> 
     # add fields identifying the metric
     mutate(
-      metric_id = '5f',
+      metric_id = '5g',
       metric_name = 'Number of participants who had a 48 month follow-up Low Dose CT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
@@ -2385,23 +2385,13 @@ calculate_metric_5b <- function() {
   
 }
 
-#' Calculate metric 5c performance
-#'
-#' @return df Tibble of aggregated performance by project and month for metric 5c
-calculate_metric_5c <- function() {
-  
-  # get a dataframe with our data and aggregate
-  df <- get_df_metric_5c_ldct_3_month() |> aggregate_metric_standard()
-  
-}
-
 #' Calculate metric 5d performance
 #'
 #' @return df Tibble of aggregated performance by project and month for metric 5d
 calculate_metric_5d <- function() {
   
   # get a dataframe with our data and aggregate
-  df <- get_df_metric_5d_ldct_12_month() |> aggregate_metric_standard()
+  df <- get_df_metric_5d_ldct_3_month() |> aggregate_metric_standard()
   
 }
 
@@ -2411,7 +2401,7 @@ calculate_metric_5d <- function() {
 calculate_metric_5e <- function() {
   
   # get a dataframe with our data and aggregate
-  df <- get_df_metric_5e_ldct_24_month() |> aggregate_metric_standard()
+  df <- get_df_metric_5e_ldct_12_month() |> aggregate_metric_standard()
   
 }
 
@@ -2421,7 +2411,17 @@ calculate_metric_5e <- function() {
 calculate_metric_5f <- function() {
   
   # get a dataframe with our data and aggregate
-  df <- get_df_metric_5f_ldct_48_month() |> aggregate_metric_standard()
+  df <- get_df_metric_5f_ldct_24_month() |> aggregate_metric_standard()
+  
+}
+
+#' Calculate metric 5g performance
+#'
+#' @return df Tibble of aggregated performance by project and month for metric 5g
+calculate_metric_5g <- function() {
+  
+  # get a dataframe with our data and aggregate
+  df <- get_df_metric_5g_ldct_48_month() |> aggregate_metric_standard()
   
 }
 
