@@ -273,7 +273,8 @@ cat(paste('☑️', Sys.time(), 'Data prepared\n', sep = ' '))
 # notify re: long process
 cat(paste('⏱️', Sys.time(), 'Generating datasheets, please wait ...\n', sep = ' '))
 
-# open the folder
+# open the folder (or create if it doesn't exist)
+if(!file.exists(here('data', 'datasheets')){dir.create(path = here('data', 'datasheets'))})
 browseURL(url = here('data', 'datasheets'))
 
 # generate datasheet files for these projects for these months
