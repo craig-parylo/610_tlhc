@@ -23,7 +23,7 @@ library(tictoc)      # timing monitor
 
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== phase1_sql_output_transfer =============================================\n')
+cat('== tlhc_datasheet_transfer ================================================\n')
 tic()
 
 # Setup ------------------------------------------------------------------------
