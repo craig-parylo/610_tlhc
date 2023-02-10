@@ -103,7 +103,7 @@ with_progress({
   df_metric_7r_incidental_respiratorybronchiolitis <- get_df_metric_7r_respiratory_bronchiolitis()
   df_metric_7s_incidental_interstitiallungabnormalities <- get_df_metric_7s_interstitial_lung_abnormalities()
   df_metric_7t_incidental_othercancers <- get_df_metric_7t_incidental_other_cancers()
-  df_metric_7t_incidental_othercancers_alt <- get_df_metric_7t_incidental_other_cancers_alternate()
+  #df_metric_7t_incidental_othercancers_alt <- get_df_metric_7t_incidental_other_cancers_alternate() # nb, using the value supplied on the lung cancer data
   df_metric_7u_incidental_emphysema <- get_df_metric_7u_incidental_emphysema()
   df_metric_7_incidental_any <- get_df_metric_7_incidental_any() # nb, do this at the end of metric 7 series as relies on data loaded
   
@@ -177,7 +177,7 @@ with_progress({
   df_metric_7q <- calculate_metric_7q()
   df_metric_7r <- calculate_metric_7r()
   df_metric_7s <- calculate_metric_7s()
-  df_metric_7t <- calculate_metric_7t()
+  #df_metric_7t <- calculate_metric_7t() nb, using the value from the lung cancer aggregate report
   df_metric_7u <- calculate_metric_7u()
   df_metric_7 <- calculate_metric_7() # nb, more efficient to do this after 7a-7u
   
@@ -234,7 +234,7 @@ with_progress({
     df_metric_7q,
     df_metric_7r,
     df_metric_7s,
-    df_metric_7t,
+    #df_metric_7t, # nb, using the figures supplied in the lung cancer aggregate (df_metric_6a6f)
     df_metric_7u,
     
     df_metric_8b,
