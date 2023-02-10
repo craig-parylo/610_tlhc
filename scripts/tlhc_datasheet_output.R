@@ -15,12 +15,14 @@ library(progressr)   # progress bar
 library(lubridate)   # working with dates
 library(zoo)         # working with dates (yearmon)
 library(janitor)     #
+library(tictoc)      # process monitoring
+tic()
 
 # config -----------------------------------------------------------------------
-months_backwards <- 12 # the number of months backwards to generate reports
+#months_backwards <- 12 # the number of months backwards to generate reports
 
 # use this if refreshing from the start of the programme:
-#months_backwards <- abs(interval(as.Date('2019-04-01'), floor_date(today(), unit = 'month') %m-% months(2)) %/% months(1))
+months_backwards <- abs(interval(as.Date('2019-04-01'), floor_date(today(), unit = 'month') %m-% months(2)) %/% months(1))
 
 
 # Notify user 
@@ -300,3 +302,4 @@ cat(paste('☑️', Sys.time(), 'Datasheets generated\n', sep = ' '))
 
 # update the user
 cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+toc()
