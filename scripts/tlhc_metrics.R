@@ -15,6 +15,7 @@ library(tictoc)        # timing monitor
 library(fuzzyjoin)     # joining on fuzzy word matches
 source(here('scripts', 'func_name_projects.R')) # naming projects
 source(here('scripts', 'tlhc_metric_functions.R')) # functions for loading metric data
+readRenviron(here('.Renviron')) # project level environment variables
 
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
@@ -76,10 +77,10 @@ with_progress({
   df_metric_4b_ldct_ineligible <- get_df_metric_4b_ldct_ineligible()
   df_metric_5a_ldct_initial <- get_df_metric_5a_ldct_initial()
   df_metric_5b_ldct_initial_dna <- get_df_metric_5b_ldct_initial_dna()
-  df_metric_5c_ldct_3_month <- get_df_metric_5c_ldct_3_month()
-  df_metric_5d_ldct_12_month <- get_df_metric_5d_ldct_12_month()
-  df_metric_5e_ldct_24_month <- get_df_metric_5e_ldct_24_month()
-  df_metric_5f_ldct_48_month <- get_df_metric_5f_ldct_48_month()
+  df_metric_5d_ldct_3_month <- get_df_metric_5c_ldct_3_month()
+  df_metric_5e_ldct_12_month <- get_df_metric_5d_ldct_12_month()
+  df_metric_5f_ldct_24_month <- get_df_metric_5e_ldct_24_month()
+  df_metric_5g_ldct_48_month <- get_df_metric_5f_ldct_48_month()
   # df_metric_6a6f <- get_df_metric_6_lung_cancers_from_aggregate() # nb, not required as already aggregate
   
   df_metric_7a_incidental_consolidation <- get_df_metric_7a_incidental_consolidation()
@@ -151,10 +152,10 @@ with_progress({
   df_metric_4b <- calculate_metric_4b()
   df_metric_5a <- calculate_metric_5a()
   df_metric_5b <- calculate_metric_5b()
-  df_metric_5c <- calculate_metric_5c()
   df_metric_5d <- calculate_metric_5d()
   df_metric_5e <- calculate_metric_5e()
   df_metric_5f <- calculate_metric_5f()
+  df_metric_5g <- calculate_metric_5g()
   df_metric_6a6f <- calculate_metric_6a6f()
   
   df_metric_7a <- calculate_metric_7a()
@@ -207,10 +208,10 @@ with_progress({
     df_metric_4b,
     df_metric_5a,
     df_metric_5b,
-    df_metric_5c,
     df_metric_5d,
     df_metric_5e,
-    #  df_metric_5f, # NEW metric, not yet approved
+    df_metric_5f,
+    df_metric_5g, # NEW metric - 48 month surveillance scans
     df_metric_6a6f,
     
     df_metric_7,
