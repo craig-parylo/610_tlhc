@@ -77,10 +77,10 @@ with_progress({
   df_metric_4b_ldct_ineligible <- get_df_metric_4b_ldct_ineligible()
   df_metric_5a_ldct_initial <- get_df_metric_5a_ldct_initial()
   df_metric_5b_ldct_initial_dna <- get_df_metric_5b_ldct_initial_dna()
-  df_metric_5d_ldct_3_month <- get_df_metric_5c_ldct_3_month()
-  df_metric_5e_ldct_12_month <- get_df_metric_5d_ldct_12_month()
-  df_metric_5f_ldct_24_month <- get_df_metric_5e_ldct_24_month()
-  df_metric_5g_ldct_48_month <- get_df_metric_5f_ldct_48_month()
+  df_metric_5d_ldct_3_month <- get_df_metric_5d_ldct_3_month()
+  df_metric_5e_ldct_12_month <- get_df_metric_5e_ldct_12_month()
+  df_metric_5f_ldct_24_month <- get_df_metric_5f_ldct_24_month()
+  df_metric_5g_ldct_48_month <- get_df_metric_5g_ldct_48_month()
   # df_metric_6a6f <- get_df_metric_6_lung_cancers_from_aggregate() # nb, not required as already aggregate
   
   df_metric_7a_incidental_consolidation <- get_df_metric_7a_incidental_consolidation()
