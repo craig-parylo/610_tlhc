@@ -245,6 +245,7 @@ with_progress({
     df_metric_11,
     df_metric_12,
     df_metric_13,
+    df_metric_14
     
   ) |>
     arrange(
