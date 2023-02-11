@@ -30,3 +30,5 @@ vignettes/*.pdf
 data/tlhc/*
 # Generated html README file (not needed)
 README.html
+# Outputs folder
+outputs/
