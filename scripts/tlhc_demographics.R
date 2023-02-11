@@ -17,11 +17,9 @@ library(janitor)       # convenience function to add totals to columns
 library(writexl)       # outputs the results to excel
 library(tictoc)        # performance monitoring
 
-# library(pivottabler)
-# library(openxlsx)
-
-source(here('scripts', 'craig', 'func_name_projects.R')) # naming projects
-source(here('scripts', 'tlhc_scripts', 'tlhc_metrics_functions.R')) # functions for loading metric data
+# UDFs 
+source(here('scripts', 'func_name_projects.R')) # naming projects
+source(here('scripts', 'tlhc_metric_functions.R')) # functions for loading metric data
 
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
@@ -124,6 +122,10 @@ func_summarise_by_project_deprivation <- function(df) {
   return(
     df |> 
       #mutate(calc_lsoa_imd_decile = replace_na(calc_lsoa_imd_decile, 'Not known')) |> # ensure all deciles are labelled
+      mutate(
+        calc_lsoa_imd_decile = factor(x = calc_lsoa_imd_decile),
+        calc_lsoa_imd_decile = fct_explicit_na(calc_lsoa_imd_decile, na_level = 'Not known')
+      ) |> 
       group_by(project, calc_lsoa_imd_decile) |> 
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |> # count participants by group
       ungroup() |> 
@@ -188,7 +190,9 @@ func_flatfile_summarise_project_demographic <- function(df, str_demo, var_demo) 
       mutate(
         demographic_value = !!var_demo,                                            # alias the demographic field
         demographic = str_demo,                                                    # add in the demographic type
-        demographic_value = replace_na(demographic_value, 'Not known')             # ensure all NAs are coded
+        demographic_value = factor(x = demographic_value),                         # convert the demographic to a factor
+        #demographic_value = replace_na(demographic_value, 'Not known')             # ensure all NAs are coded
+        demographic_value = fct_explicit_na(demographic_value, na_level = 'Not known') # explicitly label NAs
       ) |> 
       group_by(project, demographic, demographic_value, metric_id, metric_name) |> # group by project, variable and metric info
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |>     # count participants
@@ -209,10 +213,14 @@ func_flatfile_summarise_project_demographic <- function(df, str_demo, var_demo) 
 # testing only ---
 # df_test <- func_flatfile_summarise_project_demographic(
 #   df = df_metric_1a_invites_first,
+#   str_demo = 'Deprivation',
+#   var_demo = calc_lsoa_imd_decile
+# )
+# df_test <- func_flatfile_summarise_project_demographic(
+#   df = df_metric_1a_invites_first,
 #   str_demo = 'Gender',
 #   var_demo = calc_sex
 # )
-
 
 
 ## overview --------------------------------------------------------------------
@@ -350,7 +358,7 @@ outputs <- list(
 # save as an Excel file for copying to the template
 write_xlsx(
   x = outputs,
-  path = here('mi_data', paste0('demographics_', today(), '.xlsx')),
+  path = here('outputs', paste0('tlhc_demographics_', today(), '.xlsx')),
   col_names = T
 )
 
@@ -479,18 +487,29 @@ df_demographic_flatfile <- bind_rows(
 )
 
 
+# test <- func_flatfile_summarise_project_demographic(
+#   df = df_metric_1a_invites_first,
+#   str_demo = 'Deprivation',
+#   var_demo = calc_lsoa_imd_decile
+# )
+
+# test <- func_flatfile_summarise_project_demographic(
+#   df = df_metric_1a_invites_first,
+#   str_demo = 'Deprivation',
+#   var_demo = calc_lsoa_imd_decile
+# )
 
 ## output the flatfile for sending ----
 # Louise stated she would like it as a .csv:
 write_csv(
   x = df_demographic_flatfile,
-  file = here('mi_data', 'flat_files', paste0('demographics_flatfile_', today(), '.csv'))
+  file = here('outputs', paste0('tlhc_demographics_flatfile_', today(), '.csv'))
 )
 
 # writing as .rds in case we can use it elsewhere
 write_rds(
   x = df_demographic_flatfile,
-  file = here('mi_data', 'flat_files', paste0('demographics_flatfile_', today(), '.Rds'))
+  file = here('data', 'tlhc', paste0('tlhc_demographics_flatfile_', today(), '.Rds'))
 )
 
 
