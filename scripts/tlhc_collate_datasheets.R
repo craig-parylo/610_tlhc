@@ -279,6 +279,14 @@ files_data <- files_data |>
     folder_file = as.character(folder_file)
   )
 
+## Data cleansing ----
+# NB, there are two versions of metric 6e throughout project history, which is confusing.
+# The old measure counted 'patients with a lung cancer diagnosis' whereas the new
+# one is interested in lung cancers that cannot be staged. This step removes any
+# old 6e values from the totals so we can be sure we're reporting just the new one.
+files_data <- files_data |> 
+  filter(!Data_Name == 'Patients with a Lung Cancer diagnosis')
+
 cat(paste('☑️', Sys.time(), 'Data collated from individual submissions\n', sep = ' '))
 
 ## Submitted data ----
