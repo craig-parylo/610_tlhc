@@ -1,0 +1,192 @@
+---
+title: "Targeted Lung Health Check user guide"
+format: 
+  html:
+    theme: 
+      light: flatly
+      dark: darkly
+    toc: true
+    toc-depth: 2
+    toc-title: Contents
+editor: visual
+---
+
+# Introduction
+
+This document provides an overview of the approach used in the calculation of data items and metrics from record-level data and in the generation of the monthly management information (MI) reports. It is split into two parts;
+
+-   Quick start - instructions on setting up your project and producing monthly reports, and
+
+-   Reference guide - explains each process in more detail and provides background information.
+
+# Quick start
+
+## First time set up
+
+If this is the first time using this R project you will first need to install the dependency libraries, and if you are working at The Strategy Unit and intend on producing reports for sharing with projects you will also need to configure some environment variables to point to network folders.
+
+### Libraries
+
+This project is produced using [renv](https://rstudio.github.io/renv/articles/renv.html) to track which libraries are used in this project, specifically which versions of these libraries, so that you can recreate the same environment to run this code.
+
+Run the following command in the Console:
+
+```{r filename='Console'}
+#| eval: false
+#| echo: true
+renv::restore()
+```
+
+The required libraries will be downloaded and installed to your project environment ready for use. Please note this step may take a little time to complete.
+
+### .Renviron
+
+If you are working at The Strategy Unit and will be involved in producing monthly management information (MI) reports then you will need access to aggregated data submission file from projects hosted on the CSU's Office 365 SharePoint server and on the Azure 'Z:/drive'.
+
+You need to manually specify the paths to these locations in a way this R project can pick up. To create your .Renviron file please run the following in the Console:
+
+```{r filename='Console'}
+#| eval: false
+#| echo: true
+usethis::edit_r_environ("project")
+```
+
+If this is the first time you are using this project the above command will create an .Renviron file in the root of the project directory and open it for editing. Add entries for `base_365` and `base_azure`, as shown in these examples and configure them to your drive mappings:
+
+```{r filename='.Renviron'}
+#| eval: false
+#| echo: true
+base_365=C:/Users/user.name/path/to/project/610/tlhc
+base_azure=//servername.nhs.uk/path/to/project/610/tlhc
+```
+
+**Please note the use of forward slashes** (instead of the usual windows backslashes) as this is what works best for the R interpreter.
+
+Save this file, close it and restart your R session for the variables to be available for use.
+
+With your dependencies loaded and your .Renviron file set up you are now set to proceed.
+
+## Logic switchboard
+
+Remembering the names of scripts and the order in which to run them can be tricky, so the following script provides convenient access to run the code used in this project. Think of it like a switchboard connecting you with the functionality within this project.
+
+[scripts/tlhc_logic.R](scripts/tlhc_logic.R "Open tlhc_logic file")
+
+To use it:
+
+-   Open the script for editing within RStudio,
+
+-   Load the `here` library (Ctrl+Enter) on line 7,
+
+-   Choose your desired process and run it by pressing Ctrl+Enter. The scripts are ordered into a typical workflow consisting of:
+
+    1.  [Downloading SQL data],
+
+    2.  [Processing downloaded data],
+
+    3.  [Calculating metric performance],
+
+    4.  Ad-hoc and DQ reports (works in progress),
+
+    5.  [Outputting datasheets] - producing monthly datasheets based on SQL data,
+
+    6.  [Transferring datasheets] - transferring these datasheets to the azure file server,
+
+    7.  [Collate datasheet information] - gather data from all datasheets from projects (SQL data and from projects who provide aggregate reports), to a single tibble
+
+    8.  [Producing TLHC report],
+
+    9.  [Producing the demographic report].
+
+Each of these steps is described in more detail in the [Reference guide] section.
+
+# Reference guide
+
+## Downloading SQL data
+
+[scripts/tlhc_download_sql_data.R](scripts/tlhc_download_sql_data.R "Click to see the data")
+
+This script manages the download of data from the SQL server.
+
+The data in question is the pseudonymised record-level data for some participants in the TLHC programme. These participants attended a care provider projects (henceforth referred to as *projects*), usually early adopters of the TLHC approach, are providing detailed data to help provide detailed views of the impact evaluation for the programme. These projects are usually early adopters of the TLHC approach, referred to as *Phase 1* projects.
+
+Not all projects provide record-level data, an increasing number provide monthly aggregate reports on their activity. These projects, typically referred to as *Phase 2 & 3* projects instead submit single-sheet summaries of their activities, such as the number of invites sent, the number of lung health checks performed, and the number of CT scans completed.
+
+Regardless of their type, each project provides monthly data conforming to the minimum dataset (MDS) which can be found the the Cancer Alliances Workspace on the NHS Futures site ([Evaluation templates](https://future.nhs.uk/canc/view?objectID=27196208)), NB, access requires an NHS Futures account and access to TLHC programme workspace.
+
+The MDS for projects submitting record-level information comprises eight tables:
+
+| Table                     | Types of data collected                                                                                                                                                                   |
+|---------------------|---------------------------------------------------|
+| Demographics              | Age at referral, CCG, LSOA of residence, ethnicity                                                                                                                                        |
+| Other History             | Pre-existing conditions identified within primary care; COPD, IHD, cancer                                                                                                                 |
+| Pathway-Invite            | Details of the invitation to attend a lung health check; date of invites and follow-ups, outcome of invite                                                                                |
+| Pathway-Lung Health Check | Attendance status, smoking history, whether in person or virtually (telephone / video call)                                                                                               |
+| Measurements              | Calculated risk scores (of lung cancer), height, weight, spirometry                                                                                                                       |
+| Pathway-LDCT              | Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialties |
+| Pathway-Diagnostics       | Detailed metrics from LDCT such as whether; full dose CT scan used, bronchoscopy undertaken                                                                                               |
+| Pathway-Smoking Cessation | Records details of who is offered, takes up and successfully completes a smoking cessation course                                                                                         |
+
+: Projects submitting record-level data usually do so either by;
+
+-   discrete monthly submissions on activity occurring the previous month, or,
+
+-   submitting their whole cohort each month in a rolling submission, or,
+
+-   occasionally, a mix of above the above two approaches.
+
+This means there is a large amount of duplicate data in the SQL database, with multiple duplicate records exist for the same patient as their record is resubmitted each month, or iterative submissions for the same patient where more details are added to their record over time.
+
+For example, a patient receiving an invitation to attend a lung health check one month may have a demographic record submitted about them and details of their invitation but an empty record for their lung health check (because it hasn't happened yet). The next month the patient receives a lung health check so the project submits a more detailed record for them which may include a more detailed demographic record (as more is known about the patient), the outcome from the invite (whether the patient accepted it or not) and details about their lung health check (what date it was on, how it took place, some details the patient gave about themselves).
+
+As the SQL database contains details for each and every successful submission there is a lot of data to work with. So the challenge facing us is how to filter all this data to give us just the pertinent information that represents the best picture of what is happening across these projects.
+
+## Processing downloaded data
+
+Process downloaded tables to convert fields to required types, calculate flags used in metric processing.
+
+## Calculating metric performance
+
+Calculate metrics based on downloaded files which have been processed.
+
+## Outputting datasheets
+
+Output the results of the SQL data collation process into separate datasheets ready to go into DATA NEW folders.
+
+## Transferring datasheets
+
+Transfer the files generated by TLHC DATASHEET OUTPUT to the DATA NEW folder.
+
+Navigate the file system on DATA NEW
+
+Test if a file exists already
+
+If it exists, then archive the current file and replace with new one
+
+If it is new then add to the file system
+
+## Collate datasheet information
+
+To provide a source of data for Management Information (MI) reporting for the TLHC project.
+
+OBJECTIVES
+
+1\. Collate submitted data (in the form of .xls\* datasheets) from participating projects to a single data source
+
+2\. Output the consolidated data as an .Rds file - for use in generating the TLHC report
+
+3\. Output a flat file for sharing with NHSE
+
+## Producing TLHC report
+
+To produce a TLHC report
+
+OBJECTIVES
+
+Load mi data file
+
+Cycle over projects and output a pivot_wider table
+
+## Producing the demographic report
+
+Calculate demographic reports

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Targeted Lung Health Check user guide</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="user_guide_files/libs/clipboard/clipboard.min.js"></script>
+<script src="user_guide_files/libs/quarto-html/quarto.js"></script>
+<script src="user_guide_files/libs/quarto-html/popper.min.js"></script>
+<script src="user_guide_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="user_guide_files/libs/quarto-html/anchor.min.js"></script>
+<link href="user_guide_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="user_guide_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="user_guide_files/libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="user_guide_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="user_guide_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="user_guide_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="user_guide_files/libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#user-guide" id="toc-user-guide" class="nav-link" data-scroll-target="#user-guide">User guide</a>
+  <ul class="collapse">
+  <li><a href="#first-time-set-up" id="toc-first-time-set-up" class="nav-link" data-scroll-target="#first-time-set-up">First time set up</a></li>
+  <li><a href="#logic-switchboard" id="toc-logic-switchboard" class="nav-link" data-scroll-target="#logic-switchboard">Logic switchboard</a></li>
+  </ul></li>
+  <li><a href="#reference-guide" id="toc-reference-guide" class="nav-link" data-scroll-target="#reference-guide">Reference guide</a>
+  <ul class="collapse">
+  <li><a href="#downloading-sql-data" id="toc-downloading-sql-data" class="nav-link" data-scroll-target="#downloading-sql-data">Downloading SQL data</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Targeted Lung Health Check user guide</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>This document provides an overview of the approach used in the calculation of data items and metrics from record-level data and in the generation of the monthly management information (MI) reports. It is split into two parts;</p>
+<ul>
+<li><p>User guide - provides step-by-step instructions to process and report data, and a</p></li>
+<li><p>Reference guide - that explains each process in more detail.</p></li>
+</ul>
+</section>
+<section id="user-guide" class="level1">
+<h1>User guide</h1>
+<section id="first-time-set-up" class="level2">
+<h2 class="anchored" data-anchor-id="first-time-set-up">First time set up</h2>
+<p>If this is the first time using this R project you will first need to install the dependency libraries, and if you are working at The Strategy Unit and intend on producing reports for sharing with projects you will also need to configure some environment variables to point to network folders.</p>
+<section id="libraries" class="level3">
+<h3 class="anchored" data-anchor-id="libraries">Libraries</h3>
+<p>This project is produced using <a href="https://rstudio.github.io/renv/articles/renv.html">renv</a> to track which libraries are used in this project, specifically which versions of these libraries, so that you can recreate the same environment to run this code.</p>
+<p>Run the following command in the Console:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Console</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>renv<span class="sc">::</span><span class="fu">restore</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>The required libraries will be downloaded and installed to your project environment ready for use. Please note this step may take a little time to complete.</p>
+</section>
+<section id="renviron" class="level3">
+<h3 class="anchored" data-anchor-id="renviron">.Renviron</h3>
+<p>If you are working at The Strategy Unit and will be involved in producing monthly management information (MI) reports then you will need access to aggregated data submission file from projects hosted on the CSU’s Office 365 SharePoint server and on the Azure ‘Z:/drive’.</p>
+<p>You need to manually specify the paths to these locations in a way this R project can pick up. To create your .Renviron file please run the following in the Console:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Console</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>usethis<span class="sc">::</span><span class="fu">edit_r_environ</span>(<span class="st">"project"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>If this is the first time you are using this project the above command will create an .Renviron file in the root of the project directory and open it for editing. Add entries for <code>base_365</code> and <code>base_azure</code>, as shown in these examples and configure them to your drive mappings:</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.Renviron</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>base_365<span class="ot">=</span>C<span class="sc">:</span><span class="er">/</span>Users<span class="sc">/</span>user.name<span class="sc">/</span>path<span class="sc">/</span>to<span class="sc">/</span>project<span class="sc">/</span><span class="dv">610</span><span class="sc">/</span>tlhc</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>base_azure<span class="ot">=</span><span class="er">//</span>servername.nhs.uk<span class="sc">/</span>path<span class="sc">/</span>to<span class="sc">/</span>project<span class="sc">/</span><span class="dv">610</span><span class="sc">/</span>tlhc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p><strong>Please note the use of forward slashes</strong> (instead of the usual windows backslashes) as this is what works best for the R interpreter.</p>
+<p>Save this file, close it and restart your R session for the variables to be available for use.</p>
+<p>With your dependencies loaded and your .Renviron file set up you are now set to proceed.</p>
+</section>
+</section>
+<section id="logic-switchboard" class="level2">
+<h2 class="anchored" data-anchor-id="logic-switchboard">Logic switchboard</h2>
+<p>Remembering the names of scripts and the order in which to run them can be tricky, so the following script provides convenient access to run the code used in this project. Think of it like a switchboard connecting you with the functionality within this project.</p>
+<p><a href="scripts/tlhc_logic.R" title="Open tlhc_logic file">scripts/tlhc_logic.R</a></p>
+<p>To use it:</p>
+<ul>
+<li><p>Open the script for editing within RStudio,</p></li>
+<li><p>Load the <code>here</code> library (Ctrl+Enter) on line 7,</p></li>
+<li><p>Choose your desired process and run it by pressing Ctrl+Enter. The scripts are ordered into a typical workflow consisting of:</p>
+<ol type="1">
+<li><p>[Downloading data] - downloading data from the SQL server,</p></li>
+<li><p>Processing the downloaded files,</p></li>
+<li><p>Calculating metric performance,</p></li>
+<li><p>Ad-hoc and DQ reports (works in progress),</p></li>
+<li><p>Producing monthly datasheets based on SQL data,</p></li>
+<li><p>Transferring these datasheets to the file server,</p></li>
+<li><p>Collating data from all datasheets from projects (SQL data and from projects who provide aggregate reports), then</p></li>
+<li><p>Producing the TLHC MI report,</p></li>
+<li><p>Producing the TLHC demographics report.</p></li>
+</ol></li>
+</ul>
+<p>Each of these steps is described in more detail in the <a href="#reference-guide">Reference guide</a> section.</p>
+</section>
+</section>
+<section id="reference-guide" class="level1">
+<h1>Reference guide</h1>
+<section id="downloading-sql-data" class="level2">
+<h2 class="anchored" data-anchor-id="downloading-sql-data">Downloading SQL data</h2>
+<p><a href="scripts/tlhc_download_sql_data.R" title="Click to see the data">scripts/tlhc_download_sql_data.R</a></p>
+<p>This script manages the download of data from the SQL server.</p>
+<p>The data in question is the pseudonymised record-level data for some participants in the TLHC programme. These participants attended a care provider projects (henceforth referred to as <em>projects</em>), usually early adopters of the TLHC approach, are providing detailed data to help provide detailed views of the impact evaluation for the programme. These projects are usually early adopters of the TLHC approach, referred to as <em>Phase 1</em> projects.</p>
+<p>Not all projects provide record-level data, an increasing number provide monthly aggregate reports on their activity. These projects, typically referred to as <em>Phase 2 &amp; 3</em> projects instead submit single-sheet summaries of their activities, such as the number of invites sent, the number of lung health checks performed, and the number of CT scans completed.</p>
+<p>Regardless of their type, each project provides monthly data conforming to the minimum dataset (MDS) which can be found the the Cancer Alliances Workspace on the NHS Futures site (<a href="https://future.nhs.uk/canc/view?objectID=27196208">Evaluation templates</a>), NB, access requires an NHS Futures account and access to TLHC programme workspace.</p>
+<p>The MDS for projects submitting record-level information comprises eight tables:</p>
+<table class="table">
+<caption>Projects submitting record-level data usually do so either by;</caption>
+<colgroup>
+<col style="width: 29%">
+<col style="width: 70%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Table</th>
+<th>Types of data collected</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Demographics</td>
+<td>Age at referral, CCG, LSOA of residence, ethnicity</td>
+</tr>
+<tr class="even">
+<td>Other History</td>
+<td>Pre-existing conditions identified within primary care; COPD, IHD, cancer</td>
+</tr>
+<tr class="odd">
+<td>Pathway-Invite</td>
+<td>Details of the invitation to attend a lung health check; date of invites and follow-ups, outcome of invite</td>
+</tr>
+<tr class="even">
+<td>Pathway-Lung Health Check</td>
+<td>Attendance status, smoking history, whether in person or virtually (telephone / video call)</td>
+</tr>
+<tr class="odd">
+<td>Measurements</td>
+<td>Calculated risk scores (of lung cancer), height, weight, spirometry</td>
+</tr>
+<tr class="even">
+<td>Pathway-LDCT</td>
+<td>Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialties</td>
+</tr>
+<tr class="odd">
+<td>Pathway-Diagnostics</td>
+<td>Detailed metrics from LDCT such as whether; full dose CT scan used, bronchoscopy undertaken</td>
+</tr>
+<tr class="even">
+<td>Pathway-Smoking Cessation</td>
+<td>Records details of who is offered, takes up and successfully completes a smoking cessation course</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>discrete monthly submissions on activity occurring the previous month, or,</p></li>
+<li><p>submitting their whole cohort each month in a rolling submission, or,</p></li>
+<li><p>occasionally, a mix of above the above two approaches.</p></li>
+</ul>
+<p>This means there is a large amount of duplicate data in the SQL database, with multiple duplicate records exist for the same patient as their record is resubmitted each month, or iterative submissions for the same patient where more details are added to their record over time.</p>
+<p>For example, a patient receiving an invitation to attend a lung health check one month may have a demographic record submitted about them and details of their invitation but an empty record for their lung health check (because it hasn’t happened yet). The next month the patient receives a lung health check so the project submits a more detailed record for them which may include a more detailed demographic record (as more is known about the patient), the outcome from the invite (whether the patient accepted it or not) and details about their lung health check (what date it was on, how it took place, some details the patient gave about themselves).</p>
+<p>As the SQL database contains details for each and every successful submission there is a lot of data to work with. So the challenge facing us is how to filter all this data to give us just the pertinent information that represents the best picture of what is happening across these projects.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  let localAlternateSentinel = 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
