@@ -280,12 +280,26 @@ files_data <- files_data |>
   )
 
 ## Data cleansing ----
-# NB, there are two versions of metric 6e throughout project history, which is confusing.
-# The old measure counted 'patients with a lung cancer diagnosis' whereas the new
-# one is interested in lung cancers that cannot be staged. This step removes any
-# old 6e values from the totals so we can be sure we're reporting just the new one.
+
 files_data <- files_data |> 
-  filter(!Data_Name == 'Patients with a Lung Cancer diagnosis')
+  # metric 6e
+  # NB, there are two versions of metric 6e throughout project history, which is confusing.
+  # The old measure counted 'patients with a lung cancer diagnosis' whereas the new
+  # one is interested in lung cancers that cannot be staged. This step removes any
+  # old 6e values from the totals so we can be sure we're reporting just the new one.
+  filter(!Data_Name == 'Patients with a Lung Cancer diagnosis') |> 
+  
+  # metric 4 - referred for ldct
+  # NB, metric 4a was previously identified by metric ID '4', this was changed with
+  # the addition of metric 4b (risk score for ldct but ineligible for scan). Many
+  # of the data collection templates still refer to metric 4, however. This process
+  # casts them all as '4a'.
+  mutate(
+    Data_ID = case_when(
+      Data_ID %in% c('4', 4) ~ '4a',
+      TRUE ~ Data_ID
+    )
+  )
 
 cat(paste('☑️', Sys.time(), 'Data collated from individual submissions\n', sep = ' '))
 
