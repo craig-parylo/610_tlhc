@@ -132,6 +132,9 @@ cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
 
 # Reference data ---------------------------------------------------------------
 
+# ensure there is a tlhc folder within the data folder
+if(!dir.exists(here('data', 'tlhc'))){dir.create(here('data', 'tlhc'))}
+
 # initiate tlhc file read process with progress indicator
 cat(paste('⏱️', Sys.time(), 'Loading SQL tables, please wait ...\n', sep = ' '))
 
