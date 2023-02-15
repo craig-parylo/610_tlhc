@@ -1,0 +1,149 @@
+---
+title: "Transaction IDs"
+format: 
+  html:
+    page-layout: full
+    theme: flatly
+editor: visual
+---
+
+```{r}
+#| label: libraries
+#| echo: false
+#| message: false
+library(tidyverse)
+library(reactable)
+library(lubridate)
+library(here)
+```
+
+```{r}
+#| label: temp_load_local_data
+#| echo: false
+# read data for display
+df <- readRDS(file = here('data', 'tlhc', 'df_latest_transact.Rds'))
+df_pivot <- readRDS(file = here('data', 'tlhc', 'df_latest_transact_pivot.Rds'))
+df_pivot_transid <- readRDS(file = here('data', 'tlhc', 'df_latest_transact_pivot_transid.Rds'))
+```
+
+```{r}
+#| label: time_since_update
+#| echo: false
+
+# function to display file age
+display_age <- function(period) {
+  return(
+    paste0(
+      #if(period$month == 0){''}else{paste0(period$month, 'month ')},
+      if(period$day == 0){''}else{paste0(period$day, 'day ')},
+      if(period$hour == 0){''}else{paste0(period$hour, 'hr ')},
+      if(period$minute == 0){''}else{paste0(period$minute, 'mins')}
+    )
+  )
+}
+
+# read the time the file was last updated
+file_info <- file.info(here('data', 'tlhc', 'df_latest_transact.Rds'))
+file_modified <- interval(start = file_info$mtime, end = now())
+file_age <- as.period(file_modified)
+file_age_text <- display_age(file_age)
+
+```
+
+Data around `r file_age_text` old
+
+::: panel-tabset
+### Includes
+
+For use when updating [TransactionID_table_MASTER.xlsx](https://csucloudservices.sharepoint.com/:x:/r/sites/CSU/strat/suteam/Shared%20Documents/Strategy%20Unit/Projects/Current/610%20Targeted%20Lung%20Health%20Checks%20Evaluation/Monthly%20MI%20reporting/SQL%20queries/TransactionID_table_MASTER.xlsx?d=waa43979196a641149433b4cf9688748b&csf=1&web=1&e=QNDllp)
+
+```{r}
+#| label: transaction_id_include
+#| echo: false
+# tweak the data
+df_pivot_transid |> 
+  select(
+    `Project` = Project_name,
+    `TransID` = TransactionId,
+    `Code` = project_code,
+    `Demo` = Demographics,
+    `LHC` = `Lung Health Checks`,
+    `Meas` = Measurements,
+    `OH` = `Other History`,
+    `Diag` = Diagnostics,
+    `Inv` = Invites,
+    LDCT,
+    `Smoking` = `Smoking cessation`
+  ) |> 
+  reactable(
+    filterable = T, 
+    pagination = F,
+    defaultColDef = colDef(
+      style = function(value) {
+        if (value %in% c('Include')) {
+          list(background = 'rgba(0, 255, 0, 0.1)', fontSize = '0.8em')
+        } else if (value %in% c('Exclude')) {
+          list(background = 'rgba(255, 0, 0, 0.1)', fontSize = '0.8em')
+        } else {
+          list(fontSize = '0.8em')
+        }
+      }
+    )
+  )
+```
+
+### Date received
+
+```{r}
+#| label: transaction_id_dates
+#| echo: false
+df_pivot |> 
+  select(
+    `Project` = Project_name,
+    `TransID` = TransactionId,
+    `Code` = project_code,
+    `Demo` = Demographics,
+    `LHC` = `Lung Health Checks`,
+    `Meas` = Measurements,
+    `OH` = `Other History`,
+    `Diag` = Diagnostics,
+    `Inv` = Invites,
+    LDCT,
+    `Smoking` = `Smoking cessation`
+  ) |> 
+  reactable(
+    filterable = T, 
+    pagination = F,
+    defaultColDef = colDef(
+      style = list(fontSize = '0.8em')
+    )
+  )
+```
+
+### Full data
+
+```{r}
+#| label: transaction_data
+#| echo: false
+df |> 
+  select(
+    `Project` = Project_name,
+    `Code` = project_code,
+    `Submitted file` = SubmittedFile,
+    `Received` = ReceivedDate,
+    `TransID` = TransactionId,
+    `User email` = UserEmail,
+    `Table` = table_name,
+    `Include` = include
+  ) |> 
+  arrange(Project, desc(Received)) |> 
+  reactable(
+    filterable = T, 
+    pagination = F,
+    resizable = T,
+    defaultColDef = colDef(
+      style = list(fontSize = '0.8em')
+    )
+  )
+```
+:::
