@@ -111,7 +111,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul class="collapse">
   <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#user-guide" id="toc-user-guide" class="nav-link" data-scroll-target="#user-guide">User guide</a>
+  <li><a href="#quick-start" id="toc-quick-start" class="nav-link" data-scroll-target="#quick-start">Quick start</a>
   <ul class="collapse">
   <li><a href="#first-time-set-up" id="toc-first-time-set-up" class="nav-link" data-scroll-target="#first-time-set-up">First time set up</a></li>
   <li><a href="#logic-switchboard" id="toc-logic-switchboard" class="nav-link" data-scroll-target="#logic-switchboard">Logic switchboard</a></li>
@@ -119,6 +119,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#reference-guide" id="toc-reference-guide" class="nav-link" data-scroll-target="#reference-guide">Reference guide</a>
   <ul class="collapse">
   <li><a href="#downloading-sql-data" id="toc-downloading-sql-data" class="nav-link" data-scroll-target="#downloading-sql-data">Downloading SQL data</a></li>
+  <li><a href="#processing-downloaded-data" id="toc-processing-downloaded-data" class="nav-link" data-scroll-target="#processing-downloaded-data">Processing downloaded data</a></li>
+  <li><a href="#calculating-metric-performance" id="toc-calculating-metric-performance" class="nav-link" data-scroll-target="#calculating-metric-performance">Calculating metric performance</a></li>
+  <li><a href="#outputting-datasheets" id="toc-outputting-datasheets" class="nav-link" data-scroll-target="#outputting-datasheets">Outputting datasheets</a></li>
+  <li><a href="#transferring-datasheets" id="toc-transferring-datasheets" class="nav-link" data-scroll-target="#transferring-datasheets">Transferring datasheets</a></li>
+  <li><a href="#collate-datasheet-information" id="toc-collate-datasheet-information" class="nav-link" data-scroll-target="#collate-datasheet-information">Collate datasheet information</a></li>
+  <li><a href="#producing-tlhc-report" id="toc-producing-tlhc-report" class="nav-link" data-scroll-target="#producing-tlhc-report">Producing TLHC report</a></li>
+  <li><a href="#producing-the-demographic-report" id="toc-producing-the-demographic-report" class="nav-link" data-scroll-target="#producing-the-demographic-report">Producing the demographic report</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -146,12 +153,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Introduction</h1>
 <p>This document provides an overview of the approach used in the calculation of data items and metrics from record-level data and in the generation of the monthly management information (MI) reports. It is split into two parts;</p>
 <ul>
-<li><p>User guide - provides step-by-step instructions to process and report data, and a</p></li>
-<li><p>Reference guide - that explains each process in more detail.</p></li>
+<li><p>Quick start - instructions on setting up your project and producing monthly reports, and</p></li>
+<li><p>Reference guide - explains each process in more detail and provides background information.</p></li>
 </ul>
 </section>
-<section id="user-guide" class="level1">
-<h1>User guide</h1>
+<section id="quick-start" class="level1">
+<h1>Quick start</h1>
 <section id="first-time-set-up" class="level2">
 <h2 class="anchored" data-anchor-id="first-time-set-up">First time set up</h2>
 <p>If this is the first time using this R project you will first need to install the dependency libraries, and if you are working at The Strategy Unit and intend on producing reports for sharing with projects you will also need to configure some environment variables to point to network folders.</p>
@@ -195,6 +202,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Save this file, close it and restart your R session for the variables to be available for use.</p>
 <p>With your dependencies loaded and your .Renviron file set up you are now set to proceed.</p>
 </section>
+<section id="native-pipe" class="level3">
+<h3 class="anchored" data-anchor-id="native-pipe">Native pipe |&gt;</h3>
+<p>This project has been written throughout using R’s native pipe operator <code>|&gt;</code> instead of the maggritr pipe operator <code>%&gt;%</code>. The native pipe operator has been available for use since R v4.1.0 and can be configured for use by enabling a global option:</p>
+<p><code>Tools</code> &gt; <code>Global Options</code> &gt; <code>Code</code> &gt; toggle on the option for <code>Use native pipe operator</code>.</p>
+</section>
 </section>
 <section id="logic-switchboard" class="level2">
 <h2 class="anchored" data-anchor-id="logic-switchboard">Logic switchboard</h2>
@@ -206,15 +218,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li><p>Load the <code>here</code> library (Ctrl+Enter) on line 7,</p></li>
 <li><p>Choose your desired process and run it by pressing Ctrl+Enter. The scripts are ordered into a typical workflow consisting of:</p>
 <ol type="1">
-<li><p>[Downloading data] - downloading data from the SQL server,</p></li>
-<li><p>Processing the downloaded files,</p></li>
-<li><p>Calculating metric performance,</p></li>
+<li><p><a href="#downloading-sql-data">Downloading SQL data</a>,</p></li>
+<li><p><a href="#processing-downloaded-data">Processing downloaded data</a>,</p></li>
+<li><p><a href="#calculating-metric-performance">Calculating metric performance</a>,</p></li>
 <li><p>Ad-hoc and DQ reports (works in progress),</p></li>
-<li><p>Producing monthly datasheets based on SQL data,</p></li>
-<li><p>Transferring these datasheets to the file server,</p></li>
-<li><p>Collating data from all datasheets from projects (SQL data and from projects who provide aggregate reports), then</p></li>
-<li><p>Producing the TLHC MI report,</p></li>
-<li><p>Producing the TLHC demographics report.</p></li>
+<li><p><a href="#outputting-datasheets">Outputting datasheets</a> - producing monthly datasheets based on SQL data,</p></li>
+<li><p><a href="#transferring-datasheets">Transferring datasheets</a> - transferring these datasheets to the azure file server,</p></li>
+<li><p><a href="#collate-datasheet-information">Collate datasheet information</a> - gather data from all datasheets from projects (SQL data and from projects who provide aggregate reports), to a single tibble</p></li>
+<li><p><a href="#producing-tlhc-report">Producing TLHC report</a>,</p></li>
+<li><p><a href="#producing-the-demographic-report">Producing the demographic report</a>.</p></li>
 </ol></li>
 </ul>
 <p>Each of these steps is described in more detail in the <a href="#reference-guide">Reference guide</a> section.</p>
@@ -224,17 +236,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h1>Reference guide</h1>
 <section id="downloading-sql-data" class="level2">
 <h2 class="anchored" data-anchor-id="downloading-sql-data">Downloading SQL data</h2>
-<p><a href="scripts/tlhc_download_sql_data.R" title="Click to see the data">scripts/tlhc_download_sql_data.R</a></p>
+<section id="pre-requisites" class="level3">
+<h3 class="anchored" data-anchor-id="pre-requisites">Pre-requisites</h3>
+<p>Licence to access MLCSU’s SQL Server<br>
+VPN connected<br>
+All packages installed (see <a href="#libraries">Libraries</a>)</p>
+</section>
+<section id="to-run" class="level3">
+<h3 class="anchored" data-anchor-id="to-run">To run</h3>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tlhc_logic.R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(<span class="st">'scripts'</span>, <span class="st">'tlhc_download_sql_data.R'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="about" class="level3">
+<h3 class="anchored" data-anchor-id="about">About</h3>
 <p>This script manages the download of data from the SQL server.</p>
 <p>The data in question is the pseudonymised record-level data for some participants in the TLHC programme. These participants attended a care provider projects (henceforth referred to as <em>projects</em>), usually early adopters of the TLHC approach, are providing detailed data to help provide detailed views of the impact evaluation for the programme. These projects are usually early adopters of the TLHC approach, referred to as <em>Phase 1</em> projects.</p>
 <p>Not all projects provide record-level data, an increasing number provide monthly aggregate reports on their activity. These projects, typically referred to as <em>Phase 2 &amp; 3</em> projects instead submit single-sheet summaries of their activities, such as the number of invites sent, the number of lung health checks performed, and the number of CT scans completed.</p>
 <p>Regardless of their type, each project provides monthly data conforming to the minimum dataset (MDS) which can be found the the Cancer Alliances Workspace on the NHS Futures site (<a href="https://future.nhs.uk/canc/view?objectID=27196208">Evaluation templates</a>), NB, access requires an NHS Futures account and access to TLHC programme workspace.</p>
 <p>The MDS for projects submitting record-level information comprises eight tables:</p>
 <table class="table">
-<caption>Projects submitting record-level data usually do so either by;</caption>
+<caption>Record-level tables</caption>
 <colgroup>
-<col style="width: 29%">
-<col style="width: 70%">
+<col style="width: 12%">
+<col style="width: 87%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -265,7 +296,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 <tr class="even">
 <td>Pathway-LDCT</td>
-<td>Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialties</td>
+<td>Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialities</td>
 </tr>
 <tr class="odd">
 <td>Pathway-Diagnostics</td>
@@ -277,6 +308,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </tr>
 </tbody>
 </table>
+<p>Projects submitting record-level data usually do so either by:</p>
 <ul>
 <li><p>discrete monthly submissions on activity occurring the previous month, or,</p></li>
 <li><p>submitting their whole cohort each month in a rolling submission, or,</p></li>
@@ -285,6 +317,216 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This means there is a large amount of duplicate data in the SQL database, with multiple duplicate records exist for the same patient as their record is resubmitted each month, or iterative submissions for the same patient where more details are added to their record over time.</p>
 <p>For example, a patient receiving an invitation to attend a lung health check one month may have a demographic record submitted about them and details of their invitation but an empty record for their lung health check (because it hasn’t happened yet). The next month the patient receives a lung health check so the project submits a more detailed record for them which may include a more detailed demographic record (as more is known about the patient), the outcome from the invite (whether the patient accepted it or not) and details about their lung health check (what date it was on, how it took place, some details the patient gave about themselves).</p>
 <p>As the SQL database contains details for each and every successful submission there is a lot of data to work with. So the challenge facing us is how to filter all this data to give us just the pertinent information that represents the best picture of what is happening across these projects.</p>
+</section>
+<section id="how-tables-are-downloaded" class="level3">
+<h3 class="anchored" data-anchor-id="how-tables-are-downloaded">How tables are downloaded</h3>
+<p>The solution for most tables is to group by <code>ParticipantID</code> and take the latest supplied data, based on the assumption that the quality and accuracy of information improves for each successive submission (or at least doesn’t get any worse).</p>
+<p>For example, a record on the Invites table contains the date a participant was invited to attend their LHC when it is submitted. Let us imagine the patient doesn’t respond to this initial invite so next month a follow-up invite is sent and that month’s submission contains a record that now contains an initial invite date and a follow-up date for this patient. Let’s then imagine the subsequent month the patient responded to the invite and their record is outcomed with the status ‘Patient accepted’ and is then submitted with an initial invite date, a follow-up invite date, and an outcome status. We now have three records for this patient in the SQL database table submitted over three successive months, where the latest supplied record contains the most complete and accurate data of the patient’s invite status. Thus the latest supplied data per participant is the record we wish to use.</p>
+<p>This approach won’t work for the LDCT and Diagnostics tables, however, as a patient can legitimately have multiple scans. The approach for these tables is to get one record per combination of participant and date of scan.</p>
+<p>The approach for downloading from the SQL server data can be described in the following table:</p>
+<table class="table">
+<caption>SQL download algorithm</caption>
+<colgroup>
+<col style="width: 13%">
+<col style="width: 86%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>TLHC table(s)</th>
+<th>How data are downloaded</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><p>Demographics</p>
+<p>Other History</p>
+<p>Invitations</p>
+<p>Lung Health Check</p>
+<p>Measurements</p>
+<p>Smoking cessation</p></td>
+<td><p>One record per <code>ParticipantID</code></p>
+<p>If multiple records per participant exist then the latest record is used, as identified from a combination of:</p>
+<ul>
+<li><p><code>ReceivedDate</code> (date the data was received by MLCSU), and</p></li>
+<li><p><code>CSURowNumber</code> (a field created by the SQL server).</p></li>
+</ul>
+<p>If multiples still exist per <code>ParticipantID</code> then the first record in the list is selected.</p></td>
+</tr>
+<tr class="even">
+<td>LDCT</td>
+<td><p>One record per combination of <code>ParticipantID</code> and <code>LDCT_Date</code></p>
+<p>If multiple records exist per combination then the latest record is used, as identified from a combination of:</p>
+<ul>
+<li><p><code>ReceivedDate</code> (date the data was received by MLCSU), and</p></li>
+<li><p><code>CSURowNumber</code> (a field created by the SQL server).</p></li>
+</ul>
+<p>If multiples still exist per combination of <code>ParticipantID</code> and <code>LDCT_Date</code> then the first record in the list is selected.</p></td>
+</tr>
+<tr class="odd">
+<td>Diagnostics</td>
+<td><p>One record per combination of <code>ParticipantID</code> and <code>Full_Dose_CT_Date</code></p>
+<p>If multiple records exist per combination then the latest record is used, as identified from a combination of:</p>
+<ul>
+<li><p><code>ReceivedDate</code> (date the data was received by MLCSU), and</p></li>
+<li><p><code>CSURowNumber</code> (a field created by the SQL server).</p></li>
+</ul>
+<p>If multiples still exist per combination of <code>ParticipantID</code> and <code>Full_Dose_CT_Date</code> then the first record in the list is selected.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="processing-downloaded-data" class="level2">
+<h2 class="anchored" data-anchor-id="processing-downloaded-data">Processing downloaded data</h2>
+<section id="pre-requisites-1" class="level3">
+<h3 class="anchored" data-anchor-id="pre-requisites-1">Pre-requisites</h3>
+<p><a href="#renviron">.Renviron</a> configured<br>
+All packages installed (see <a href="#libraries">Libraries</a>)<br>
+<a href="#downloading-sql-data">Downloading SQL data</a> step completed</p>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tlhc_logic.R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(<span class="st">'scripts'</span>, <span class="st">'tlhc_process_sql_data.R'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="about-1" class="level3">
+<h3 class="anchored" data-anchor-id="about-1">About</h3>
+<p>The aim of this script is to prepare data for metric calculations by ensuring dates are recognised and standardising commonly-used fields. It processes all eight tables downloaded from SQL in the above step and produces a further eight tables containing the original data plus the calculated dates and standardised fields.</p>
+</section>
+<section id="date-processing" class="level3">
+<h3 class="anchored" data-anchor-id="date-processing">Date processing</h3>
+<p>Dates are a vital part of the data submissions as they form the time dimension against which the MI data is reported, e.g.&nbsp;number of invitations <em>per month</em>, the number of LHCs <em>per month</em>, the number of scans undertaken <em>per month</em>.</p>
+<p>Data are submitted by projects as comma-separate text files, .csv. As such all dates are provided as character strings which need to be parsed into date types recognised by R before we can use them to work out these measures. There are a number of different patterns in use by projects:</p>
+<table class="table">
+<caption>Date parsing patterns</caption>
+<colgroup>
+<col style="width: 30%">
+<col style="width: 68%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Pattern</th>
+<th>Example submitted date to be parsed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>‘%d/%m/%Y’</td>
+<td>01/01/2022</td>
+</tr>
+<tr class="even">
+<td>‘%d/%m/%Y %H:%M’</td>
+<td>01/02/2022 10:30</td>
+</tr>
+<tr class="odd">
+<td>‘%b %d %Y %H:%M’</td>
+<td>Mar 1 2022 11:30</td>
+</tr>
+<tr class="even">
+<td>‘%d-%m-%y’</td>
+<td>01-04-22</td>
+</tr>
+<tr class="odd">
+<td>‘%Y-%m-%d %H:%M:%S’</td>
+<td>2022-05-01 00:00:00</td>
+</tr>
+<tr class="even">
+<td>‘%Y%m%d’</td>
+<td>20220101</td>
+</tr>
+<tr class="odd">
+<td>‘%d-%b-%y’</td>
+<td>25-Aug-21</td>
+</tr>
+</tbody>
+</table>
+<p>In addition some dates are supplied in Excel integer format, that is the number of days since an arbitrary date in the past, the origin point which is set as 30th December 1899 in MS Excel 365. These dates appear as a five digit string, e.g.&nbsp;<code>44971</code> corresponding to the date 14th February 2023.</p>
+</section>
+<section id="standardising-key-fields" class="level3">
+<h3 class="anchored" data-anchor-id="standardising-key-fields">Standardising key fields</h3>
+<p>There are fields containing categorical data that are crucial to the calculation of MI reports, such as whether the patient accepted their LHC invitation, or whether the patient attended their LHC, or what the outcome of the LDCT scan was.</p>
+<p>The categories of values permitted within these fields is specified in the MDS, yet, a range of values are routinely provided which first require standardising before metrics can be effectively calculated.</p>
+<p>The fields this data cleaning process is applied to includes:</p>
+<ul>
+<li><p>Invite outcome,</p></li>
+<li><p>LHC attendance category,</p></li>
+<li><p>LHC delivery mode,</p></li>
+<li><p>Reason where patients are ineligible for an LDCT,</p></li>
+<li><p>LDCT scan outcome,</p></li>
+<li><p>Smoking cessation completed successfully, and</p></li>
+<li><p>Demographic details such as gender, ethnicity, martial status, smoking status,</p></li>
+</ul>
+<p>Finally, there are a number of statuses calculated from supplied data that are required in the calculation of metrics, including:</p>
+<ul>
+<li><p>flags indicating validity of <code>ParticipantID</code> and <code>TransactionId</code> values,</p></li>
+<li><p>the name of the submitting organisation (based on <code>SubmittedZipFile</code>),</p></li>
+<li><p>the deprivation decile (based on the residential <code>LSOA</code> code for the participant),</p></li>
+<li><p>age group,</p></li>
+<li><p>eligibility of the participant for the TLHC programme (based on <code>Invite Outcome</code>),</p></li>
+<li><p>invite outcome date (depends on the latest value in <code>First_Letter_Date</code>, <code>Second_Letter_Date</code>, <code>Follow_up_call_Date</code> and <code>Contact_Date</code>), and</p></li>
+<li><p>scan sequencing and classification into initial, 3 month follow-up, 12 month follow-up, 24 month follow-up and 48 month follow-up.</p></li>
+</ul>
+<p>This processing step produces eight further .Rds files, one for each of the base tables, identified by a prefix of ‘calc_’ in the filename and stored in the ‘tlhc’ subfolder of ‘data’. These tables are now ready for use in calculating metric performance.</p>
+</section>
+</section>
+<section id="calculating-metric-performance" class="level2">
+<h2 class="anchored" data-anchor-id="calculating-metric-performance">Calculating metric performance</h2>
+<section id="pre-requisites-2" class="level3">
+<h3 class="anchored" data-anchor-id="pre-requisites-2">Pre-requisites</h3>
+<p><a href="#renviron">.Renviron</a> configured<br>
+All packages installed (see <a href="#libraries">Libraries</a>)</p>
+</section>
+<section id="to-run-1" class="level3">
+<h3 class="anchored" data-anchor-id="to-run-1">To run</h3>
+<div class="cell">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tlhc_logic.R</strong></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="fu">here</span>(<span class="st">'scripts'</span>, <span class="st">'tlhc_metrics.R'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="about-2" class="level3">
+<h3 class="anchored" data-anchor-id="about-2">About</h3>
+<p>This step takes processed data and produces a set of records per metric which are then aggregated to produce a count per metric per month per project.</p>
+</section>
+</section>
+<section id="outputting-datasheets" class="level2">
+<h2 class="anchored" data-anchor-id="outputting-datasheets">Outputting datasheets</h2>
+<p>Output the results of the SQL data collation process into separate datasheets ready to go into DATA NEW folders.</p>
+</section>
+<section id="transferring-datasheets" class="level2">
+<h2 class="anchored" data-anchor-id="transferring-datasheets">Transferring datasheets</h2>
+<p>Transfer the files generated by TLHC DATASHEET OUTPUT to the DATA NEW folder.</p>
+<p>Navigate the file system on DATA NEW</p>
+<p>Test if a file exists already</p>
+<p>If it exists, then archive the current file and replace with new one</p>
+<p>If it is new then add to the file system</p>
+</section>
+<section id="collate-datasheet-information" class="level2">
+<h2 class="anchored" data-anchor-id="collate-datasheet-information">Collate datasheet information</h2>
+<p>To provide a source of data for Management Information (MI) reporting for the TLHC project.</p>
+<p>OBJECTIVES</p>
+<p>1. Collate submitted data (in the form of .xls* datasheets) from participating projects to a single data source</p>
+<p>2. Output the consolidated data as an .Rds file - for use in generating the TLHC report</p>
+<p>3. Output a flat file for sharing with NHSE</p>
+</section>
+<section id="producing-tlhc-report" class="level2">
+<h2 class="anchored" data-anchor-id="producing-tlhc-report">Producing TLHC report</h2>
+<p>To produce a TLHC report</p>
+<p>OBJECTIVES</p>
+<p>Load mi data file</p>
+<p>Cycle over projects and output a pivot_wider table</p>
+</section>
+<section id="producing-the-demographic-report" class="level2">
+<h2 class="anchored" data-anchor-id="producing-the-demographic-report">Producing the demographic report</h2>
+<p>Calculate demographic reports</p>
 </section>
 </section>
 

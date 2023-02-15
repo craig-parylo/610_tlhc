@@ -66,6 +66,12 @@ Save this file, close it and restart your R session for the variables to be avai
 
 With your dependencies loaded and your .Renviron file set up you are now set to proceed.
 
+### Native pipe \|\>
+
+This project has been written throughout using R's native pipe operator `|>` instead of the maggritr pipe operator `%>%`. The native pipe operator has been available for use since R v4.1.0 and can be configured for use by enabling a global option:
+
+`Tools` \> `Global Options` \> `Code` \> toggle on the option for `Use native pipe operator`.
+
 ## Logic switchboard
 
 Remembering the names of scripts and the order in which to run them can be tricky, so the following script provides convenient access to run the code used in this project. Think of it like a switchboard connecting you with the functionality within this project.
@@ -104,7 +110,22 @@ Each of these steps is described in more detail in the [Reference guide] section
 
 ## Downloading SQL data
 
-[scripts/tlhc_download_sql_data.R](scripts/tlhc_download_sql_data.R "Click to see the data")
+### Pre-requisites
+
+| Licence to access MLCSU's SQL Server
+| VPN connected
+| All packages installed (see [Libraries])
+
+### To run
+
+```{r filename='tlhc_logic.R'}
+#| eval: false
+#| echo: true
+library(here)
+source(here('scripts', 'tlhc_download_sql_data.R'))
+```
+
+### About
 
 This script manages the download of data from the SQL server.
 
@@ -116,18 +137,29 @@ Regardless of their type, each project provides monthly data conforming to the m
 
 The MDS for projects submitting record-level information comprises eight tables:
 
-| Table                     | Types of data collected                                                                                                                                                                   |
-|---------------------|---------------------------------------------------|
-| Demographics              | Age at referral, CCG, LSOA of residence, ethnicity                                                                                                                                        |
-| Other History             | Pre-existing conditions identified within primary care; COPD, IHD, cancer                                                                                                                 |
-| Pathway-Invite            | Details of the invitation to attend a lung health check; date of invites and follow-ups, outcome of invite                                                                                |
-| Pathway-Lung Health Check | Attendance status, smoking history, whether in person or virtually (telephone / video call)                                                                                               |
-| Measurements              | Calculated risk scores (of lung cancer), height, weight, spirometry                                                                                                                       |
-| Pathway-LDCT              | Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialties |
-| Pathway-Diagnostics       | Detailed metrics from LDCT such as whether; full dose CT scan used, bronchoscopy undertaken                                                                                               |
-| Pathway-Smoking Cessation | Records details of who is offered, takes up and successfully completes a smoking cessation course                                                                                         |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table                     | Types of data collected                                                                                                                                                                    |
++===========================+============================================================================================================================================================================================+
+| Demographics              | Age at referral, CCG, LSOA of residence, ethnicity                                                                                                                                         |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Other History             | Pre-existing conditions identified within primary care; COPD, IHD, cancer                                                                                                                  |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pathway-Invite            | Details of the invitation to attend a lung health check; date of invites and follow-ups, outcome of invite                                                                                 |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pathway-Lung Health Check | Attendance status, smoking history, whether in person or virtually (telephone / video call)                                                                                                |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Measurements              | Calculated risk scores (of lung cancer), height, weight, spirometry                                                                                                                        |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pathway-LDCT              | Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialities |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pathway-Diagnostics       | Detailed metrics from LDCT such as whether; full dose CT scan used, bronchoscopy undertaken                                                                                                |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Pathway-Smoking Cessation | Records details of who is offered, takes up and successfully completes a smoking cessation course                                                                                          |
++---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-: Projects submitting record-level data usually do so either by;
+: Record-level tables
+
+Projects submitting record-level data usually do so either by:
 
 -   discrete monthly submissions on activity occurring the previous month, or,
 
@@ -141,13 +173,160 @@ For example, a patient receiving an invitation to attend a lung health check one
 
 As the SQL database contains details for each and every successful submission there is a lot of data to work with. So the challenge facing us is how to filter all this data to give us just the pertinent information that represents the best picture of what is happening across these projects.
 
+### How tables are downloaded
+
+The solution for most tables is to group by `ParticipantID` and take the latest supplied data, based on the assumption that the quality and accuracy of information improves for each successive submission (or at least doesn't get any worse).
+
+For example, a record on the Invites table contains the date a participant was invited to attend their LHC when it is submitted. Let us imagine the patient doesn't respond to this initial invite so next month a follow-up invite is sent and that month's submission contains a record that now contains an initial invite date and a follow-up date for this patient. Let's then imagine the subsequent month the patient responded to the invite and their record is outcomed with the status 'Patient accepted' and is then submitted with an initial invite date, a follow-up invite date, and an outcome status. We now have three records for this patient in the SQL database table submitted over three successive months, where the latest supplied record contains the most complete and accurate data of the patient's invite status. Thus the latest supplied data per participant is the record we wish to use.
+
+This approach won't work for the LDCT and Diagnostics tables, however, as a patient can legitimately have multiple scans. The approach for these tables is to get one record per combination of participant and date of scan.
+
+The approach for downloading from the SQL server data can be described in the following table:
+
++-------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| TLHC table(s)     | How data are downloaded                                                                                                            |
++===================+====================================================================================================================================+
+| Demographics      | One record per `ParticipantID`                                                                                                     |
+|                   |                                                                                                                                    |
+| Other History     | If multiple records per participant exist then the latest record is used, as identified from a combination of:                     |
+|                   |                                                                                                                                    |
+| Invitations       | -   `ReceivedDate` (date the data was received by MLCSU), and                                                                      |
+|                   |                                                                                                                                    |
+| Lung Health Check | -   `CSURowNumber` (a field created by the SQL server).                                                                            |
+|                   |                                                                                                                                    |
+| Measurements      | If multiples still exist per `ParticipantID` then the first record in the list is selected.                                        |
+|                   |                                                                                                                                    |
+| Smoking cessation |                                                                                                                                    |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| LDCT              | One record per combination of `ParticipantID` and `LDCT_Date`                                                                      |
+|                   |                                                                                                                                    |
+|                   | If multiple records exist per combination then the latest record is used, as identified from a combination of:                     |
+|                   |                                                                                                                                    |
+|                   | -   `ReceivedDate` (date the data was received by MLCSU), and                                                                      |
+|                   |                                                                                                                                    |
+|                   | -   `CSURowNumber` (a field created by the SQL server).                                                                            |
+|                   |                                                                                                                                    |
+|                   | If multiples still exist per combination of `ParticipantID` and `LDCT_Date` then the first record in the list is selected.         |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| Diagnostics       | One record per combination of `ParticipantID` and `Full_Dose_CT_Date`                                                              |
+|                   |                                                                                                                                    |
+|                   | If multiple records exist per combination then the latest record is used, as identified from a combination of:                     |
+|                   |                                                                                                                                    |
+|                   | -   `ReceivedDate` (date the data was received by MLCSU), and                                                                      |
+|                   |                                                                                                                                    |
+|                   | -   `CSURowNumber` (a field created by the SQL server).                                                                            |
+|                   |                                                                                                                                    |
+|                   | If multiples still exist per combination of `ParticipantID` and `Full_Dose_CT_Date` then the first record in the list is selected. |
++-------------------+------------------------------------------------------------------------------------------------------------------------------------+
+
+: SQL download algorithm
+
 ## Processing downloaded data
 
-Process downloaded tables to convert fields to required types, calculate flags used in metric processing.
+### Pre-requisites
+
+| [.Renviron] configured
+| All packages installed (see [Libraries])
+| [Downloading SQL data] step completed
+
+```{r filename='tlhc_logic.R'}
+#| eval: false
+#| echo: true
+library(here)
+source(here('scripts', 'tlhc_process_sql_data.R'))
+```
+
+### About
+
+The aim of this script is to prepare data for metric calculations by ensuring dates are recognised and standardising commonly-used fields. It processes all eight tables downloaded from SQL in the above step and produces a further eight tables containing the original data plus the calculated dates and standardised fields.
+
+### Date processing
+
+Dates are a vital part of the data submissions as they form the time dimension against which the MI data is reported, e.g. number of invitations *per month*, the number of LHCs *per month*, the number of scans undertaken *per month*.
+
+Data are submitted by projects as comma-separate text files, .csv. As such all dates are provided as character strings which need to be parsed into date types recognised by R before we can use them to work out these measures. There are a number of different patterns in use by projects:
+
++---------------------+------------------------------------------------+
+| Pattern             | Example submitted date to be parsed            |
++=====================+================================================+
+| '%d/%m/%Y'          | 01/01/2022                                     |
++---------------------+------------------------------------------------+
+| '%d/%m/%Y %H:%M'    | 01/02/2022 10:30                               |
++---------------------+------------------------------------------------+
+| '%b %d %Y %H:%M'    | Mar 1 2022 11:30                               |
++---------------------+------------------------------------------------+
+| '%d-%m-%y'          | 01-04-22                                       |
++---------------------+------------------------------------------------+
+| '%Y-%m-%d %H:%M:%S' | 2022-05-01 00:00:00                            |
++---------------------+------------------------------------------------+
+| '%Y%m%d'            | 20220101                                       |
++---------------------+------------------------------------------------+
+| '%d-%b-%y'          | 25-Aug-21                                      |
++---------------------+------------------------------------------------+
+
+: Date parsing patterns
+
+In addition some dates are supplied in Excel integer format, that is the number of days since an arbitrary date in the past, the origin point which is set as 30th December 1899 in MS Excel 365. These dates appear as a five digit string, e.g. `44971` corresponding to the date 14th February 2023.
+
+### Standardising key fields
+
+There are fields containing categorical data that are crucial to the calculation of MI reports, such as whether the patient accepted their LHC invitation, or whether the patient attended their LHC, or what the outcome of the LDCT scan was.
+
+The categories of values permitted within these fields is specified in the MDS, yet, a range of values are routinely provided which first require standardising before metrics can be effectively calculated.
+
+The fields this data cleaning process is applied to includes:
+
+-   Invite outcome,
+
+-   LHC attendance category,
+
+-   LHC delivery mode,
+
+-   Reason where patients are ineligible for an LDCT,
+
+-   LDCT scan outcome,
+
+-   Smoking cessation completed successfully, and
+
+-   Demographic details such as gender, ethnicity, martial status, smoking status,
+
+Finally, there are a number of statuses calculated from supplied data that are required in the calculation of metrics, including:
+
+-   flags indicating validity of `ParticipantID` and `TransactionId` values,
+
+-   the name of the submitting organisation (based on `SubmittedZipFile`),
+
+-   the deprivation decile (based on the residential `LSOA` code for the participant),
+
+-   age group,
+
+-   eligibility of the participant for the TLHC programme (based on `Invite Outcome`),
+
+-   invite outcome date (depends on the latest value in `First_Letter_Date`, `Second_Letter_Date`, `Follow_up_call_Date` and `Contact_Date`), and
+
+-   scan sequencing and classification into initial, 3 month follow-up, 12 month follow-up, 24 month follow-up and 48 month follow-up.
+
+This processing step produces eight further .Rds files, one for each of the base tables, identified by a prefix of 'calc\_' in the filename and stored in the 'tlhc' subfolder of 'data'. These tables are now ready for use in calculating metric performance.
 
 ## Calculating metric performance
 
-Calculate metrics based on downloaded files which have been processed.
+### Pre-requisites
+
+| [.Renviron] configured
+| All packages installed (see [Libraries])
+
+### To run
+
+```{r filename='tlhc_logic.R'}
+#| eval: false
+#| echo: true
+library(here)
+source(here('scripts', 'tlhc_metrics.R'))
+```
+
+### About
+
+This step takes processed data and produces a set of records per metric which are then aggregated to produce a count per metric per month per project.
 
 ## Outputting datasheets
 
