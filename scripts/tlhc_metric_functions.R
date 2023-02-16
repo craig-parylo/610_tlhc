@@ -1154,7 +1154,7 @@ get_df_metric_5d_ldct_3_month <- function() {
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
-      calc_ldct_date_corrected_sequence == 2, # this is the patient's second scan
+      #calc_ldct_date_corrected_sequence == 2, # this is the patient's second scan
       calc_ldct_date_corrected_category == '3 month follow-up scan' # we only want 3 month scans
     ) 
   
@@ -1193,7 +1193,7 @@ get_df_metric_5e_ldct_12_month <- function() {
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
-      calc_ldct_date_corrected_sequence == 3, # this is the patient's third scan
+      #calc_ldct_date_corrected_sequence == 3, # this is the patient's third scan
       calc_ldct_date_corrected_category == '12 month follow-up scan' # we only want 12 month scans
     ) 
   
@@ -1232,7 +1232,7 @@ get_df_metric_5f_ldct_24_month <- function() {
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
-      calc_ldct_date_corrected_sequence == 4, # this is the patient's fourth scan
+      #calc_ldct_date_corrected_sequence == 4, # this is the patient's fourth scan
       calc_ldct_date_corrected_category == '24 month follow-up scan' # we only want 12 month scans
     ) 
   
@@ -1271,7 +1271,7 @@ get_df_metric_5g_ldct_48_month <- function() {
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
-      calc_ldct_date_corrected_sequence == 5, # this is the patient's fifth scan
+      #calc_ldct_date_corrected_sequence == 5, # this is the patient's fifth scan
       calc_ldct_date_corrected_category == '48 month follow-up scan' # we only want 48 month scans
     ) 
   
