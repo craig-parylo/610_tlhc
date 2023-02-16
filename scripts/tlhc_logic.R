@@ -52,3 +52,13 @@ rm(list=ls())
 # NB, output needs copying to the demographics report template
 source(here('scripts', 'tlhc_demographics.R'))
 rm(list=ls())
+
+# Checking submissions ---------------------------------------------------------
+
+# TransactionID generation
+file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range for 'Include' submissions (if required)
+source(here('scripts', 'tlhc_latest_submissions.R'))
+
+# View the results of the transactions
+file.edit(here('scripts', 'tlhc_transaction_id.qmd')) # NB need to render this manually
+browseURL(here('scripts', 'tlhc_transaction_id.html')) # to view a previously generated html file
