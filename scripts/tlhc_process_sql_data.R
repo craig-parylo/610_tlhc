@@ -501,6 +501,7 @@ process_ldct <- function(df) {
   df_temp <- lazy_dt(df) |> 
     select(ParticipantID, calc_ldct_date_corrected) |> # small subset
     filter(!is.na(calc_ldct_date_corrected)) |> # the following process requires dates
+    unique() |> # handle cases where same dates have been uploaded in different formats (e.g.15/09/2021 and 2021-09-15 00:00:00)
     group_by(ParticipantID) |> 
     mutate(
       calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T), # get the date of the first scan
