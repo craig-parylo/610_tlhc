@@ -108,6 +108,31 @@ Each of these steps is described in more detail in the [Reference guide] section
 
 # Reference guide
 
+## Checking for new submissions
+
+### Pre-requisites
+
+| Licence to access MLCSU's SQL Server
+| VPN connected
+| All packages installed (see [Libraries])
+
+### To run
+
+```{r filename='tlhc_logic.R'}
+#| eval: false
+#| echo: true
+library(here)
+source(here('scripts', 'tlhc_latest_submissions.R'))
+file.edit(here('scripts', 'tlhc_transaction_id.qmd')) # then click 'Render'
+browseURL(here('scripts', 'tlhc_transaction_id.html')) # optional - to view a previously generated html file
+```
+
+Composed of an R script and a Quarto markdown to renders the output as a html file, this step gives insight into the latest submissions by projects to each of the eight SQL tables.
+
+The R script connects to the SQL Server and identifies the latest transactions received from each project to each table and saves the output into three .Rds files within the `tlhc` subfolder of `data`.
+
+The next step opens a Quarto markdown file in edit mode and requires you to click the `Render` button in the menu bar to produce a rendered html file.
+
 ## Downloading SQL data
 
 ### Pre-requisites
@@ -137,25 +162,16 @@ Regardless of their type, each project provides monthly data conforming to the m
 
 The MDS for projects submitting record-level information comprises eight tables:
 
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Table                     | Types of data collected                                                                                                                                                                    |
-+===========================+============================================================================================================================================================================================+
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Demographics              | Age at referral, CCG, LSOA of residence, ethnicity                                                                                                                                         |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Other History             | Pre-existing conditions identified within primary care; COPD, IHD, cancer                                                                                                                  |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Pathway-Invite            | Details of the invitation to attend a lung health check; date of invites and follow-ups, outcome of invite                                                                                 |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Pathway-Lung Health Check | Attendance status, smoking history, whether in person or virtually (telephone / video call)                                                                                                |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Measurements              | Calculated risk scores (of lung cancer), height, weight, spirometry                                                                                                                        |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Pathway-LDCT              | Patients who exceed a risk threshold are offered a low-dose CT scan (LDCT), this table is used to record whether the scan took place, key findings, onward referrals to other specialities |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Pathway-Diagnostics       | Detailed metrics from LDCT such as whether; full dose CT scan used, bronchoscopy undertaken                                                                                                |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Pathway-Smoking Cessation | Records details of who is offered, takes up and successfully completes a smoking cessation course                                                                                          |
-+---------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 : Record-level tables
 
@@ -246,23 +262,15 @@ Dates are a vital part of the data submissions as they form the time dimension a
 
 Data are submitted by projects as comma-separate text files, .csv. As such all dates are provided as character strings which need to be parsed into date types recognised by R before we can use them to work out these measures. There are a number of different patterns in use by projects:
 
-+---------------------+------------------------------------------------+
-| Pattern             | Example submitted date to be parsed            |
-+=====================+================================================+
-| '%d/%m/%Y'          | 01/01/2022                                     |
-+---------------------+------------------------------------------------+
-| '%d/%m/%Y %H:%M'    | 01/02/2022 10:30                               |
-+---------------------+------------------------------------------------+
-| '%b %d %Y %H:%M'    | Mar 1 2022 11:30                               |
-+---------------------+------------------------------------------------+
-| '%d-%m-%y'          | 01-04-22                                       |
-+---------------------+------------------------------------------------+
-| '%Y-%m-%d %H:%M:%S' | 2022-05-01 00:00:00                            |
-+---------------------+------------------------------------------------+
-| '%Y%m%d'            | 20220101                                       |
-+---------------------+------------------------------------------------+
-| '%d-%b-%y'          | 25-Aug-21                                      |
-+---------------------+------------------------------------------------+
+| Pattern             | Example submitted date to be parsed |
+|---------------------|-------------------------------------|
+| '%d/%m/%Y'          | 01/01/2022                          |
+| '%d/%m/%Y %H:%M'    | 01/02/2022 10:30                    |
+| '%b %d %Y %H:%M'    | Mar 1 2022 11:30                    |
+| '%d-%m-%y'          | 01-04-22                            |
+| '%Y-%m-%d %H:%M:%S' | 2022-05-01 00:00:00                 |
+| '%Y%m%d'            | 20220101                            |
+| '%d-%b-%y'          | 25-Aug-21                           |
 
 : Date parsing patterns
 
@@ -314,6 +322,7 @@ This processing step produces eight further .Rds files, one for each of the base
 
 | [.Renviron] configured
 | All packages installed (see [Libraries])
+| [Processing downloaded data] step is completed
 
 ### To run
 
@@ -328,9 +337,44 @@ source(here('scripts', 'tlhc_metrics.R'))
 
 This step takes processed data and produces a set of records per metric which are then aggregated to produce a count per metric per month per project.
 
+Each metric has specifications for which data 'pass' the metric definition and which records don't. The first part of this script produces in-memory tables of records for each metric where the contents of the tables are passed through a series of filters to meet the minimum requirements for the metric
+
+These filters generally take the form:
+
+-   Limit to valid submissions,
+
+-   Limit to eligible participants,
+
+-   Limit to records with valid dates (to report activity per month),
+
+-   Limit to records with values in key fields - for example the Outcome field to report attendances at LHCs.
+
+The product from this process is a series of tables of record-level data per metric, which, instead of being saved to disc these tables are retained in-memory only. The reason for this is two-fold; to avoid further duplicating data storage and to ensure metric reporting is freshly calculated on the latest available data, and secondly to allow for post-hoc investigation of the metric data at a finer granular level.
+
+These in-memory tables are then passed to another round of processing to summarise performance for each metric for each project in each reporting month. The result of this, a table called `df_metrics`, is then stored as an .Rds file in the `tlhc` subfolder of `data` and will be used in the next step.
+
 ## Outputting datasheets
 
 Output the results of the SQL data collation process into separate datasheets ready to go into DATA NEW folders.
+
+### Pre-requisites
+
+| [.Renviron] configured
+| All packages installed (see [Libraries])
+
+### To run
+
+```{r filename='tlhc_logic.R'}
+#| eval: false
+#| echo: true
+library(here)
+file.edit(here('scripts', 'tlhc_datasheet_output.R')) # to control how far back
+source(here('scripts', 'tlhc_datasheet_output.R'))
+```
+
+### About
+
+This step takes the df_metrics.Rds file and uses it to generate a datasheet
 
 ## Transferring datasheets
 
