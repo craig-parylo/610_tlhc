@@ -98,8 +98,11 @@ process_alltables <- function(df) {
         # C&M submission which is not the latest one
         (calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)) ~ 'Invalid',
         
-        # North Kirklees / Bradford errant LDCT submission with all records on the same date
+        # North Kirklees / Bradford errant LDCT submission with all records on the same date (2023-02)
         TransactionId == 187617 ~ 'Invalid',
+        
+        # Tameside and Glossop - errant LDCT submission with records not recognised by project (2023-02-17)
+        TransactionId == 148984 ~ 'Invalid',
         
         # Else mark as valid
         TRUE ~ 'Valid'
