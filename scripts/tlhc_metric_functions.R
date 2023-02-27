@@ -10,7 +10,14 @@
 #' 1. loading base data,
 #' 2. prepare sets of records that meet metric criteria,
 #' 3. calculate aggregated metric performance
+
+#' checking dataset
+#' df_lhc |> filter(project == 'East Lancashire') |> filter (calc_valid_transactionid == 'Valid', calc_eligible == 'Eligible', calc_valid_participantid == 'Valid', !is.na(calc_lhc_date_yearmon),calc_lhc_attendance_category == 'Attended',calc_lhc_delivery_method_category == 'F2F') |> view ()
+
 #' 
+#'
+#'
+#'
 #'------------------------------------------------------------------------------
 
 # Libraries --------------------------------------------------------------------
@@ -1073,10 +1080,10 @@ get_df_metric_5a_ldct_initial <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+     # calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+     # (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       calc_ldct_date_corrected_category == 'Initial scan' # we only want initial scans
     ) 
@@ -1111,10 +1118,10 @@ get_df_metric_5b_ldct_initial_dna <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      # (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT did not attend', # we have confirmation the patient DNA'd
       calc_ldct_date_corrected_category == 'Initial scan' # we only want initial scans
     ) 
@@ -1149,10 +1156,10 @@ get_df_metric_5d_ldct_3_month <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       calc_ldct_date_corrected_category == '3 month follow-up scan' # we only want 3 month scans
     ) 
@@ -1187,10 +1194,10 @@ get_df_metric_5e_ldct_12_month <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       calc_ldct_date_corrected_category == '12 month follow-up scan' # we only want 12 month scans
     ) 
@@ -1225,10 +1232,10 @@ get_df_metric_5f_ldct_24_month <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       calc_ldct_date_corrected_category == '24 month follow-up scan' # we only want 12 month scans
     ) 
@@ -1263,10 +1270,10 @@ get_df_metric_5g_ldct_48_month <- function() {
     # limit the dataframe for valid metric
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
-      calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       calc_ldct_date_corrected_category == '48 month follow-up scan' # we only want 48 month scans
     ) 
