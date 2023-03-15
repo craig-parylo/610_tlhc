@@ -69,45 +69,85 @@ download_tlhc_table <- function(str_table = '') {
   
   # decide how to process
   if(str_table == 'tbTLHCTLHC_Pathway_LDCT') {
-    # LDCT - we need a record per patient per scan
+    ## LDCT ----
+    # We need a record per patient per scan
+    
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
+      193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
+      166818, 162700, 159250, 156519, 154427, 150593, 148604, 146601,
+      144689, 142285, 136238, 134308, 131832
+      
+    )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
       #head(n=100000) |> # temporary - for testing
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
       group_by(ParticipantID, LDCT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
       filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
       collect() # download the data
     
+    rm(invalid_transid)
+    
   } else if (str_table == 'tbTLHCTLHC_Pathway_Diagnostics'){
-    # Diagnostics - we need a record per patient per full dose CT date
+    ## Diagnostics ----
+    # We need a record per patient per full dose CT date
+    
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
+      193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
+      166818, 159250, 156519, 154427, 150593, 148604, 146601, 144689,
+      142285, 136238, 134308, 131832
+      
+    )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
-      #head(n=100000) |> # temporary - for testing
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
       group_by(ParticipantID, Full_Dose_CT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
       filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
       collect() # download the data
     
+    rm(invalid_transid)
+    
+  } else if (str_table == 'tbTLHCTLHC_SmokingCessation'){
+    ## Smoking cessation ----
+    # We need to explicitly exclude some transactions
+
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # 2023-03-15 Doncaster transactions leading to over-reported 8b (offered SC) agreed to be removed today
+      130374, 131748, 134772, 137383, 140163, 142235, 142270, 144804,
+      146557, 148934, 150726, 154626, 156928, 159567, 163913, 167075,
+      169080, 169267, 171092, 175619, 178824, 181324
+    )
+    
+    df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_SmokingCessation')) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      group_by(ParticipantID) |> # get one record for each participant
+      slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
+      slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
+      collect() # download the data
+    
+    rm(invalid_transid)
+    
   } else {
-    # All other tables - we need a record per patient
+    ## All other tables ----
+    # We need a record per patient
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
-      #head(n=100000) |> # temporary - for testing
       group_by(ParticipantID) |> # get one record for each participant:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
-      #slice_max(LoadDate) |> # get record(s) with the latest load datetime loaded
-      #slice_max(DatasetId) |> # get record(s) with the latest dataset id
-      #slice_max(FileId) |> # get record(s) with the latest file id
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
-      #slice_max(ParticipantID, n = 1) |> # get the last record in the group (handles any possible remaining duplicates)
       filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
       collect() # download the data
   }
@@ -118,8 +158,8 @@ download_tlhc_table <- function(str_table = '') {
   # save it to file
   future:::save_rds(
     object = df,
-    pathname = here('data', 'tlhc', paste0(str_table, '.Rds')
-    )
+    pathname = here('data', 'tlhc', paste0(str_table, '.Rds')),
+    compress = 'none' # don't compress - hopefully will be a faster read
   )
   
   # housekeeping
