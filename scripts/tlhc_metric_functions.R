@@ -10,14 +10,6 @@
 #' 1. loading base data,
 #' 2. prepare sets of records that meet metric criteria,
 #' 3. calculate aggregated metric performance
-
-#' checking dataset
-#' df_lhc |> filter(project == 'East Lancashire') |> filter (calc_valid_transactionid == 'Valid', calc_eligible == 'Eligible', calc_valid_participantid == 'Valid', !is.na(calc_lhc_date_yearmon),calc_lhc_attendance_category == 'Attended',calc_lhc_delivery_method_category == 'F2F') |> view ()
-
-#' 
-#'
-#'
-#'
 #'------------------------------------------------------------------------------
 
 # Libraries --------------------------------------------------------------------
