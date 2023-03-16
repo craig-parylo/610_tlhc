@@ -159,7 +159,7 @@ download_tlhc_table <- function(str_table = '') {
   future:::save_rds(
     object = df,
     pathname = here('data', 'tlhc', paste0(str_table, '.Rds')),
-    compress = 'none' # don't compress - hopefully will be a faster read
+    compress = T # compress the data for ease of storage
   )
   
   # housekeeping
