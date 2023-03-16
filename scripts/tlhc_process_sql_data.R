@@ -692,9 +692,16 @@ manage_table_processing <- function(str_table) {
   #df_calc <- process_tlhc_table(df = sample_n(tbl = df, size = 100000), str_table = str_table)
   
   # save the new file
-  saveRDS(
+  # saveRDS(
+  #   object = df_calc,
+  #   file = here('data', 'tlhc', paste0('calc_', str_table, '.Rds'))
+  # )
+  
+  # save the file without compression
+  future:::save_rds(
     object = df_calc,
-    file = here('data', 'tlhc', paste0('calc_', str_table, '.Rds'))
+    pathname = here('data', 'tlhc', paste0('calc_', str_table, '.Rds')),
+    compress = F # don't compress to make metric calcualtion quicker
   )
   
   # update the user
