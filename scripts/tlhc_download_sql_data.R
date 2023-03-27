@@ -78,7 +78,10 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
       193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
       166818, 162700, 159250, 156519, 154427, 150593, 148604, 146601,
-      144689, 142285, 136238, 134308, 131832
+      144689, 142285, 136238, 134308, 131832,
+      
+      # 2023-03-27 Bradford and North Kirklees - agreed with Kerrie Massey and Graham Bowmer today to exclude all submissions before March 2023 as they confirm their recent re-submissions are the most up-to-date and accurate data
+      189740, 187617, 185024, 181645, 178639, 175549, 171166, 165345, 158882
       
     )
     
