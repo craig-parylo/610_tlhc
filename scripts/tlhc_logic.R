@@ -2,7 +2,8 @@
 #' SWITCHBOARD
 #' 
 #' -----------------------------------------------------------------------------
-
+# df_lhc |> filter(project == 'East Lancashire') |> view ()
+# df_demo |> filter (calc_submitting_organisation_name == "Thurrock and Southend") |> count(calc_lsoa_name) |> view ()
 # Libraries -----
 library(here)
 
@@ -48,9 +49,16 @@ file.edit(here('scripts', 'tlhc_report.R'))
 source(here('scripts', 'tlhc_report.R'))
 rm(list=ls())
 
+
 # Produce demographic report (estimated time = 1 minute)
 # NB, output needs copying to the demographics report template
 source(here('scripts', 'tlhc_demographics.R'))
+rm(list=ls())
+
+# Produce TLHC report comparsion (estimated time = 2 mins)
+# please change the report production date in the script 
+file.edit(here('scripts', 'tlhc_compare_reports.R'))
+source(here('scripts', 'tlhc_compare_reports.R'))
 rm(list=ls())
 
 # Checking submissions ---------------------------------------------------------
@@ -60,5 +68,5 @@ file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range
 source(here('scripts', 'tlhc_latest_submissions.R'))
 
 # View the results of the transactions
-file.edit(here('scripts', 'tlhc_transaction_id.qmd')) # NB need to render this manually
-browseURL(here('scripts', 'tlhc_transaction_id.html')) # to view a previously generated html file
+file.edit(here('scripts', 'tlhc_transaction_id_v2.qmd')) # NB need to render this manually
+browseURL(here('scripts', 'tlhc_transaction_id_v2.html')) # to view a previously generated html file
