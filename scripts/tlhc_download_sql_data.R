@@ -142,6 +142,28 @@ download_tlhc_table <- function(str_table = '') {
       collect() # download the data
     
     rm(invalid_transid)
+  
+  } else if (str_table == 'tbTLHCTLHC_Pathway_Invite'){
+    ## Invites ----
+    # We need to explicitly exclude some transactions
+    
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # 2023-04-05 Southampton newer submissions overwrite First_Letter dates and need to be managed separately
+      # NNB, this list will need adding to each month to exclude the latest submission
+      197086, 194098, 192749, 190354, 187373, 186011, 184105, 181295, 181294,
+    )
+    
+    df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      group_by(ParticipantID) |> # get one record for each participant
+      slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
+      slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
+      collect() # download the data
+    
+    rm(invalid_transid)
     
   } else {
     ## All other tables ----
