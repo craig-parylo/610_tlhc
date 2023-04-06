@@ -30,6 +30,10 @@ file.edit(here('scripts', 'tlhc_validation.R'))
 
 # Reporting --------------------------------------------------------------------
 
+# southampton manual adjustment for follow-up invites (estimated time = 1 mins)
+source(here('scripts', 'tlhc_create_manual_adjustment_southampton.R'))
+rm(list=ls())
+
 # output datasheets (estimated time = 1 mins)
 file.edit(here('scripts', 'tlhc_datasheet_output.R')) # to edit how many months back to produce the datasheets
 source(here('scripts', 'tlhc_datasheet_output.R'))
