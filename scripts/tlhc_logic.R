@@ -2,8 +2,7 @@
 #' SWITCHBOARD
 #' 
 #' -----------------------------------------------------------------------------
-# df_lhc |> filter(project == 'East Lancashire') |> view ()
-# df_demo |> filter (calc_submitting_organisation_name == "Thurrock and Southend") |> count(calc_lsoa_name) |> view ()
+
 # Libraries -----
 library(here)
 
