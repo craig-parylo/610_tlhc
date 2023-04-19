@@ -70,6 +70,9 @@ rm(list=ls())
 file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range for 'Include' submissions (if required)
 source(here('scripts', 'tlhc_latest_submissions.R'))
 
-# View the results of the transactions
-file.edit(here('scripts', 'tlhc_transaction_id_v2.qmd')) # NB need to render this manually
-browseURL(here('scripts', 'tlhc_transaction_id_v2.html')) # to view a previously generated html file
+# View the results of the transactions v2 - using Shiny app
+runApp(here('scripts', 'transid', 'app.R'))
+
+# View the results of the transactions v1 - using quarto doc
+file.edit(here('scripts', 'tlhc_transaction_id.qmd')) # NB need to render this manually
+browseURL(here('scripts', 'tlhc_transaction_id.html')) # to view a previously generated html file
