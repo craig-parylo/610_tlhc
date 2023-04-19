@@ -70,7 +70,7 @@ rm(list=ls())
 file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range for 'Include' submissions (if required)
 source(here('scripts', 'tlhc_latest_submissions.R'))
 
-# View the results of the transactions v2 - using Shiny app
+# View the results of the transactions v2 - using Shiny app (nb, to stop this process click the 'stop' button in the console)
 runApp(here('scripts', 'transid', 'app.R'))
 
 # View the results of the transactions v1 - using quarto doc
