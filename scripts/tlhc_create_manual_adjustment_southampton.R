@@ -214,6 +214,7 @@ df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
   collect() # download the data
 
 rm(invalid_transid)
+dbDisconnect(con)
 
 # Process the data -------------------------------------------------------------
 df <- df |> ungroup()
@@ -221,6 +222,12 @@ df <- process_alltables(df = df) # identify the project, when received, etc
 df <- process_invites(df = df) # invite outcome, date parsing, etc.
 
 # Produce a manual adjustment file ---------------------------------------------
+
+## Follow-up invitations ----------
+# combine both first and second invites to the same field and output a simple
+# dataframe of Participant and follow-up invite month
+
+# follow-up invitations
 df_southampton_followups <- bind_rows(
   # follow-ups which overwrite the first letter dates 
   df |> 
@@ -237,12 +244,41 @@ df_southampton_followups <- bind_rows(
     select(ParticipantID, month = calc_second_letter_date_yearmonth)
 )
 
-# summarise
-df_southampton_followups |> 
+# summarise the number of invitations per month
+df_fu <- df_southampton_followups |> 
   group_by(month) |> 
-  summarise(participants_followed_up = n_distinct(ParticipantID)) |> 
-  ungroup() |> 
-  view()
+  summarise(metric_1c_followup_invitations = n_distinct(ParticipantID)) |> 
+  ungroup()
+
+## accepted invitations -----
+
+# filter records the same way for metric 2 then
+df_accep <- df |> 
+  filter(
+    calc_valid_transactionid == 'Valid', # valid transactions
+    calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+    calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
+    calc_invite_accepted == 'Accepted', # confirmation the invite was accepted
+    !is.na(calc_invite_outcome_date_yearmon)
+  ) |> 
+  # get the month to report this metric by
+  mutate(month = pmax(calc_first_letter_date_yearmonth, calc_second_letter_date_yearmonth, na.rm = T)) |> 
+  select(ParticipantID, month, calc_first_letter_date_yearmonth, calc_second_letter_date_yearmonth) |> 
+  group_by(month) |> 
+  summarise(metric_2_accepted_invitations = n_distinct(ParticipantID)) |> 
+  ungroup()
+
+# combine both to a single object
+df_southampton_ma <- full_join(
+  x = df_fu,
+  y = df_accep,
+  by = 'month'
+) |> 
+  arrange(month) |> 
+  # limit to Aug 2022 onward
+  filter(month >= 'Aug 2022')
+  
+view(df_southampton_ma)
 
 # open the manual adjustment file for editing
 browseURL(file.path(Sys.getenv('base_365'),'Monthly MI reporting', 'Data processing procedure', 'tlhc_manual_adjustments.xlsx'))
