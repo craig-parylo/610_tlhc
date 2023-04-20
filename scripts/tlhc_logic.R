@@ -58,7 +58,7 @@ rm(list=ls())
 source(here('scripts', 'tlhc_demographics.R'))
 rm(list=ls())
 
-# Produce TLHC report comparsion (estimated time = 2 mins)
+# Produce TLHC report comparison (estimated time = 2 mins)
 # please change the report production date in the script 
 file.edit(here('scripts', 'tlhc_compare_reports.R'))
 source(here('scripts', 'tlhc_compare_reports.R'))
@@ -71,6 +71,7 @@ file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range
 source(here('scripts', 'tlhc_latest_submissions.R'))
 
 # View the results of the transactions v2 - using Shiny app (nb, to stop this process click the 'stop' button in the console)
+library(shiny)
 runApp(here('scripts', 'transid', 'app.R'))
 
 # View the results of the transactions v1 - using quarto doc
