@@ -91,7 +91,7 @@ helper_create_metric_table <- function(df_project, flag_project = TRUE) {
     summarise(numerator = sum(Numerator, na.rm = T)) |> 
     mutate(
       numerator = ifelse(
-        Data_ID %in% c('10', '11', '12', '13'),
+        Data_ID %in% c('10', '11', '12', '13', '1b'),
         NA,
         numerator
       )
