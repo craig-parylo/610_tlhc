@@ -33,11 +33,17 @@ get_transaction_data <- function(tbl_label, tbl_name, pattern) {
     .connection_string = "Driver={SQL Server};SERVER=MLCSU-BI-SQL;DATABASE=TLHC_Reporting"
   )
   
+  # set a lower date for the sql query to speed it up a bit
+  temp_date_lower <- (today() - months(4))
+  
   # download the details from SQL
   sql_table <- tbl(con, in_schema('dbo', tbl_name)) |> 
+    filter(ReceivedDate >= temp_date_lower) |> 
     select(SubmittedFile, ReceivedDate, TransactionId, UserEmail) |> 
     distinct() |> 
     collect()
+  
+  rm(temp_date_lower)
   
   # extract project code and filter for latest submission per project
   sql_table <- sql_table |> 
