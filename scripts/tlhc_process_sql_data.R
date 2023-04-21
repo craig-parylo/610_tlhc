@@ -416,11 +416,22 @@ process_invites <- function(df) {
       ),
       
       # work out when the invite was outcomed
-      calc_invite_outcome_date = coalesce(
+      calc_invite_outcome_date_old = coalesce(
         calc_contact_date, 
         calc_follow_up_call_date, 
         calc_second_letter_date, 
         calc_first_letter_date
+      ),
+      calc_invite_outcome_date_yearmon_old = as.yearmon(calc_invite_outcome_date_old),
+      
+      # work out when the invite was outcomed
+      # version 2 using the maximum date of these fields instead of coalescing
+      calc_invite_outcome_date = pmax(
+        calc_contact_date, 
+        calc_follow_up_call_date, 
+        calc_second_letter_date, 
+        calc_first_letter_date,
+        na.rm = T
       ),
       calc_invite_outcome_date_yearmon = as.yearmon(calc_invite_outcome_date)
       
@@ -554,7 +565,9 @@ process_measurement <- function(df) {
     mutate(
       # PLCOm2012 score (NB, a predictive risk model score for six-year lung cancer risk - expressed as a percentage)
       calc_PLCOm2012 = na_if(PLCOm2012, 'NULL'), # deal with textual NULLs
-      calc_PLCOm2012 = str_replace(string = calc_PLCOm2012, pattern = '\\..|\\:', replacement = '.'), # deal with malformatted values (e.g. 0..45 or 01:50)
+      #calc_PLCOm2012 = str_replace(string = calc_PLCOm2012, pattern = '\\..|\\:', replacement = '.'), # deal with malformatted values (e.g. 0..45 or 01:50)
+      # NB, testing new code as the above was found to strip out first digit following period e.g. 1.92 becomes 1.2
+      calc_PLCOm2012 = str_replace(string = calc_PLCOm2012, pattern = '\\.{2}|\\:', replacement = '.'), # deal with malformatted values (e.g. 0..45 or 01:50)
       calc_PLCOm2012 = as.numeric(calc_PLCOm2012), # convert to numeric
       
       # PLCOm2012 risk group with reference to a 1.51 threshold
