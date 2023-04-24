@@ -14,10 +14,12 @@ library(lubridate)
 library(furrr)
 library(progressr)
 library(here)
+library(tictoc)
 
 # Notify user 
 cat(rep('\n', 50)) # 50 blank lines to clear the console
 cat('== tlhc_latest_submissions_v2.R ===========================================\n')
+tic()
 
 # Functions ----
 #' Get Transaction Data
@@ -279,3 +281,4 @@ cat(paste('☑️', Sys.time(), 'Tables stored as RDS\n', sep = ' '))
 
 # update the user
 cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+toc()
