@@ -52,7 +52,6 @@ file.edit(here('scripts', 'tlhc_report.R'))
 source(here('scripts', 'tlhc_report.R'))
 rm(list=ls())
 
-
 # Produce demographic report (estimated time = 1 minute)
 # NB, output needs copying to the demographics report template
 source(here('scripts', 'tlhc_demographics.R'))
@@ -66,7 +65,7 @@ rm(list=ls())
 
 # Checking submissions ---------------------------------------------------------
 
-# TransactionID generation
+# TransactionID generation (estimated time = 1 minute)
 file.edit(here('scripts', 'tlhc_latest_submissions.R')) # to edit the date range for 'Include' submissions (if required)
 source(here('scripts', 'tlhc_latest_submissions.R'))
 
