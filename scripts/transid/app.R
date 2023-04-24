@@ -31,7 +31,7 @@ df_latest_files <- df |>
     ReceivedDate,
     TransactionId,
     Project_name,
-    UserEmail,
+    UserEmail
   ) |>
   unique() |> 
   arrange(desc(ReceivedDate))
@@ -247,7 +247,9 @@ server <- function(input, output) {
       pagination = F,
       columns = list(
         ReceivedDate = colDef(name = 'Received date', align = 'left', maxWidth = 210, format = colFormat(datetime = T)),
-        TransactionId = colDef(name = 'Trans ID', maxWidth = 80, align = 'left')
+        TransactionId = colDef(name = 'Trans ID', maxWidth = 80, align = 'left'),
+        Project_name = colDef(name = 'Project', minWidth = 200, resizable = T),
+        UserEmail = colDef(name = 'User email')
       )
     )
   })
