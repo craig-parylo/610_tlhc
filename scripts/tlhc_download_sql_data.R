@@ -165,6 +165,23 @@ download_tlhc_table <- function(str_table = '') {
     
     rm(invalid_transid)
     
+  } else if (str_table == 'tbTLHCTLHC_LungHealthCheck'){
+    ## LHC ----
+    # We need to explicitly exclude some transactions
+    
+    # define transactions to ignore
+    invalid_transid <- c('')
+    
+    df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      group_by(ParticipantID, LHC_Date) |> # get one record for each participant for each LHC date (to account for non-attendances)
+      slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
+      slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
+      collect() # download the data
+    
+    rm(invalid_transid)
+    
   } else {
     ## All other tables ----
     # We need a record per patient
