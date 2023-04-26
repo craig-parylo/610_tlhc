@@ -68,6 +68,7 @@ with_progress({
   df_metric_1c_invites_followup <- get_df_metric_1c_invites_followup()
   df_metric_2_invites_accepted <- get_df_metric_2_invites_accepted()
   
+  df_lhc_first_attended <- get_first_attended_lhc_per_participant() # helper data frame for 3a, 3b, 4a, 10 and 12
   df_metric_3a_attend_f2f <- get_df_metric_3a_attend_f2f()
   df_metric_3b_attend_tel <- get_df_metric_3b_attend_tel()
   df_metric_3c_dna_f2f <- get_df_metric_3c_dna_f2f()
