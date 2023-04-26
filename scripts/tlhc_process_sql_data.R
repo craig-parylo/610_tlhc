@@ -714,7 +714,7 @@ manage_table_processing <- function(str_table) {
   future:::save_rds(
     object = df_calc,
     pathname = here('data', 'tlhc', paste0('calc_', str_table, '.Rds')),
-    compress = F # don't compress to make metric calcualtion quicker
+    compress = F # don't compress to make metric calculation quicker
   )
   
   # update the user
