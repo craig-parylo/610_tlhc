@@ -194,7 +194,10 @@ process_demographics <- function(df) {
       ),
       
       # age
-      calc_age = as.numeric(str_remove(Age, 'yrs')), # tidy up ages supplied as XXyrs
+      calc_age = str_remove(Age, 'yrs'), # tidy up ages supplied as XXyrs
+      calc_age = na_if(calc_age, 'NULL'), # explicitly cast string literal 'NULL' as NA
+      #calc_age = as.numeric(str_remove(Age, 'yrs')), # tidy up ages supplied as XXyrs
+      calc_age = as.numeric(calc_age), # cast to numeric
       calc_age_tlhc_valid = case_when( # categorises ages which are valid for tlhc (55-74)
         (calc_age >= 55) & (calc_age <= 74) ~ 'Valid', 
         TRUE ~ 'Invalid'
@@ -565,8 +568,6 @@ process_measurement <- function(df) {
     mutate(
       # PLCOm2012 score (NB, a predictive risk model score for six-year lung cancer risk - expressed as a percentage)
       calc_PLCOm2012 = na_if(PLCOm2012, 'NULL'), # deal with textual NULLs
-      #calc_PLCOm2012 = str_replace(string = calc_PLCOm2012, pattern = '\\..|\\:', replacement = '.'), # deal with malformatted values (e.g. 0..45 or 01:50)
-      # NB, testing new code as the above was found to strip out first digit following period e.g. 1.92 becomes 1.2
       calc_PLCOm2012 = str_replace(string = calc_PLCOm2012, pattern = '\\.{2}|\\:', replacement = '.'), # deal with malformatted values (e.g. 0..45 or 01:50)
       calc_PLCOm2012 = as.numeric(calc_PLCOm2012), # convert to numeric
       
@@ -575,7 +576,9 @@ process_measurement <- function(df) {
       
       # LLPv2 score (NB, an alternate risk model score)
       calc_LLPv2_risk = na_if(LLPv2_Risk, 'NULL'), # deal with textual NULLs
-      calc_LLPv2_risk = str_replace(string = calc_LLPv2_risk, pattern = '\\>', replacement = ''), # deal with malformatted values (e.g. >3.56 or ?0.89)
+      calc_LLPv2_risk = str_replace(string = calc_LLPv2_risk, pattern = '\\>|\\.{2}', replacement = ''), # deal with malformatted values (e.g. >3.56 or 2..07)
+      calc_LLPv2_risk = str_remove(string = calc_LLPv2_risk, pattern = '\\?|\\;'), # deal with malformatted values (e.g. '?0.89 ' or 1.56;)
+      calc_LLPv2_risk = trimws(calc_LLPv2_risk), # deal with malformed values including leading or trailing spaces
       calc_LLPv2_risk = as.numeric(calc_LLPv2_risk), # convert to numeric
       
       # LLPv2 risk group with reference to a 2.5 threshold
