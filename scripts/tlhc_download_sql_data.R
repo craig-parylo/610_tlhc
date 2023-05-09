@@ -26,10 +26,11 @@ library(zoo)           # date functions (yearmonths)
 library(progressr)     # progress bars
 library(tictoc)        # timing processes
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_download_sql_data.R ===============================================\n')
-cat(paste('⚠️', Sys.time(), 'Please allow up to 20 minutes for this process to run...\n'))
+update_user(stage = 'start', message = 'tlhc_latest_submissions.R')
+update_user(icon = '⚠️', message = 'Please allow up to 30 minutes for this process to run')
 tic()
 
 # Setup ------------------------------------------------------------------------
@@ -210,7 +211,7 @@ download_tlhc_table <- function(str_table = '') {
 }
 
 # notify the user
-cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
+update_user(message = 'Setup complete and UDFs loaded')
 
 # Reference data ---------------------------------------------------------------
 
@@ -218,7 +219,7 @@ cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
 if(!dir.exists(here('data', 'tlhc'))){dir.create(here('data', 'tlhc'))}
 
 # initiate tlhc file read process with progress indicator
-cat(paste('⏱️', Sys.time(), 'Loading SQL tables, please wait ...\n', sep = ' '))
+update_user(message = 'Loading SQL tables, please wait ...', icon = '⏱️')
 
 # submitting organisations ----
 df_projectlu <- tbl(con, in_schema('dbo', 'dboProjectLookup')) |> 
@@ -317,11 +318,11 @@ with_progress({
 
 
 # notify the user
-cat(paste('☑️', Sys.time(), 'SQL tables loaded\n', sep = ' '))
+update_user(message = 'SQL tables loaded')
 
 # housekeeping
 rm(df_table_details)
 
 # done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
+update_user(icon = '🔚', stage = 'end')
 toc()
