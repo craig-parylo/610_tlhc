@@ -405,12 +405,34 @@ identify_participant_risk_groups <- function(df) {
 #' @return df with lhc yearmonth added
 identify_lhc_yearmon <- function(df) {
   
-  # get invite details
-  if(!exists('df_lhc')){df_lhc <- load_df_lhc()}
+  # # get invite details
+  # if(!exists('df_lhc')){df_lhc <- load_df_lhc()}
+  # 
+  # # create a lookup between participant id and lhc date
+  # df_lhc_yearmon <- df_lhc |> 
+  #   # limit the dataframe to valid, attended LHC
+  #   filter(
+  #     calc_valid_transactionid == 'Valid', # valid transactions
+  #     calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+  #     calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
+  #     !is.na(calc_lhc_date_yearmon), # exclude records without a LHC date
+  #     calc_lhc_attendance_category == 'Attended', # participant is recorded as attending
+  #   ) |>
+  #   # take the first attended lhc for a given participant
+  #   group_by(ParticipantID) |> 
+  #   slice_min(calc_lhc_date) |> 
+  #   ungroup() |> 
+  #   # simplify to required fields
+  #   select(ParticipantID, calc_lhc_date_yearmon, calc_lhc_date) |> 
+  #   unique()
   
-  # create a lookup between participant id and lhc date
-  df_lhc_yearmon <- df_lhc |> 
-    select(ParticipantID, calc_lhc_date_yearmon, calc_lhc_date) |> 
+  # get lhc details
+  if(!exists('df_lhc_first_attended')){df_lhc_first_attended <- get_first_attended_lhc_per_participant()}
+  
+  # create a lookup between participant and lhc date
+  df_lhc_yearmon <- df_lhc_first_attended |> 
+    # simplify to required fields
+    select(ParticipantID, calc_lhc_date_yearmon, calc_lhc_date) |>
     unique()
   
   # add yearmonth to the supplied df
@@ -423,6 +445,7 @@ identify_lhc_yearmon <- function(df) {
   # return the result
   return(df)
 }
+
 
 #' Standard aggregation of single metric performance
 #' 
@@ -691,6 +714,39 @@ get_pulmonary_incidental_data_for_item <- function(str_finding,
   return(df)
 }
 
+#' Get a dataframe for metric 10 - median time from invite to lhc
+#' 
+#' Return a record-level tibble in support of calculating the metric for 
+#' median time (days) between initial invite and the lhc date
+#' 
+#' Data is filtered for valid records where we have a value in the month 
+#' dimension
+#' 
+#' @return Tibble
+get_first_attended_lhc_per_participant <- function() {
+  
+  # load the data if not already loaded
+  if(!exists('df_lhc')){df_lhc <- load_df_lhc()}
+  
+  return(
+    df_lhc |> 
+      # limit the dataframe for valid metric
+      filter(
+        calc_valid_transactionid == 'Valid', # valid transactions
+        calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+        calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
+        !is.na(calc_lhc_date_yearmon), # exclude records without a LHC date
+        calc_lhc_attendance_category == 'Attended', # participant is recorded as attending
+        !is.na(calc_first_letter_date) # exclude records without an invite date
+      ) |> 
+      # take the first attended lhc for a given participant
+      group_by(ParticipantID) |> 
+      slice_min(calc_lhc_date) |> 
+      ungroup()
+  )
+}
+
+
 ## load metric df --------------------------------------------------------------
 
 ### based on invites ---------------------------------------------------
@@ -833,7 +889,7 @@ get_df_metric_2_invites_accepted <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_3a_attend_f2f <- function() {
+get_df_metric_3a_attend_f2f_old <- function() {
   
   p('df for metric 3a')
   
@@ -860,6 +916,36 @@ get_df_metric_3a_attend_f2f <- function() {
   )
 }
 
+
+#' Get a dataframe for metric 3a - face-to-face lung health checks
+#' 
+#' Return a record-level tibble in support of calculating the metric for 
+#' lung health checks performed face-to-face.
+#' 
+#' Data is filtered for valid records where we have a value in the month 
+#' dimension
+#' 
+#' @return Tibble
+get_df_metric_3a_attend_f2f <- function() {
+  
+  p('df for metric 3a')
+  
+  # load the data if not already loaded - this is a helper function that has the metric logic included
+  if(!exists('df_lhc_first_attended')){df_lhc_first_attended <- get_first_attended_lhc_per_participant()}
+  
+  return(
+    df_lhc_first_attended |> 
+      # add fields identifying the metric
+      mutate(
+        metric_id = '3a',
+        metric_name = 'Number of patients who attended a face-to-face Lung Health Check',
+        month = calc_lhc_date_yearmon,
+      ) |> 
+      # limit to just F2F contacts
+      filter(calc_lhc_delivery_method_category == 'F2F') # the method of delivery is face-to-face
+  )
+}
+
 #' Get a dataframe for metric 3b - telephone lung health checks
 #' 
 #' Return a record-level tibble in support of calculating the metric for 
@@ -869,7 +955,7 @@ get_df_metric_3a_attend_f2f <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_3b_attend_tel <- function() {
+get_df_metric_3b_attend_tel_old <- function() {
   
   p('df for metric 3b')
   
@@ -893,6 +979,35 @@ get_df_metric_3b_attend_tel <- function() {
         calc_lhc_attendance_category == 'Attended', # participant is recorded as attending
         calc_lhc_delivery_method_category == 'Virtual' # the method of delivery is not face-to-face
       )
+  )
+}
+
+#' Get a dataframe for metric 3b - telephone lung health checks
+#' 
+#' Return a record-level tibble in support of calculating the metric for 
+#' lung health checks performed on the telephone (or virtual).
+#' 
+#' Data is filtered for valid records where we have a value in the month 
+#' dimension
+#' 
+#' @return Tibble
+get_df_metric_3b_attend_tel <- function() {
+  
+  p('df for metric 3b')
+  
+  # load the data if not already loaded - this is a helper function that has the metric logic included
+  if(!exists('df_lhc_first_attended')){df_lhc_first_attended <- get_first_attended_lhc_per_participant()}
+    
+  return(
+    df_lhc_first_attended |> 
+      # add fields identifying the metric
+      mutate(
+        metric_id = '3b',
+        metric_name = 'Number of patients who attended a telephone Lung Health Check',
+        month = calc_lhc_date_yearmon,
+      ) |> 
+      # limit to just virtual contacts
+      filter(calc_lhc_delivery_method_category == 'Virtual') # the method of delivery is face-to-face
   )
 }
 
@@ -2118,7 +2233,7 @@ get_df_metric_9_smoking_completed <- function() {
 #' dimension
 #' 
 #' @return Tibble
-get_df_metric_10_median_inv_to_lhc <- function() {
+get_df_metric_10_median_inv_to_lhc_old <- function() {
   
   p('df for metric 10')
   
@@ -2147,6 +2262,37 @@ get_df_metric_10_median_inv_to_lhc <- function() {
       filter(calc_days_from_invite_to_lhc >= 0) # only keep records with a positive number
   )
 }
+
+#' Get a dataframe for metric 10 - median time from invite to lhc
+#' 
+#' Return a record-level tibble in support of calculating the metric for 
+#' median time (days) between initial invite and the lhc date
+#' 
+#' Data is filtered for valid records where we have a value in the month 
+#' dimension
+#' 
+#' @return Tibble
+get_df_metric_10_median_inv_to_lhc <- function() {
+  
+  p('df for metric 10')
+  
+  # load the data if not already loaded - this is a helper function that has the metric logic included
+  if(!exists('df_lhc_first_attended')){df_lhc_first_attended <- get_first_attended_lhc_per_participant()}
+  
+  return(
+    df_lhc_first_attended |> 
+      # add fields identifying the metric
+      mutate(
+        metric_id = '10',
+        metric_name = 'Median time from initial invite to lung health check (days)',
+        month = calc_lhc_date_yearmon,
+      ) |> 
+      # calculate the number of days between invite and lhc
+      mutate(calc_days_from_invite_to_lhc = (calc_lhc_date - calc_first_letter_date)) |> 
+      filter(calc_days_from_invite_to_lhc >= 0) # only keep records with a positive number
+  )
+}
+
 
 #' Get a dataframe for metric 11 - median time from invite to ldct
 #' 
@@ -2227,6 +2373,7 @@ get_df_metric_12_median_lhc_to_ldct <- function() {
       filter(calc_days_from_lhc_to_ldct >= 0) # only keep records with a positive number
   )
 }
+
 
 #' Get a dataframe for metric 13 - median time from invite to diagnosis
 #' 
@@ -2310,6 +2457,10 @@ calculate_metric_3a <- function() {
   
 }
 
+# calculate_metric_3a_v2 <- function() {
+#   df <- get_df_metric_3a_attend_f2f_v2() |> aggregate_metric_standard()
+# }
+
 #' Calculate metric 3b performance
 #'
 #' @return df Tibble of aggregated performance by project and month for metric 3b
@@ -2319,6 +2470,10 @@ calculate_metric_3b <- function() {
   df <- get_df_metric_3b_attend_tel() |> aggregate_metric_standard()
   
 }
+
+# calculate_metric_3b_v2 <- function() {
+#   df <- get_df_metric_3b_attend_tel_v2() |> aggregate_metric_standard()
+# }
 
 #' Calculate metric 3c performance
 #'

@@ -16,7 +16,7 @@ rm(list=ls())
 source(here('scripts', 'tlhc_process_sql_data.R'))
 rm(list=ls())
 
-# Calculate metrics (estimated time = 2 mins)
+# Calculate metrics (estimated time = 4 mins)
 source(here('scripts', 'tlhc_metrics.R'))
 rm(list=ls())
 
