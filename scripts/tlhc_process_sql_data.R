@@ -18,9 +18,10 @@ library(tictoc)        # timing processes
 library(openxlsx)      # opening xlsx files
 library(dtplyr)        # faster data wrangling
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_process_sql_data.R ================================================\n')
+update_user(stage = 'start', message = 'tlhc_process_sql_data.R')
 tic()
 
 # UDF --------------------------------------------------------------------------
@@ -204,47 +205,47 @@ process_demographics <- function(df) {
       ),
       
       # bins ages into groups required for MI report
-      calc_age_group_report = fct_explicit_na(
-        cut(
+      calc_age_group_report = fct_na_value_to_level(
+        f = cut(
           x = calc_age,
           breaks = c(-Inf, -1, 49, 59, 69, 79, Inf),
           labels = addNA(c('Age below zero', '0-49', '50-59', '60-69', '70-79', '80+'))
         ),
-        na_level = 'Not known'
+        level = 'Not known'
       ),
       
       # bins ages into groups required for the Ipsos report
-      calc_age_group_ipsos = fct_explicit_na(
-        cut(
+      calc_age_group_ipsos = fct_na_value_to_level(
+        f = cut(
           x = calc_age,
           breaks = c(-Inf, -1, 54, 64, 74, 75, Inf),
           labels = c('Age below zero', 'Other', '55-64', '65-74', '75', 'Other')
         ),
-        na_level = 'Not known'
+        level = 'Not known'
       ),
       
       # marital status - convert to factor and ensure we have values for na
-      calc_marital_status = fct_explicit_na(
-        factor(
+      calc_marital_status = fct_na_value_to_level(
+        f = factor(
           calc_marital_status,
           levels = c('Single', 'Married or civil partner', 'Divorced', 'Separated', 'Widow(er)', 'Prefer not to say', 'Not known')
         ),
-        na_level = 'Not known'
+        level = 'Not known'
       ),
       
       # ethnic group - convert to factor and ensure we have values for na
-      calc_ethnic_group = fct_explicit_na(
-        factor(
+      calc_ethnic_group = fct_na_value_to_level(
+        f = factor(
           calc_ethnic_group,
           levels = c('Asian or Asian British', 'Black or Black British', 'Mixed', 'Not stated', 'Other Ethnic Group', 'White')
         ),
-        na_level = 'Not known'
+        level = 'Not known'
       ),
       
       # language - convert to a factor and ensure we have values for na
-      calc_language = fct_explicit_na(
-        fct_infreq(calc_language),
-        na_level = 'Not known'
+      calc_language = fct_na_value_to_level(
+        f = fct_infreq(calc_language),
+        level = 'Not known'
       )
       
       
@@ -726,13 +727,13 @@ manage_table_processing <- function(str_table) {
 }
 
 # notify the user
-cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
+update_user(message = 'Setup complete and UDFs loaded')
 
 # Load data --------------------------------------------------------------------
 # load tables and run them through the processing function
 
 # initiate tlhc file read process with progress indicator
-cat(paste('⏱️', Sys.time(), 'Processing SQL tables, please wait ...\n', sep = ' '))
+update_user(message = 'Processing SQL tables, please wait ...', icon = '⏱️')
 
 ## project lookups (used as reference) ----
 df_projectlu <- readRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
@@ -792,5 +793,5 @@ with_progress({
 # write_csv(x = df_marital_status, file = here('mi_data', 'tlhc', 'reference', 'marital_status.csv'))
 
 # done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()
