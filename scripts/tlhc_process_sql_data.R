@@ -74,9 +74,21 @@ process_alltables <- function(df) {
       calc_submitting_organisation_code = str_sub(SubmittedZipFile, 1, 5),
       
       # identify invalid Participant IDs
+      # calc_valid_participantid = case_when(
+      #   nchar(ParticipantID) < 15 ~ 'Invalid', # length is too short
+      #   is.numeric(ParticipantID) ~ 'Invalid', # not an alphanumeric pseudo_NHS_number
+      #   TRUE ~ 'Valid'
+      # ),
+      
+      #calc_valid_participantid_length = (nchar(as.character(ParticipantID)) < 60),
+      #calc_valid_participantid_numeric = is.numeric(ParticipantID),
+      # calc_valid_participantid = case_when(
+      #   calc_valid_participantid_length | calc_valid_participantid_numeric ~ 'Invalid',
+      #   .default = 'Valid'
+      # ),
+      
       calc_valid_participantid = case_when(
-        nchar(ParticipantID) < 15 ~ 'Invalid', # length is too short
-        is.numeric(ParticipantID) ~ 'Invalid', # not an alphanumeric pseudo_NHS_number
+        nchar(ParticipantID) < 60 | is.numeric(ParticipantID) ~ 'Invalid',
         TRUE ~ 'Valid'
       ),
       
