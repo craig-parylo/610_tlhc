@@ -21,9 +21,10 @@ library(furrr)       # parallel processing
 library(progressr)   # progress bars
 library(tictoc)      # timing monitor
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_datasheet_transfer ================================================\n')
+update_user(stage = 'start', message = 'tlhc_datasheet_transfer.R')
 tic()
 
 # Setup ------------------------------------------------------------------------
@@ -128,7 +129,7 @@ lapply(
 )
 
 # notify user
-cat(paste('☑️', Sys.time(), 'Archive folders checked\n', sep = ' '))
+update_user(message = 'Archive folders checked')
 
 ## archive files ---------------------------------------------------------------
 
@@ -152,7 +153,7 @@ with_progress({
 })
 
 # notify user
-cat(paste('☑️', Sys.time(), 'Older files have been archived\n', sep = ' '))
+update_user(message = 'Older files have been archived')
 
 ## replace with new datasheets -------------------------------------------------
 
@@ -175,9 +176,8 @@ with_progress({
 })
 
 # notify user
-cat(paste('☑️', Sys.time(), 'New files copied across\n', sep = ' '))
-
+update_user(message = 'New files copied across')
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()
