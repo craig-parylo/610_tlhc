@@ -57,7 +57,7 @@ update_user <- function(message = '', stage = '', icon = '☑️') {
   stage <- trimws(tolower(stage))
   
   # prepare time
-  time <- date_now(zone = '')
+  time <- date_format(date_now(zone = ''), format = '%H:%M:%S')
   
   # update the icon if end of script
   icon <- case_when(
