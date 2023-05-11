@@ -17,14 +17,14 @@ library(lubridate)     # working with dates
 library(zoo)           # working with dates (yearmon)
 library(tictoc)        # process monitoring
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
+# Notify user 
+update_user(stage = 'start', message = 'tlhc_report.R')
 tic()
 
 # Suppress summarise info
 options(dplyr.summarise.inform = FALSE)
-
-# Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_report.R ==========================================================\n')
 
 # Functions --------------------------------------------------------------------
 
@@ -250,8 +250,7 @@ add_project_table <- function(wb, df_project, ref_projects) {
   )
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on', head_project_name, '\n', sep = ' '))
-  
+  update_user(message = paste('... working on', head_project_name), icon = '📄')
   
   # generate an output table ---
   df_ccg <- helper_create_metric_table(df_project = df_project, flag_project = TRUE)
@@ -317,7 +316,7 @@ add_project_table <- function(wb, df_project, ref_projects) {
 add_contents_table <- function(wb, df) {
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on Contents\n', sep = ' '))
+  update_user(message = '... working on Contents', icon = '📄')
   
   # create a summary 
   df_contents <- df |> 
@@ -518,7 +517,7 @@ add_contents_table <- function(wb, df) {
 add_cancer_diagnosis <- function(wb, df) {
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on Cancer diagnosis\n', sep = ' '))
+  update_user(message = '... working on Cancer diagnosis', icon = '📄')
   
   ### project summary
   df_cancer <- df |> 
@@ -844,7 +843,7 @@ helper_ps_add_metric <- function(df_recipient, df_donor, metrics, metric_name, g
 add_summary_project <- function(wb, df) {
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on Summary by project\n', sep = ' '))
+  update_user(message = '... working on Summary by project', icon = '📄')
   
   # get the list of projects as reported in the template
   df_ps_spine <- read.xlsx(
@@ -1589,7 +1588,7 @@ generate_metric_summary_table <- function(df) {
 add_summary_national <- function(wb, df) {
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on National summary\n', sep = ' '))
+  update_user(message = '... working on National summary', icon = '📄')
   
   # get latest month's data
   latest_month <- format(max(df$month_date), '%b %Y')
@@ -1704,7 +1703,7 @@ add_summary_national <- function(wb, df) {
 add_phase_sheets <- function(wb, df) {
   
   # update the user
-  cat(paste('📄', Sys.time(), '... working on Original, Onboarded and Phase 3 sheets\n', sep = ' '))
+  update_user(message = '... working on Original, Onboarded and Phase 3 sheets', icon = '📄')
   
   # get a list of metrics from the workbook
   df_template <- read.xlsx(
@@ -1815,7 +1814,7 @@ add_phase_sheets <- function(wb, df) {
 }
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Functions defined\n', sep = ' '))
+update_user(message = 'Functions defined')
 
 # Load data --------------------------------------------------------------------
 
@@ -1879,7 +1878,7 @@ wb <- loadWorkbook(
 )
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Data loaded\n', sep = ' '))
+update_user(message = 'Data loaded')
 
 # Main logic -------------------------------------------------------------------
 
@@ -1931,7 +1930,7 @@ removeWorksheet(
 
 ## save the workbook ----
 # update the user
-cat(paste('⏱️', Sys.time(), 'Saving workbook\n', sep = ' '))
+update_user(message = 'Saving workbook')
 
 # do the saving
 saveWorkbook(
@@ -1947,5 +1946,5 @@ url = here('outputs', paste0('TLHC key metrics ', Sys.Date(), '.xlsx'))
 browseURL(url = url)
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()
