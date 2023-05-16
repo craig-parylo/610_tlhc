@@ -61,8 +61,9 @@ update_user <- function(message = '', stage = '', icon = '☑️') {
 
   # update the icon if end of script
   icon <- case_when(
-    stage == 'end' ~ '🔚',
-    .default = '☑️'
+    stage == 'end' ~ '🔚', # if end of script then use this
+    !icon == '☑️' ~ icon,  # if non-standard icon then use that
+    .default = '☑️'        # default to check
   )
 
   # add blank lines if start of script
