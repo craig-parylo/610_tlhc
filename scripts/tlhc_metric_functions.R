@@ -23,9 +23,6 @@ library(fuzzyjoin)     # joining on fuzzy word matches
 source(here('scripts', 'func_name_projects.R')) # naming projects
 
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_metrics.R =========================================================\n')
-tic()
 
 # UDF --------------------------------------------------------------------------
 ## load data -------------------------------------------------------------------
@@ -2884,12 +2881,3 @@ calculate_metric_14a <- function() {
   df <- get_df_metric_14a_lc_pathway_following_ldct() |> aggregate_metric_standard()
   
 }
-
-
-# notify the user
-cat(paste('☑️', Sys.time(), 'Setup complete and UDFs loaded\n', sep = ' '))
-
-
-# done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
-toc()

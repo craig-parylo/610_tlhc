@@ -16,6 +16,11 @@ library(lubridate)   # working with dates
 library(zoo)         # working with dates (yearmon)
 library(janitor)     #
 library(tictoc)      # process monitoring
+
+source(here('scripts', 'tlhc_general_functions.R'))
+
+# Notify user 
+update_user(stage = 'start', message = 'tlhc_datasheet_output.R')
 tic()
 
 # config -----------------------------------------------------------------------
@@ -24,10 +29,6 @@ tic()
 # use this if refreshing from the start of the programme:
 months_backwards <- abs(interval(as.Date('2019-04-01'), floor_date(today(), unit = 'month') %m-% months(2)) %/% months(1))
 
-
-# Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_datasheet_output ==================================================\n')
 
 # Load data --------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ df_template <- read.xlsx(xlsxFile = wb, cols = c(1:2,6)) |>
   )
 
 # notify user
-cat(paste('☑️', Sys.time(), 'Variables initialised and reference data loaded\n', sep = ' '))
+update_user(message = 'Variables inititalised and reference data loaded')
 
 # Process data -----------------------------------------------------------------
 
@@ -268,13 +269,13 @@ proj_month <- df |>
   filter(month %in% rolling_months$yearmon)
 
 # notify user
-cat(paste('☑️', Sys.time(), 'Data prepared\n', sep = ' '))
+update_user(message = 'Data prepared')
 
 
 ## parallel processing ----
 
 # notify re: long process
-cat(paste('⏱️', Sys.time(), 'Generating datasheets, please wait ...\n', sep = ' '))
+udpate_user(message = 'Generating datasheets, please wait ...', icon = '⏱️')
 
 # open the folder (or create if it doesn't exist)
 if(!file.exists(here('data', 'datasheets'))){dir.create(path = here('data', 'datasheets'))}
@@ -298,8 +299,8 @@ with_progress({
 })
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Datasheets generated\n', sep = ' '))
+update_user(message = 'Datasheets generated')
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()

@@ -16,9 +16,10 @@ library(progressr)
 library(here)
 library(tictoc)
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_latest_submissions_v2.R ===========================================\n')
+update_user(stage = 'start', message = 'tlhc_latest_submissions.R')
 tic()
 
 # Functions ----
@@ -75,7 +76,7 @@ get_transaction_data <- function(tbl_label, tbl_name, pattern) {
 }
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Functions defined\n', sep = ' '))
+update_user(message = 'Functions defined')
 
 # Setup ----
 # define the connection
@@ -93,7 +94,7 @@ sql_proj_lu <- tbl(con, in_schema('dbo', 'dboProjectLookup')) |>
     Project_name = ProjectName
   )
 
-cat(paste('☑️', Sys.time(), 'Project lookup downloaded\n', sep = ' '))
+update_user(message = 'Project lookup downloaded')
 
 
 ## Define input table ----
@@ -138,22 +139,11 @@ table_details <- tibble(
 )
 rm(tbl_label, tbl_name, pattern)
 
-cat(paste('☑️', Sys.time(), 'Input table generated\n', sep = ' '))
-# 
-# test <- table_details |>
-#   head(1) |> 
-#   mutate(
-#     data = future_pmap(
-#       .l = list(tbl_label, tbl_name, pattern), 
-#       .f = get_transaction_data,
-#       .options = furrr_options(seed=NULL)
-#     )
-#   )
-
+update_user(message = 'Input table generated')
 
 ## Parallel processing ----
 # notify re: long process
-cat(paste('⏱️', Sys.time(), 'Loading SQL tables, please wait ...\n', sep = ' '))
+update_user(icon = '⏱️', message = 'Loading SQL tables, please wait ...')
 
 # download details from SQL
 plan(multisession)
@@ -177,7 +167,7 @@ df <- bind_rows(
 rm(table_details_data)
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Data gathered from SQL\n', sep = ' '))
+update_user(message = 'Data gathered from SQL')
 
 ## Data tidy ----
 # add in project names
@@ -258,8 +248,7 @@ df_pivot_transid <- df |>
   )
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Data tidied\n', sep = ' '))
-
+update_user(message = 'Data tidied')
 
 # store for future use
 saveRDS(
@@ -277,8 +266,8 @@ saveRDS(
 
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Tables stored as RDS\n', sep = ' '))
+update_user(message = 'Tables stored as RDS')
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Script complete ===================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()

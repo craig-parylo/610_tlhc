@@ -26,7 +26,13 @@ library(lubridate)     # date functions
 library(zoo)           # date functions
 library(DBI)           # sql connection
 library(dbplyr)        # tidy sql processing
+library(tictoc)        # process timing
 
+source(here('scripts', 'tlhc_general_functions.R'))
+
+# Notify user 
+update_user(stage = 'start', message = 'tlhc_create_manual_adjustment_southampton.R')
+tic()
 
 # UDF --------------------------------------------------------------------------
 
@@ -282,3 +288,7 @@ view(df_southampton_ma)
 
 # open the manual adjustment file for editing
 browseURL(file.path(Sys.getenv('base_365'),'Monthly MI reporting', 'Data processing procedure', 'tlhc_manual_adjustments.xlsx'))
+
+# done!
+update_user(stage = 'end')
+toc()

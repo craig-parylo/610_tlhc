@@ -15,11 +15,11 @@ library(tictoc)        # timing monitor
 library(fuzzyjoin)     # joining on fuzzy word matches
 source(here('scripts', 'func_name_projects.R')) # naming projects
 source(here('scripts', 'tlhc_metric_functions.R')) # functions for loading metric data
+source(here('scripts', 'tlhc_general_functions.R')) # general functions
 readRenviron(here('.Renviron')) # project level environment variables
 
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_metrics.R =========================================================\n')
+update_user(stage = 'start', message = 'tlhc_metrics.R')
 tic()
 
 
@@ -35,7 +35,7 @@ handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the 
 
 with_progress({
   
-  cat(paste('⏱️', Sys.time(), '... loading base tables\n', sep = ' '))
+  update_user(message = 'Loading base tables', icon = '⏱️')
   p <- progressor(steps = 9)
   
   df_demo <- load_df_demo()
@@ -49,7 +49,6 @@ with_progress({
   df_smoking <- load_df_smoking()
   df_diag <- load_df_diagnostics()
   
-  cat(paste('☑️', Sys.time(), 'Base tables loaded\n', sep = ' '))
 })
 
 
@@ -61,7 +60,7 @@ with_progress({
 
 with_progress({
   
-  cat(paste('⏱️', Sys.time(), '... loading metric dataframes\n', sep = ' '))
+  update_user(message = 'Loading metric dataframes', icon = '⏱️')
   p <- progressor(steps = 46)
   
   df_metric_1a_invites_first <- get_df_metric_1a_invites_first()
@@ -119,7 +118,6 @@ with_progress({
   
   df_metric_14a_lc_pathway_following_ldct <- get_df_metric_14a_lc_pathway_following_ldct()
   
-  cat(paste('☑️', Sys.time(), 'Metric-specific dataframes loaded\n', sep = ' '))
 })
 
 
@@ -137,7 +135,7 @@ with_progress({
 # aggregates at project and month
 with_progress({
   
-  cat(paste('⏱️', Sys.time(), '... aggregating metric performance\n', sep = ' '))
+  update_user(message = 'Aggregating metric performance', icon = '⏱️')
   p <- progressor(steps = 45)
   
   df_metric_1a <- calculate_metric_1a()
@@ -255,26 +253,19 @@ with_progress({
       month
     )
   
-  cat(paste('☑️', Sys.time(), 'Metric aggregations calculated\n', sep = ' '))
 })
 
 
-
-
-cat(paste('☑️', Sys.time(), 'Metrics calculated\n', sep = ' '))
+update_user(message = 'Metrics calculated')
 
 # save metric output
 df_metrics |>
   saveRDS(here('data', 'tlhc', 'tlhc_metrics.Rds'))
-cat(paste('☑️', Sys.time(), 'Metrics file saved\n', sep = ' '))
-
+update_user(message = 'Metrics file saved')
 
 # testing ----
-
 # df_metric_7u_incidental_emphysema |> count(project, calc_ldct_date_corrected_yearmon) |> view()
 
-
-
 # done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
+update_user(stage = 'end')
 toc()

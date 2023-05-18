@@ -75,8 +75,7 @@ process_alltables <- function(df) {
       
       # identify invalid Participant IDs
       calc_valid_participantid = case_when(
-        nchar(ParticipantID) < 15 ~ 'Invalid', # length is too short
-        is.numeric(ParticipantID) ~ 'Invalid', # not an alphanumeric pseudo_NHS_number
+        nchar(ParticipantID) < 60 | is.numeric(ParticipantID) ~ 'Invalid',
         TRUE ~ 'Valid'
       ),
       
@@ -97,7 +96,7 @@ process_alltables <- function(df) {
       # )
       calc_valid_transactionid = case_when(
         # C&M submission which is not the latest one
-        (calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)) ~ 'Invalid',
+        #(calc_submitting_organisation_code == 'RBQ00') & (TransactionId < max(TransactionId)) ~ 'Invalid',
         
         # North Kirklees / Bradford errant LDCT submission with all records on the same date (2023-02)
         TransactionId == 187617 ~ 'Invalid',

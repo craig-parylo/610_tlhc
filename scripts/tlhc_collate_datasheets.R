@@ -28,6 +28,13 @@ library(readxl)           # reading from excel
 library(parallel)         # parallel processing
 library(future.apply)     # parallel processing
 library(progressr)        # progress bar
+library(tictoc)           # process timing
+
+source(here('scripts', 'tlhc_general_functions.R'))
+
+# Notify user 
+update_user(stage = 'start', message = 'tlhc_collate_datasheets.R')
+tic()
 
 ## Initialise variables ----
 #end_month   <- as_date('2022-11-01') # NB, update this each month
@@ -95,12 +102,6 @@ read_tlhc_file <- function(folder_file) {
 
 # Preparation ------------------------------------------------------------------
 
-# Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_collate_datasheets.R ==============================================\n')
-
-
-
 ## Reference data ----
 
 # Project details
@@ -130,7 +131,7 @@ ref_months <- seq.Date(
   mutate(month = as.yearmon(month_date))
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Variables initialised and reference data loaded\n', sep = ' '))
+update_user(message = 'Variables initialised and reference data loaded')
 
 # Process files ----------------------------------------------------------------
 
@@ -229,7 +230,7 @@ files_excluded <- file_list |>
 rm(file_list)
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Files identified\n', sep = ' '))
+update_user('Files identified')
 
 ## Read files ----
 #' Read files and gather details for metric/numerator/denominator/values.
@@ -243,7 +244,7 @@ handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the 
 plan('multisession') # set up the future.apply package
 
 # initiate tlhc file read process with progress indicator
-cat(paste('⏱️', Sys.time(), 'Reading files ...\n', sep = ' '))
+update_user(message = 'Reading files ...', icon = '⏱️')
 with_progress({
   p <- progressor(steps = length(files$folder_file))
   files_data <- files |> 
@@ -254,13 +255,13 @@ with_progress({
       )
     )
 })
-cat(paste('⏱️', Sys.time(), '...', length(files$folder_file), 'files read\n', sep = ' '))
+update_user(message = paste('...', length(files$folder_file), 'files read'))
 
 # housekeeping
 rm(p)
 
 # Display a list of excluded files (ignore archived files)
-cat(paste('⚠️', Sys.time(), '...', length(files_excluded$folder_file), 'files excluded - displaying for review\n', sep = ' '))
+update_user(message = paste('...', length(files_excluded$folder_file), 'files excluded - displaying for review'), icon = '⚠️')
 view(files_excluded |> filter(str_detect(folder_file, 'archive|Archive', negate = T)))
 
 
@@ -301,7 +302,7 @@ files_data <- files_data |>
     )
   )
 
-cat(paste('☑️', Sys.time(), 'Data collated from individual submissions\n', sep = ' '))
+update_user(message = 'Data collated from individual submissions')
 
 ## Submitted data ----
 #' Process the submitted data to combine the file meta data with the metric 
@@ -335,7 +336,7 @@ submitted_data <- left_join(
 
 # housekeeping
 rm(temp_files, temp_data)
-cat(paste('☑️', Sys.time(), 'Combined submission and metadata information\n', sep = ' '))
+update_user(message = 'Combined submission and metadata information')
 
 
 ## MI template ----
@@ -395,7 +396,7 @@ mi_data <- left_join(
   )
 
 # update the user
-cat(paste('☑️', Sys.time(), 'Populated MI template with submitted data\n', sep = ' '))
+update_user(message = 'Populated MI template with submitted data')
 
 
 # -- Outputs --------------------------------------------------------------------
@@ -456,4 +457,5 @@ write_csv(
 
 
 # done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
+update_user(stage = 'end')
+toc()
