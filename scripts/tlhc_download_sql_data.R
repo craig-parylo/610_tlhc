@@ -182,6 +182,26 @@ download_tlhc_table <- function(str_table = '') {
       collect() # download the data
     
     rm(invalid_transid)
+  
+  } else if (str_table == 'tbTLHCTLHC_Demographics'){
+    ## Demographics ----
+    # We need to explicitly exclude some transactions
+    
+    # define transactions to ignore
+    invalid_transid <- c(
+      # Luton South Bedfordshire - contains invalid ParticipantIDs
+      194295
+    )
+    
+    df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      group_by(ParticipantID) |> # get one record for each participant
+      slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
+      slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |> # get the first row where multiples still exist
+      collect() # download the data
+    
+    rm(invalid_transid)
     
   } else {
     ## All other tables ----
