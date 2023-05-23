@@ -274,65 +274,26 @@ get_data_for_sankey <- function() {
   
   # get ldct ----
   update_user(message = 'Getting ldct data ...', icon = '⏱️')
-  df_sankey_ldct <- load_df_ldct()
-  df_sankey_ldct <- df_sankey_ldct |> 
+  df_sankey_ldct <- load_df_ldct() |> 
+  lazy_dt() |> # using dtplyr to speed up
     filter(
       calc_valid_transactionid == 'Valid', # valid transactions
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
-    )
-  
-    # initial scans
-  df_sankey_ldct_1 <- df_sankey_ldct |> 
-    filter(calc_ldct_date_corrected_category == 'Initial scan') |> 
-    select(ParticipantID, ldct_1 = calc_ldct_date_corrected_category) |> 
-    unique()
-
-  df_sankey_ldct_2 <- df_sankey_ldct |> 
-    filter(calc_ldct_date_corrected_category == '3 month follow-up scan') |> 
-    select(ParticipantID, ldct_2 = calc_ldct_date_corrected_category) |> 
-    unique()
-  
-  df_sankey_ldct_3 <- df_sankey_ldct |> 
-    filter(calc_ldct_date_corrected_category == '12 month follow-up scan') |> 
-    select(ParticipantID, ldct_3 = calc_ldct_date_corrected_category) |> 
-    unique()
-  
-  df_sankey_ldct_4 <- df_sankey_ldct |> 
-    filter(calc_ldct_date_corrected_category == '24 month follow-up scan') |> 
-    select(ParticipantID, ldct_4 = calc_ldct_date_corrected_category) |> 
-    unique()
-  
-  df_sankey_ldct_5 <- df_sankey_ldct |> 
-    filter(calc_ldct_date_corrected_category == '48 month follow-up scan') |> 
-    select(ParticipantID, ldct_5 = calc_ldct_date_corrected_category) |> 
-    unique()
-  
-  # combine the results
-  df_sankey_ldct <- df_sankey_ldct |> 
-    select(ParticipantID) |> 
-    unique() |> 
-    left_join(
-      y = df_sankey_ldct_1,
-      by = 'ParticipantID'
     ) |> 
-    left_join(
-      y = df_sankey_ldct_2,
-      by = 'ParticipantID'
+    group_by(ParticipantID) |> 
+    mutate(
+      calc_ldct_count = n_distinct(calc_ldct_date_corrected),
+      calc_ldct_count_groups = cut(
+        x = calc_ldct_count,
+        breaks = c(-Inf, 1, 2, Inf),
+        labels = c('1 x scan', '2 x scans', '3+ scans')
+      )
     ) |> 
-    left_join(
-      y = df_sankey_ldct_3,
-      by = 'ParticipantID'
-    ) |> 
-    left_join(
-      y = df_sankey_ldct_4,
-      by = 'ParticipantID'
-    ) |> 
-    left_join(
-      y = df_sankey_ldct_5,
-      by = 'ParticipantID'
-    )
+    ungroup() |> 
+    select(ParticipantID, calc_ldct_count_groups) |> 
+    as_tibble()
   
   # add ldct to the return
   df_return <- left_join(
@@ -465,21 +426,14 @@ get_sankey_for_data <- function(df) {
       outcome = 'calc_ineligible_status'
     ),
 
-    # ldct - initial scan
+    # ldct - scans
     get_flows_for_data(
       df = df,
       from = 'calc_ineligible_status',
-      to = 'ldct_1',
-      outcome = 'ldct_1'
+      to = 'calc_ldct_count_groups',
+      outcome = 'calc_ldct_count_groups'
     ),
 
-    # # ldct - 3 month scan
-    # get_flows_for_data(
-    #   df = df,
-    #   from = 'ldct_1',
-    #   to = 'ldct_2',
-    #   outcome = 'ldct_2'
-    # )
     
   ) |> 
     # convert NAs to a string
@@ -551,8 +505,7 @@ get_sankey_for_data <- function(df) {
         name %in% c('LHC Attended', 'LHC DNA', 'LHC Incomplete') ~ 8,
         name %in% c('High risk', 'Low risk') ~ 9,
         name %in% c('LDCT: referred', 'LDCT: ineligible') ~ 10,
-        name %in% c('Initial scan', 'Loss to follow up') ~ 11,
-        name %in% c('3 month follow-up scan') ~ 12
+        name %in% c('1 x scan', '2 x scans', '3+ scans', 'Loss to follow up') ~ 11
       ),
       x = rescale(x, to = c(1e-09, 0.99)),
       
@@ -561,14 +514,24 @@ get_sankey_for_data <- function(df) {
         name %in% c(
           'Invite 1 Accepted', 'Invite Accepted', 'Virtual', '1 x contacts', 
           'LHC Attended', 'High risk', 'LDCT: referred', 'Initial scan', 
-          '3 month follow-up scan'
-          ) ~ 0.0001,
+          '3 month follow-up scan', '1 x scan'
+        ) ~ 0.0001,
         
-        name %in% c('Invite 2 Accepted', '2 x contacts', 'LHC Incomplete', 'Low risk', 'LDCT: ineligible') ~ 0.2,
+        name %in% c(
+          '2 x scans', '3+ scans'
+        ) ~ 0.1,
         
-        name %in% c('Invite 3 Accepted', 'F2F', 'Virtual, F2F', 'F2F, Virtual', '3+ contacts', 'LHC DNA') ~ 0.33,
+        name %in% c(
+          'Invite 2 Accepted', '2 x contacts', 'LHC Incomplete', 
+          'LDCT: ineligible'
+        ) ~ 0.2,
         
-        #name %in% c() ~ 0.4,
+        name %in% c(
+          'Invite 3 Accepted', 'F2F', 'Virtual, F2F', 'F2F, Virtual', 
+          '3+ contacts', 'LHC DNA'
+        ) ~ 0.33,
+        
+        name %in% c('Low risk') ~ 0.4,
         
         name %in% c('GP eligible population', 'Invite 1 No response') ~ 0.5,
         
@@ -637,6 +600,12 @@ get_sankey_for_data <- function(df) {
         size = 11
       ),
       paper_bgcolor = 'rgba(0,0,0,0)'
+    ) |> 
+    config(
+      toImageButtonOptions = list(
+        format = 'svg', # one of png, svg, jpeg, webp
+        filename = 'tlhc_sankey'
+      )
     )
 }
 
@@ -649,223 +618,4 @@ df |>
   get_sankey_for_data()
 
 
-# data -------------------------------------------------------------------------
-# get some data
-# df_test <- df_metric_1a_invites_first
-# 
-# # adjust columns ----
-# df <- df_test |> 
-#   # select some fields
-#   select(
-#     ParticipantID,
-#     calc_first_letter_date,
-#     calc_second_letter_date,
-#     calc_follow_up_call_date,
-#     Invite_Outcome,
-#   ) |> 
-#   mutate(
-#     # tidy up outcome
-#     calc_invite_outcome = case_when(
-#       Invite_Outcome %in% c(
-#         'Participant accepted invitation',
-#         'Participant_accepted_invitation',
-#         'TLHC Accepted'
-#       ) ~ 'Accepted',
-#       Invite_Outcome %in% c(
-#         'Participant declined invitation',
-#         'Participant_declined_invitation'
-#       ) ~ 'Declined',
-#       Invite_Outcome %in% c(
-#         'Participant did not respond to invitation',
-#         'Participant_did_not_respond_to_invitation',
-#         'Screeninginvite-notreplied'
-#       ) ~ 'No response',
-#       Invite_Outcome %in% c(
-#         'Participant does not meet age criteria',
-#         'Participant does not meet smoking criteria',
-#         'Participant removed from GP list',
-#         'Participant_Removed_from_GP_List'
-#       ) ~ 'Ineligible',
-#       TRUE ~ 'No response'
-#     ),
-#     
-#     # remove gaps in dates
-#     calc_first_letter_date = coalesce(
-#       calc_first_letter_date,
-#       calc_second_letter_date,
-#       calc_follow_up_call_date
-#     ),
-#     calc_second_letter_date = coalesce(
-#       calc_second_letter_date,
-#       calc_follow_up_call_date
-#     ),
-#     calc_follow_up_call_date = coalesce(
-#       calc_follow_up_call_date
-#     ),
-#     
-#     # invite outcomes
-#     calc_eligible = 'GP eligible population', # all participants start here
-#     
-#     calc_invite_1 = case_when(
-#       (!is.na(calc_first_letter_date) & !is.na(calc_second_letter_date)) ~ glue('Invite 1 No response'),
-#       (!is.na(calc_first_letter_date) & is.na(calc_second_letter_date)) ~ glue('Invite 1 {calc_invite_outcome}')
-#     ),
-#     
-#     calc_invite_2 = case_when(
-#       (!is.na(calc_second_letter_date) & !is.na(calc_follow_up_call_date)) ~ glue('Invite 2 No response'),
-#       (!is.na(calc_second_letter_date) & is.na(calc_follow_up_call_date)) ~ glue('Invite 2 {calc_invite_outcome}')
-#     ),
-#     
-#     calc_invite_3 = case_when(
-#       (!is.na(calc_follow_up_call_date)) ~ glue('Invite 3 {calc_invite_outcome}')
-#     )
-#   ) |> 
-#   # simplify
-#   select(
-#     ParticipantID,
-#     calc_eligible,
-#     calc_invite_1,
-#     calc_invite_2,
-#     calc_invite_3,
-#     calc_invite_outcome
-#   )
-# 
-# # summary table ---------
-# # produce summary tables
-# df_summary <- bind_rows(
-#   # Invitation 1 
-#   df |> 
-#     select(ParticipantID, origin = calc_eligible, destination = calc_invite_1) |> 
-#     filter(!is.na(origin), !is.na(destination)) |> 
-#     group_by(origin, destination) |> 
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |> 
-#     ungroup(),
-#   
-#   df |> 
-#     filter(!is.na(calc_eligible), is.na(calc_invite_1)) |> 
-#     select(ParticipantID, origin = calc_eligible, destination = calc_invite_outcome) |> 
-#     group_by(origin, destination) |> 
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |> 
-#     ungroup(),
-#   
-#   # Invitation 2
-#   df |>
-#     select(ParticipantID, origin = calc_invite_1, destination = calc_invite_2) |>
-#     filter(!is.na(origin), !is.na(destination)) |>
-#     group_by(origin, destination) |>
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |>
-#     ungroup(),
-#   
-#   df |> 
-#     filter(!is.na(calc_invite_1), is.na(calc_invite_2)) |> 
-#     select(ParticipantID, origin = calc_invite_1, destination = calc_invite_outcome) |> 
-#     group_by(origin, destination) |> 
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |> 
-#     ungroup(),
-# 
-#   # Invitation 3
-#   df |>
-#     select(ParticipantID, origin = calc_invite_2, destination = calc_invite_3) |>
-#     filter(!is.na(origin), !is.na(destination)) |>
-#     group_by(origin, destination) |>
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |>
-#     ungroup(),
-#   
-#   df |> 
-#     filter(!is.na(calc_invite_2), is.na(calc_invite_3)) |> 
-#     select(ParticipantID, origin = calc_invite_2, destination = calc_invite_outcome) |> 
-#     group_by(origin, destination) |> 
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |> 
-#     ungroup(),
-#   
-#   df |> 
-#     filter(!is.na(calc_invite_3)) |> 
-#     select(ParticipantID, origin = calc_invite_3, destination = calc_invite_outcome) |> 
-#     group_by(origin, destination) |> 
-#     summarise(flow = n_distinct(ParticipantID, na.rm = T), .groups = 'drop_last') |> 
-#     ungroup(),
-#   
-# )
-# 
-# ## tidygraph ----
-# # get a tidy graph object
-# tg <- df_summary |> as_tbl_graph()
-# 
-# #test_tg <- df |> as_tbl_graph()
-# 
-# # extract nodes and links
-# nodes <- tg |> 
-#   activate(nodes) |> 
-#   data.frame() |> 
-#   mutate(
-#     # create an id with zero-base
-#     id = row_number()-1,
-#     
-#     # add colour definitions
-#     colour = case_when(
-#       
-#       # grey
-#       str_detect(name, 'No response') ~ '#7f8fa6',
-#       str_detect(name, 'GP eligible population') ~ '#7f8fa6',
-#       str_detect(name, 'NA') ~ '#7f8fa6',
-#       
-#       # green
-#       str_detect(name, 'Accepted') ~ '#44bd32',
-#       
-#       # red
-#       str_detect(name, 'Declined') ~ '#c23616',
-#       
-#       # amber
-#       str_detect(name, 'Ineligible') ~ '#e1b12c'
-#     ),
-#     
-#     colour_fade = col2hcl(colour = colour, alpha = 0.3)
-#   )
-# 
-# 
-# links <- tg |> 
-#   activate(edges) |> 
-#   data.frame() |> 
-#   mutate(
-#     # make ids zero-based
-#     from = from - 1, 
-#     to = to - 1,
-#     
-#     # add a label
-#     label = number(flow, big.mark = ',')
-#   )
-# 
-# # add destination colours to links
-# links <- left_join(
-#   x = links,
-#   y = nodes |> select(to = id, colour_fade),
-#   by = 'to'
-# ) 
-# 
-# ## plotly ----
-# # plot
-# plot_ly(
-#   type = 'sankey',
-#   orientation = 'h',
-#   
-#   node = list(
-#     label = nodes$name,
-#     color = nodes$colour
-#   ),
-#   
-#   link = list(
-#     source = links$from,
-#     target = links$to,
-#     value = links$flow,
-#     label = links$label,
-#     color = links$colour_fade
-#   )
-# ) |> 
-#   layout(
-#     title = 'Sankey diagram of all TLHC invites',
-#     font = list(
-#       family = 'Arial, Helvetica, sans-serif',
-#       size = 14
-#     ),
-#     paper_bgcolor = 'rgba(0,0,0,0)'
-#   )
+
