@@ -40,6 +40,8 @@ archive_current_data_files <- function() {
 
 }
 
+#archive_current_data_files()
+
 #' Update the user on script completion with a message
 #' 
 #' Prints a timestamped message to the console to update the user on script completion.
