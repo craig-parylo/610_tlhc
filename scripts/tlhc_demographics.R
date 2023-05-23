@@ -20,10 +20,10 @@ library(tictoc)        # performance monitoring
 # UDFs 
 source(here('scripts', 'func_name_projects.R')) # naming projects
 source(here('scripts', 'tlhc_metric_functions.R')) # functions for loading metric data
+source(here('scripts', 'tlhc_general_functions.R')) # user updates
 
 # Notify user 
-cat(rep('\n', 50)) # 50 blank lines to clear the console
-cat('== tlhc_demographics.R ====================================================\n')
+update_user(stage = 'start', message = 'tlhc_demographics.R')
 tic()
 
 # load metric data -------------------------------------------------------------
@@ -38,7 +38,7 @@ handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the 
 
 with_progress({
   
-  cat(paste('⏱️', Sys.time(), '... loading base tables\n', sep = ' '))
+  update_user(message = 'Loading base tables ...', icon = '⏱️')
   p <- progressor(steps = 9)
   
   df_demo <- load_df_demo()
@@ -52,7 +52,7 @@ with_progress({
   df_smoking <- load_df_smoking()
   df_diag <- load_df_diagnostics()
   
-  cat(paste('☑️', Sys.time(), 'Base tables loaded\n', sep = ' '))
+  update_user(message = 'Base tables loaded')
 })
 
 ## metric tables -----------------------------------------------------------------
@@ -62,7 +62,7 @@ with_progress({
 
 with_progress({
   
-  cat(paste('⏱️', Sys.time(), '... loading metric tables\n', sep = ' '))
+  update_user(message = 'Loading metric tables ...', icon = '⏱️')
   p <- progressor(steps = 6)
   
   df_metric_1a_invites_first <- get_df_metric_1a_invites_first()
@@ -75,7 +75,7 @@ with_progress({
   df_metric_4a_ldct_referral <- get_df_metric_4a_ldct_referral()
   df_metric_5a_ldct_initial <- get_df_metric_5a_ldct_initial()
   
-  cat(paste('☑️', Sys.time(), 'Metric tables loaded\n', sep = ' '))
+  update_user(message = 'Metric tables loaded')
 })
 
 
@@ -124,7 +124,7 @@ func_summarise_by_project_deprivation <- function(df) {
       #mutate(calc_lsoa_imd_decile = replace_na(calc_lsoa_imd_decile, 'Not known')) |> # ensure all deciles are labelled
       mutate(
         calc_lsoa_imd_decile = factor(x = calc_lsoa_imd_decile),
-        calc_lsoa_imd_decile = fct_explicit_na(calc_lsoa_imd_decile, na_level = 'Not known')
+        calc_lsoa_imd_decile = fct_na_value_to_level(calc_lsoa_imd_decile, level = 'Not known')
       ) |> 
       group_by(project, calc_lsoa_imd_decile) |> 
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |> # count participants by group
@@ -192,7 +192,7 @@ func_flatfile_summarise_project_demographic <- function(df, str_demo, var_demo) 
         demographic = str_demo,                                                    # add in the demographic type
         demographic_value = factor(x = demographic_value),                         # convert the demographic to a factor
         #demographic_value = replace_na(demographic_value, 'Not known')             # ensure all NAs are coded
-        demographic_value = fct_explicit_na(demographic_value, na_level = 'Not known') # explicitly label NAs
+        demographic_value = fct_na_value_to_level(demographic_value, level = 'Not known') # explicitly label NAs
       ) |> 
       group_by(project, demographic, demographic_value, metric_id, metric_name) |> # group by project, variable and metric info
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |>     # count participants
@@ -514,5 +514,5 @@ write_rds(
 
 
 # done!
-cat(paste('🔚', Sys.time(), '== Script complete ================================\n', sep = ' '))
+update_user(icon = '🔚', stage = 'end')
 toc()
