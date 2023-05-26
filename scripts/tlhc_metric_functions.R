@@ -734,7 +734,7 @@ get_first_attended_lhc_per_participant <- function() {
         calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
         !is.na(calc_lhc_date_yearmon), # exclude records without a LHC date
         calc_lhc_attendance_category == 'Attended', # participant is recorded as attending
-        !is.na(calc_first_letter_date) # exclude records without an invite date
+        #!is.na(calc_first_letter_date) # exclude records without an invite date
       ) |> 
       # take the first attended lhc for a given participant
       group_by(ParticipantID) |> 
