@@ -611,11 +611,15 @@ get_sankey_for_data <- function(df) {
 
 
 # test functions ---------------------------------------------------------------
-df <- get_data_for_sankey()
-get_sankey_for_data(df = df)
-df |> 
-  filter(project == 'Tameside and Glossop') |> 
-  get_sankey_for_data()
+# df <- get_data_for_sankey()
+# #df |> saveRDS(file = here('outputs', 'df_sankey.Rds'))
+# get_sankey_for_data(df = df)
+#sankey_output <- get_sankey_for_data(df = df) # output to a variable
+#saveRDS(object = sankey_output, file = here('outputs', 'sankey_output.Rds'))
+
+# df |> 
+#   filter(project == 'Tameside and Glossop') |> 
+#   get_sankey_for_data()
 
 
 
