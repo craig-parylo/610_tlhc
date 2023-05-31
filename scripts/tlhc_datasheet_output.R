@@ -275,7 +275,7 @@ update_user(message = 'Data prepared')
 ## parallel processing ----
 
 # notify re: long process
-udpate_user(message = 'Generating datasheets, please wait ...', icon = '⏱️')
+update_user(message = 'Generating datasheets, please wait ...', icon = '⏱️')
 
 # open the folder (or create if it doesn't exist)
 if(!file.exists(here('data', 'datasheets'))){dir.create(path = here('data', 'datasheets'))}
