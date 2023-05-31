@@ -39,7 +39,7 @@ tic()
 ## Initialise variables ----
 #end_month   <- as_date('2022-11-01') # NB, update this each month
 end_month   <- floor_date(today(), unit = 'month') %m-% months(2) # default to two months ago (in line with typical report cycle)
-start_month <- as_date('2019-04-01')
+start_month <- lubridate::as_date('2019-04-01')
 
 # Functions ----
 
@@ -160,7 +160,7 @@ file_list <- file_list |>
     ),
     
     # Calculate a date for the file based on month and year
-    file_date = as_date(paste(1, month_name, year), format = '%d %b %Y'),
+    file_date = lubridate::as_date(paste(1, month_name, year), format = '%d %b %Y'),
     
     # Calculate a YearMonth for the file
     file_month = as.yearmon(file_date),
