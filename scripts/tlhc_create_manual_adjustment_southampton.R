@@ -196,6 +196,9 @@ con <- dbConnect(
 ## project lookups (used as reference) ----
 df_projectlu <- readRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
 
+# update the user
+update_user(message = 'Setup complete and UDFs loaded')
+
 # Download the data ------------------------------------------------------------
 # define transactions to ignore
 invalid_transid <- c(
@@ -222,10 +225,16 @@ df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
 rm(invalid_transid)
 dbDisconnect(con)
 
+# update the user
+update_user(message = 'Southampton new invite data downloaded')
+
 # Process the data -------------------------------------------------------------
 df <- df |> ungroup()
 df <- process_alltables(df = df) # identify the project, when received, etc
 df <- process_invites(df = df) # invite outcome, date parsing, etc.
+
+# update the user
+update_user(message = 'Data processed')
 
 # Produce a manual adjustment file ---------------------------------------------
 
@@ -283,7 +292,9 @@ df_southampton_ma <- full_join(
   arrange(month) |> 
   # limit to Aug 2022 onward
   filter(month >= 'Aug 2022')
-  
+
+# update user
+update_user(message = 'Process complete - opening manual adjustment file for updating...')
 view(df_southampton_ma)
 
 # open the manual adjustment file for editing
