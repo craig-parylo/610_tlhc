@@ -9,6 +9,8 @@ library(tidyverse)     # tidy data processing
 library(here)          # localise file references
 library(fs)            # file system management
 library(clock)         # datetime functions
+library(DBI)           # sql connection
+library(dbplyr)        # tidy sql processing
 
 #' Archive current data files
 #' 
@@ -89,4 +91,44 @@ update_user <- function(message = '', stage = '', icon = '☑️') {
 
   # output the message
   cat(paste0(spacing, str_print, '\n'))
+}
+
+
+#' Get Southampton's TransactionIDs for invites
+#' 
+#' To be used to update the tlhc_download_sql process to ensure we avoid
+#' downloading new Southampton invite records - because these have been repurposed
+#' and need downloading and processing separately
+#'
+#' @return
+#' @export
+#'
+#' @examples
+get_southampton_invite_transaction_ids <- function() {
+  # Setup ------------------------------------------------------------------------
+  # set up connection to the tlhc sql database
+  con <- dbConnect(
+    odbc::odbc(),
+    .connection_string = "Driver={SQL Server};SERVER=MLCSU-BI-SQL;DATABASE=TLHC_Reporting"
+  )
+  
+  # update the user
+  #update_user(message = 'Setup complete')
+  
+  # Download the data ------------------------------------------------------------
+  df_southampton_new_invite_transactions <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
+    filter(substr(SubmittedZipFile, 1, 5) == 'RHM00') |> # only use Southampton's data
+    select(TransactionId, ReceivedDate, UserEmail) |> # limit to required fields
+    distinct() |> # remove duplication
+    arrange(desc(TransactionId)) |> # sort so the latest transaction is at the top
+    filter(TransactionId > 181294) |> # limit to the newer transactions that we want to adjust for
+    collect() # download the data
+  
+  dbDisconnect(con)
+  
+  # update the user
+  #update_user(message = 'Southampton new invite data downloaded')
+  
+  # show the results
+  view(df_southampton_new_invite_transactions)
 }
