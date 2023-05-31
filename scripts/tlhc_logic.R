@@ -8,7 +8,15 @@ library(here)
 
 # Preparation ------------------------------------------------------------------
 
+# Archive current downloaded files - not always required, but useful if needed
+source(here('scripts', 'tlhc_general_functions.R'))
+archive_current_data_files()
+rm(list=ls())
+
 # Download tables from SQL server (estimated time = 30 mins)
+source(here('scripts', 'tlhc_general_functions.R'))
+get_southampton_invite_transaction_ids() # list out Southampton's newer transaction IDs
+file.edit(here('scripts', 'tlhc_download_sql_data.R')) # to update Southampton's transactionIDs (line #157)
 source(here('scripts', 'tlhc_download_sql_data.R'))
 rm(list=ls())
 
