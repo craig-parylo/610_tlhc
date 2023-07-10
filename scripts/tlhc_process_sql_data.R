@@ -291,12 +291,15 @@ process_lhc <- function(df) {
       calc_lhc_attendance_category = case_when(
         toupper(calc_lhc_attendance) %in% c(
           'ATTENDED',
-          'PARTICIPANT ATTENDED BUT DID NOT COMPLETE LHC',
+          #'PARTICIPANT ATTENDED BUT DID NOT COMPLETE LHC',
           'PARTICIPANT ATTENDED LHC',
           'PATICIPANT_ATTEND_LHC',
           'SCREENING - HEALTH CHECK (XM1XS)',
           'FINISHED'
         ) ~ 'Attended',
+        toupper(calc_lhc_attendance) %in% c(
+          'PARTICIPANT ATTENDED BUT DID NOT COMPLETE LHC'
+        ) ~ 'Partially attended',
         toupper(calc_lhc_attendance) %in% c(
           'DID NOT ATTEND',
           'DIDNOTATTEND',
@@ -304,7 +307,7 @@ process_lhc <- function(df) {
           'PATICIPANT_DID_NOT_ATTEND_LHC'
         ) ~ 'DNA',
         is.na(calc_lhc_attendance) ~ 'NULL response',
-        TRUE ~ 'NOT CODED'
+        .default = 'NOT CODED'
       ),
       
       # flag lhc delivery method
