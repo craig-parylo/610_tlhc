@@ -593,7 +593,7 @@ get_other_incidental_data_for_item <- function(str_finding,
       calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       !is.na(calc_other_incidental_finding.x), # we have an extracted incidental finding
       dist <= dec_dist, # the matched incidental finding is within the specified distance
@@ -701,7 +701,7 @@ get_pulmonary_incidental_data_for_item <- function(str_finding,
       calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       !is.na(calc_pulmonary_incidental_finding.x), # we have an extracted incidental finding
       dist <= dec_dist, # the matched incidental finding is within the specified distance
@@ -1415,7 +1415,7 @@ get_df_metric_7t_incidental_other_cancers_alternate <- function() {
       calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       !is.na(calc_date_referralothercancer), # we have a non-null date
     ) 
@@ -1454,7 +1454,7 @@ get_df_metric_7u_incidental_emphysema <- function() {
       calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
       calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
-      (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
       str_detect(string = toupper(Emphysema_Extent), pattern = 'MODERATE|SEVERE') # reported emphysema as moderate or severe
     ) 
