@@ -127,6 +127,8 @@ download_tlhc_table <- function(str_table = '') {
 
     # define transactions to ignore
     invalid_transid <- c(
+      # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
+      213175, 213218,
       
       # 2023-03-15 Doncaster transactions leading to over-reported 8b (offered SC) agreed to be removed today
       130374, 131748, 134772, 137383, 140163, 142235, 142270, 144804,
@@ -150,6 +152,8 @@ download_tlhc_table <- function(str_table = '') {
     
     # define transactions to ignore
     invalid_transid <- c(
+      # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
+      213175, 213218,
       
       # 2023-04-05 Southampton newer submissions overwrite First_Letter dates and need to be managed separately
       # NNB, this list will need adding to each month to exclude the latest submission (RHM00)
@@ -172,7 +176,10 @@ download_tlhc_table <- function(str_table = '') {
     # We need to explicitly exclude some transactions
     
     # define transactions to ignore
-    invalid_transid <- c('')
+    invalid_transid <- c(
+      # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
+      213175, 213218
+    )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
