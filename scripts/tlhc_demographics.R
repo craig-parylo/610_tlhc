@@ -346,7 +346,7 @@ outputs <- list(
   refer_gender = df_ldct_referral_project_gender,
   refer_age = df_ldct_referral_project_age,
   refer_deprivation = df_ldct_referral_project_deprivation,
-  refer_ethnicity = df_ldct_initial_project_ethnicity,
+  refer_ethnicity = df_ldct_referral_project_ethnicity,
   
   ldct_gender = df_ldct_initial_project_gender,
   ldct_age = df_ldct_initial_project_age,
