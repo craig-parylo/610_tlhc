@@ -157,8 +157,8 @@ download_tlhc_table <- function(str_table = '') {
       
       # 2023-04-05 Southampton newer submissions overwrite First_Letter dates and need to be managed separately
       # NNB, this list will need adding to each month to exclude the latest submission (RHM00)
-      210541, 210540, 209188, 206415, 201904, 197086, 194098, 192749, 190354, 
-      187373, 186011, 184105, 181295, 181294
+      214302, 210541, 210540, 209188, 206415, 201904, 197086, 194098, 192749, 
+      190354, 187373, 186011, 184105, 181295, 181294
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
