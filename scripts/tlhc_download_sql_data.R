@@ -25,6 +25,7 @@ library(zoo)           # date functions (yearmonths)
 # library(future)        # parallel processing
 library(progressr)     # progress bars
 library(tictoc)        # timing processes
+library(readxl)        # read xlsx reference files
 
 source(here('scripts', 'tlhc_general_functions.R'))
 
@@ -44,6 +45,19 @@ con2 <- dbConnect(
   odbc::odbc(),
   .connection_string = "Driver={SQL Server};SERVER=MLCSU-BI-SQL;DATABASE=StrategicSocialCare"
 )
+
+# load a list of participantid to exclude from processing
+df_participants_exclude <- read_excel(
+  path = file.path(Sys.getenv('base_365'), 'Monthly MI reporting', 'Data processing procedure', 'tlhc_participant_ignore_list.xlsx'),
+  sheet = 'participant_ignore'
+)
+# get as a vector
+df_participants_exclude_list <- df_participants_exclude |> 
+  filter(active == T) |> # only exclude participants where we actively want to
+  select(ParticipantID) |> 
+  unique() |> 
+  as_vector()
+
 
 # UDF --------------------------------------------------------------------------
 
@@ -89,6 +103,7 @@ download_tlhc_table <- function(str_table = '') {
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
       #head(n=100000) |> # temporary - for testing
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID, LDCT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -113,6 +128,7 @@ download_tlhc_table <- function(str_table = '') {
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID, Full_Dose_CT_Date) |> # get one record for each participant on each day:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -138,6 +154,7 @@ download_tlhc_table <- function(str_table = '') {
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_SmokingCessation')) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID) |> # get one record for each participant
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -163,6 +180,7 @@ download_tlhc_table <- function(str_table = '') {
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID) |> # get one record for each participant
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -183,6 +201,7 @@ download_tlhc_table <- function(str_table = '') {
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID, LHC_Date) |> # get one record for each participant for each LHC date (to account for non-attendances)
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -203,6 +222,7 @@ download_tlhc_table <- function(str_table = '') {
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
       filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID) |> # get one record for each participant
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
@@ -216,6 +236,7 @@ download_tlhc_table <- function(str_table = '') {
     # We need a record per patient
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID) |> # get one record for each participant:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
