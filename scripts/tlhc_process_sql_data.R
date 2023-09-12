@@ -182,7 +182,7 @@ process_demographics <- function(df) {
       
       # gender
       calc_sex = case_when(
-        toupper(trimws(Sex)) %in% c('F', 'FEMAL') ~ 'Female',
+        toupper(trimws(Sex)) %in% c('F', 'FEMAL', 'FEMALE') ~ 'Female',
         toupper(trimws(Sex)) %in% c('M', 'MALE') ~ 'Male',
         TRUE ~ 'Not known'
       ),
