@@ -513,31 +513,50 @@ process_ldct <- function(df) {
   ## NNB, this is also computationally expensive so using the dtplyr lazy_dt to handle processing and transforming back to tibble
   ## afterward.
   df_temp <- lazy_dt(df) |> 
+    filter(
+      !is.na(calc_ldct_date_corrected), # the following process requires dates
+      calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
+    ) |> 
     select(ParticipantID, calc_ldct_date_corrected) |> # small subset
-    filter(!is.na(calc_ldct_date_corrected)) |> # the following process requires dates
     unique() |> # handle cases where same dates have been uploaded in different formats (e.g.15/09/2021 and 2021-09-15 00:00:00)
     group_by(ParticipantID) |> 
+    arrange(calc_ldct_date_corrected, .by_group = T) |> # sort by scan date for each participant
     mutate(
       calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T), # get the date of the first scan
       calc_ldct_date_corrected_days_from_first = (calc_ldct_date_corrected - calc_temp_ldct_date_first), # days since first scan
       calc_ldct_date_corrected_category = cut(
         x = as.numeric(calc_ldct_date_corrected_days_from_first),
-        breaks = c(-Inf, -1, 1, 61, 152, 335, 456, 669, 850, 1005, 1275, Inf),
+        breaks = c(-Inf, -1, 1, 61, 152, 335, 456, 669, 791, 1400, 1521, Inf),
         labels = c(
-          'Not classified',          # -Inf to -1
-          'Initial scan',            # -1 to 1 days --
-          'Not classified',          # 2 to 61 days
-          '3 month follow-up scan',  # 61 to 152 days --
-          'Not classified',          # 153 to 335 days
-          '12 month follow-up scan', # 335 to 465 days --
-          'Not classified',          # 456 to 669 days
-          '24 month follow-up scan', # 669 to 850 days --
-          'Not classified',          # 850 to 1005 days
-          '48 month follow-up scan', # 1005 to 1275 days --
-          'Not classified'          # above 1275 days
+          'Not classified',               # -Inf to -1
+          'Initial scan',                 # -1 to 1 days --
+          'Not classified',               # 2 to 61 days
+          '3 month follow-up scan',       # 61 to 152 days --
+          'Not classified',               # 152 to 335 days
+          '12 month follow-up scan',      # 335 to 456 days --
+          'Not classified',               # 456 to 669 days
+          '24 month follow-up scan',      # 669 to 791 days --
+          '2-year+ nodule surveillance',  # 791 to 1400 days
+          '48 month follow-up scan',      # 1400 to 1521 days --
+          '2-year+ nodule surveillance'   # above 1521 days
         )
       ),
-      calc_ldct_date_corrected_sequence = row_number() # whether the scan is the 1st, 2nd, 3rd, etc in the sequence
+      calc_ldct_date_corrected_sequence = row_number(), # whether the scan is the 1st, 2nd, 3rd, etc in the sequence
+      
+      # determine further intervals between scans
+      calc_ldct_date_corrected_months_from_first = date_count_between(
+        start = calc_temp_ldct_date_first,
+        end = calc_ldct_date_corrected,
+        precision = 'month'
+      ),
+      
+      calc_ldct_date_corrected_months_from_previous = date_count_between(
+        start = lag(x = calc_ldct_date_corrected, n = 1),
+        end = calc_ldct_date_corrected,
+        precision = 'month'
+      )
+      
+      
     ) |> 
     ungroup() |> 
     as_tibble()
