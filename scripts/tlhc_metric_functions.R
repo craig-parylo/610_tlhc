@@ -629,18 +629,21 @@ extract_pulmonary_incidental_data <- function() {
   
   # get a list of accepted pulmonary incidental findings
   if(!exists('df_incid_pulm')){df_incid_pulm <- load_pulmonary_incidental_findings()}
-  
+
   # split ldct other incidental findings by separator (dash or full stop)
   df_ldct_incid_pulmonary <- df_ldct |> 
     filter(!is.na(Pulmonary_Incidental_Findings)) |> # only work with records containing data
-    # split ldct other incidental findings by separator (dash or full stop)
-    mutate(calc_pulmonary_incidental_finding = str_split(
-      string = tolower(Pulmonary_Incidental_Findings),
-      pattern = '-| - |\\. '
-    )
+    # split ldct other incidental findings by separator (dash or full stop or capitalisation in 'lowerUpper')
+    mutate(
+      calc_pulmonary_incidental_finding = str_split(
+        string = Pulmonary_Incidental_Findings,
+        pattern = '-| - |\\. |(?<=[[:lower:]])(?=[[:upper:]][[:lower:]])'
+      )
     ) |> 
     # stretch the data so each incidental finding is on its own row
-    unnest(calc_pulmonary_incidental_finding)
+    unnest(calc_pulmonary_incidental_finding) |> 
+    mutate(calc_pulmonary_incidental_finding = tolower(calc_pulmonary_incidental_finding)) |> 
+    filter(!is.na(calc_pulmonary_incidental_finding))
   
   # fuzzy match the expanded incidentals to the official list
   df_ldct_incid_pulmonary <- stringdist_join(
