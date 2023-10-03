@@ -1318,6 +1318,42 @@ get_df_metric_5g_ldct_48_month <- function() {
   return(df_ldct)
 }
 
+#' Get a dataframe for metric 5h - participants who had a nodule surveillance scan 
+#' from a 24-month incident screening round scan onwards.
+#' 
+#' Data is filtered for valid records where we have a value in the month 
+#' dimension
+#' 
+#' @return Tibble
+get_df_metric_5h_ldct_24_month_surveillance <- function() {
+  
+  p('df for metric 5h')
+  
+  # load the data if not already loaded
+  if(!exists('df_ldct')){df_ldct <- load_df_ldct()}
+  
+  # processing
+  df_ldct <- df_ldct |> 
+    # add fields identifying the metric
+    mutate(
+      metric_id = '5h',
+      metric_name = 'Number of participants who had a nodule surveillance LDCT scan performed from a 24 month incident screening round scan onwards',
+      month = calc_ldct_date_corrected_yearmon,
+    ) |> 
+    # limit the dataframe for valid metric
+    filter(
+      calc_valid_transactionid == 'Valid', # valid transactions
+      #calc_eligible == 'Eligible', # eligible for the lhc (age group and smoking status)
+      calc_valid_participantid == 'Valid', # participant ID is a valid pseudonymised format
+      !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
+      #(calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
+      calc_ldct_outcome_corrected_groups == 'LDCT performed', # we have confirmation the scan took place (i.e. exclude future booked)
+      calc_ldct_date_corrected_category == '2-year+ nodule surveillance' # we only want surveillance scans
+    ) 
+  
+  return(df_ldct)
+}
+
 
 #' Get a dataframe for metric 7 - participants who had any incidental finding
 #' 
@@ -2463,6 +2499,16 @@ calculate_metric_5g <- function() {
   
   # get a dataframe with our data and aggregate
   df <- get_df_metric_5g_ldct_48_month() |> aggregate_metric_standard()
+  
+}
+
+#' Calculate metric 5h performance
+#'
+#' @return df Tibble of aggregated performance by project and month for metric 5h
+calculate_metric_5h <- function() {
+  
+  # get a dataframe with our data and aggregate
+  df <- get_df_metric_5h_ldct_24_month_surveillance() |> aggregate_metric_standard()
   
 }
 
