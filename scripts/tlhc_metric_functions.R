@@ -522,14 +522,17 @@ extract_other_incidental_data <- function() {
   # split ldct other incidental findings by separator (dash or full stop)
   df_ldct_incid_other <- df_ldct |> 
     filter(!is.na(Other_Incidental_Findings)) |> # only work with records containing data
-    # split ldct other incidental findings by separator (dash or full stop)
-    mutate(calc_other_incidental_finding = str_split(
-      string = tolower(Other_Incidental_Findings),
-      pattern = '-| - |\\. '
-    )
+    # split ldct other incidental findings by separator (dash or full stop or capitalisation in 'lowerUpper')
+    mutate(
+      calc_other_incidental_finding = str_split(
+      string = Other_Incidental_Findings,
+      pattern = '-| - |\\. |(?<=[[:lower:]])(?=[[:upper:]][[:lower:]])'
+      )
     ) |> 
     # stretch the data so each incidental finding is on its own row
-    unnest(calc_other_incidental_finding)
+    unnest(calc_other_incidental_finding) |> 
+    mutate(calc_other_incidental_finding = tolower(calc_other_incidental_finding)) |> 
+    filter(!is.na(calc_other_incidental_finding))
   
   # fuzzy match the expanded other incidentals to the official list
   df_ldct_incid_other <- stringdist_join(
