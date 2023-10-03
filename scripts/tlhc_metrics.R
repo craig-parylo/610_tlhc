@@ -81,6 +81,7 @@ with_progress({
   df_metric_5e_ldct_12_month <- get_df_metric_5e_ldct_12_month()
   df_metric_5f_ldct_24_month <- get_df_metric_5f_ldct_24_month()
   df_metric_5g_ldct_48_month <- get_df_metric_5g_ldct_48_month()
+  df_metric_5h_ldct_24_month_surveillance <- get_df_metric_5h_ldct_24_month_surveillance
   # df_metric_6a6f <- get_df_metric_6_lung_cancers_from_aggregate() # nb, not required as already aggregate
   
   df_metric_7a_incidental_consolidation <- get_df_metric_7a_incidental_consolidation()
@@ -155,6 +156,7 @@ with_progress({
   df_metric_5e <- calculate_metric_5e()
   df_metric_5f <- calculate_metric_5f()
   df_metric_5g <- calculate_metric_5g()
+  df_metric_5h <- calculate_metric_5h()
   df_metric_6a6f <- calculate_metric_6a6f()
   
   df_metric_7a <- calculate_metric_7a()
@@ -210,7 +212,8 @@ with_progress({
     df_metric_5d,
     df_metric_5e,
     df_metric_5f,
-    df_metric_5g, # NEW metric - 48 month surveillance scans
+    df_metric_5g,
+    df_metric_5h, # NEW metric - surveillance scans following 24-month scan
     df_metric_6a6f,
     
     df_metric_7,
