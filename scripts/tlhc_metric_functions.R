@@ -1187,7 +1187,7 @@ get_df_metric_5d_ldct_3_month <- function() {
     # add fields identifying the metric
     mutate(
       metric_id = '5d',
-      metric_name = 'Number of participants who had a 3 month follow-up Low Dose CT scan performed',
+      metric_name = 'Number of participants who have had a 3 month follow up nodule surveillance LDCT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
     # limit the dataframe for valid metric
@@ -1225,7 +1225,7 @@ get_df_metric_5e_ldct_12_month <- function() {
     # add fields identifying the metric
     mutate(
       metric_id = '5e',
-      metric_name = 'Number of participants who had a 12 month follow-up Low Dose CT scan performed',
+      metric_name = 'Number of participants who have had a 12 month follow up nodule surveillance LDCT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
     # limit the dataframe for valid metric
@@ -1263,7 +1263,7 @@ get_df_metric_5f_ldct_24_month <- function() {
     # add fields identifying the metric
     mutate(
       metric_id = '5f',
-      metric_name = 'Number of participants who had a 24 month follow-up Low Dose CT scan performed',
+      metric_name = 'Number of participants who have had a 24 month incident screening round LDCT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
     # limit the dataframe for valid metric
@@ -1301,7 +1301,7 @@ get_df_metric_5g_ldct_48_month <- function() {
     # add fields identifying the metric
     mutate(
       metric_id = '5g',
-      metric_name = 'Number of participants who had a 48 month follow-up Low Dose CT scan performed',
+      metric_name = 'Number of participants who have had a 48 month incident screening round LDCT scan performed',
       month = calc_ldct_date_corrected_yearmon,
     ) |> 
     # limit the dataframe for valid metric
