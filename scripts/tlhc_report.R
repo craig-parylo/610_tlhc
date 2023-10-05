@@ -802,12 +802,11 @@ helper_ps_add_metric <- function(df_recipient, df_donor, metrics, metric_name, g
   if(is.null(grouping)){
     
     # for total, original, onboarded / phase 3
-    df_recipient <- left_join(
+    df_recipient <- cross_join(
       x = df_recipient,
       y = df_donor |> 
         filter(Data_ID %in% metrics) |> 
-        summarise(!!metric_name := sum(Numerator, na.rm = T)),
-      by = character()
+        summarise(!!metric_name := sum(Numerator, na.rm = T))
     )
     
   }else{
@@ -1354,7 +1353,7 @@ generate_metric_summary_table <- function(df) {
       summarise(number = sum(Numerator, na.rm = T)) |> 
       mutate(
         metric_id = '5d',
-        metric_name = '3 month follow up LDCT scan performed'
+        metric_name = '3 month follow up nodule surveillance LDCT scan performed'
       )
   )
   
@@ -1366,7 +1365,7 @@ generate_metric_summary_table <- function(df) {
       summarise(number = sum(Numerator, na.rm = T)) |> 
       mutate(
         metric_id = '5e',
-        metric_name = '12 month follow up LDCT scan performed'
+        metric_name = '12 month follow up nodule surveillance LDCT scan performed'
       )
   )
   
@@ -1378,7 +1377,7 @@ generate_metric_summary_table <- function(df) {
       summarise(number = sum(Numerator, na.rm = T)) |> 
       mutate(
         metric_id = '5f',
-        metric_name = '24 month follow up LDCT scan performed'
+        metric_name = '24 month follow up incident screening LDCT scan performed'
       )
   )
   
@@ -1842,7 +1841,7 @@ df <- read_rds(
     ccg_name = factor(ccg_name),
     ccg_phase = factor(ccg_phase, levels = c('Original', 'Onboarded', 'Phase 3')),
     Data_ID = case_when(Data_ID == '4' ~ '4a', TRUE ~ Data_ID), # convert any 4 metrics to 4a for consistency
-    Data_ID = factor(Data_ID, levels = c('1a', '1c', '1b', '2', '3a', '3b', '3c', '3d', '4a', '4b', '5a', '5b', '5d', '5e', '5f', '5g', '6a', '6b', '6c', '6d', '6e', '7', '7a', '7b', '7c', '7d', '7e', '7f', '7g', '7h', '7i', '7j', '7k', '7l', '7m', '7n', '7o', '7p', '7q', '7r', '7s', '7t', '7u', '8b', '8a', '9', '10', '11', '12', '13', '14')),
+    Data_ID = factor(Data_ID, levels = c('1a', '1c', '1b', '2', '3a', '3b', '3c', '3d', '4a', '4b', '5a', '5b', '5d', '5e', '5f', '5g', '5h', '6a', '6b', '6c', '6d', '6e', '7', '7a', '7b', '7c', '7d', '7e', '7f', '7g', '7h', '7i', '7j', '7k', '7l', '7m', '7n', '7o', '7p', '7q', '7r', '7s', '7t', '7u', '8b', '8a', '9', '10', '11', '12', '13', '14')),
     month = format(month_date, '%b %Y'),
     financial_year = case_when(
       month(month_date) < 4 ~ paste(year(month_date)-1,year(month_date)-2000, sep = '-'),
