@@ -515,7 +515,7 @@ process_ldct <- function(df) {
   df_temp <- lazy_dt(df) |> 
     filter(
       !is.na(calc_ldct_date_corrected), # the following process requires dates
-      calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
+      #calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
     ) |> 
     select(ParticipantID, calc_ldct_date_corrected) |> # small subset
     unique() |> # handle cases where same dates have been uploaded in different formats (e.g.15/09/2021 and 2021-09-15 00:00:00)
