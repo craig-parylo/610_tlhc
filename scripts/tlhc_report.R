@@ -259,7 +259,7 @@ add_project_table <- function(wb, df_project, ref_projects) {
   df_template <- read.xlsx(
     xlsxFile = wb,
     sheet = 'Original',
-    rows = c(24:75),
+    rows = c(24:76),
     cols = c(1:2)
   ) |>
     # standardise column names
@@ -1599,7 +1599,7 @@ add_summary_national <- function(wb, df) {
   df_template <- read.xlsx(
     xlsxFile = wb,
     sheet = 'National summary',
-    rows = c(24:75),
+    rows = c(24:76),
     cols = c(1:2)
   ) |>
     # standardise column names
@@ -1708,7 +1708,7 @@ add_phase_sheets <- function(wb, df) {
   df_template <- read.xlsx(
     xlsxFile = wb,
     sheet = 'Original',
-    rows = c(24:75),
+    rows = c(24:76),
     cols = c(1:2)
   ) |>
     # standardise column names
@@ -1947,3 +1947,4 @@ browseURL(url = url)
 # update the user
 update_user(stage = 'end')
 toc()
+
