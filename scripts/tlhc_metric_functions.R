@@ -64,6 +64,7 @@ load_df_demo_join <- function() {
       ccg_code = CCG_Code,                 # used to work out the project name
       calc_age_tlhc_valid,                 # used to confirm valid for tlhc project
       calc_age_group_report,               # demographic
+      calc_age_group_report_v2,            # demographic
       calc_age_group_ipsos,                # demographic
       calc_sex,                            # demographic
       calc_ethnic_group,                   # demographic
