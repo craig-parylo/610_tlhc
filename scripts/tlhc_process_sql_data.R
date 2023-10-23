@@ -207,6 +207,16 @@ process_demographics <- function(df) {
         level = 'Not known'
       ),
       
+      # bins ages into groups required for MI report (version 2)
+      calc_age_group_report_v2 = fct_na_value_to_level(
+        f = cut(
+          x = calc_age,
+          breaks = c(-Inf, -1, 49, 54, 59, 64, 69, 74, 79, Inf),
+          labels = addNA(c('Age below zero', '0-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75-79', '80+'))
+        ),
+        level = 'Not known'
+      ),
+      
       # bins ages into groups required for the Ipsos report
       calc_age_group_ipsos = fct_na_value_to_level(
         f = cut(
