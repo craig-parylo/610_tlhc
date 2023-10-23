@@ -103,14 +103,14 @@ func_summarise_by_project_gender <- function(df) {
 func_summarise_by_project_age <- function(df) {
   return(
     df |> 
-      mutate(calc_age_group_report = replace_na(calc_age_group_report, 'Not known')) |> # ensure all age groups are labelled
-      group_by(project, calc_age_group_report) |> 
+      mutate(calc_age_group_report_v2 = replace_na(calc_age_group_report_v2, 'Not known')) |> # ensure all age groups are labelled
+      group_by(project, calc_age_group_report_v2) |> 
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |> # count participants by group
       ungroup() |> 
-      complete(project, calc_age_group_report) |> # ensure all projects have a full distribution of age groups
+      complete(project, calc_age_group_report_v2) |> # ensure all projects have a full distribution of age groups
       ungroup() |> 
       pivot_wider(
-        names_from = calc_age_group_report,
+        names_from = calc_age_group_report_v2,
         values_from = participants
       ) |> 
       adorn_totals(where = 'col') |> # add a total column 
@@ -163,12 +163,12 @@ func_summarise_overview <- function(df, str_metric_name) {
     df |> 
       mutate(
         calc_sex = replace_na(calc_sex, 'Not known'),
-        calc_age_group_report = replace_na(calc_age_group_report, 'Not known'),
+        calc_age_group_report_v2 = replace_na(calc_age_group_report_v2, 'Not known'),
         calc_ethnic_group = replace_na(calc_ethnic_group, 'Not known'),
         #calc_lsoa_imd_decile = replace_na(calc_lsoa_imd_decile, 'Not known'),
         metric_name = str_metric_name
       ) |> 
-      group_by(calc_sex, calc_age_group_report, calc_ethnic_group, calc_lsoa_imd_decile, metric_name) |> 
+      group_by(calc_sex, calc_age_group_report_v2, calc_ethnic_group, calc_lsoa_imd_decile, metric_name) |> 
       summarise(participants = n_distinct(ParticipantID), .groups = 'drop') |> 
       ungroup()
   )
@@ -247,14 +247,14 @@ df_metrics_overview <- bind_rows(
 ### gender and age ----
 # calculate summaries by metric, gender and age
 df_overview_metric_gender_age <- df_metrics_overview |> 
-  group_by(metric_name, calc_sex, calc_age_group_report) |> 
+  group_by(metric_name, calc_sex, calc_age_group_report_v2) |> 
   summarise(participants = sum(participants, na.rm = T)) 
 
 # calculate summaries by metric and gender (will be the subtotals)
 df_overview_metric_gender_age_subtotals <- df_metrics_overview |> 
   group_by(metric_name, calc_sex) |> 
   summarise(participants = sum(participants, na.rm = T)) |> 
-  mutate(calc_age_group_report = 'Total')
+  mutate(calc_age_group_report_v2 = 'Total')
 
 # calculate summarise by metric (will be the total)
 df_overview_metric_gender_age_total <- df_metrics_overview |> 
@@ -268,7 +268,7 @@ df_overview_metric_gender_age <- bind_rows(
   df_overview_metric_gender_age_subtotals,
   df_overview_metric_gender_age_total
 ) |> 
-  arrange(calc_sex, calc_age_group_report) |>
+  arrange(calc_sex, calc_age_group_report_v2) |>
   pivot_wider(
     names_from = metric_name,
     values_from = participants
@@ -389,7 +389,7 @@ df_demographic_flatfile <- bind_rows(
   func_flatfile_summarise_project_demographic(
     df = df_metric_1a_invites_first,
     str_demo = 'Age group',
-    var_demo = calc_age_group_report
+    var_demo = calc_age_group_report_v2
   ),
   
   func_flatfile_summarise_project_demographic(
@@ -414,7 +414,7 @@ df_demographic_flatfile <- bind_rows(
   func_flatfile_summarise_project_demographic(
     df = df_metric_3ab_attend,
     str_demo = 'Age group',
-    var_demo = calc_age_group_report
+    var_demo = calc_age_group_report_v2
   ),
   
   func_flatfile_summarise_project_demographic(
@@ -439,7 +439,7 @@ df_demographic_flatfile <- bind_rows(
   func_flatfile_summarise_project_demographic(
     df = df_metric_4a_ldct_referral,
     str_demo = 'Age group',
-    var_demo = calc_age_group_report
+    var_demo = calc_age_group_report_v2
   ),
   
   func_flatfile_summarise_project_demographic(
@@ -464,7 +464,7 @@ df_demographic_flatfile <- bind_rows(
   func_flatfile_summarise_project_demographic(
     df = df_metric_5a_ldct_initial,
     str_demo = 'Age group',
-    var_demo = calc_age_group_report
+    var_demo = calc_age_group_report_v2
   ),
   
   func_flatfile_summarise_project_demographic(
