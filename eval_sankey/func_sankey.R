@@ -288,6 +288,9 @@ get_sankey_for_data <- function(df) {
       
       # add a label
       label = number(flow, big.mark = ',')
+    ) |> 
+    mutate(
+      flow_perc = scales::percent(flow / temp_eligible_pop, accuracy = 0.1)
     )
   
   # add destination colours to links
@@ -318,7 +321,9 @@ get_sankey_for_data <- function(df) {
       target = links$to,
       value = links$flow,
       label = links$label,
-      color = links$colour_fade
+      color = links$colour_fade,
+      customdata = links$flow_perc,
+      hovertemplate = '%{source.label} → %{target.label}<br /><b>%{value}</b> participants<br /><b>%{customdata}</b> of GP eligible population'
     )
   ) |> 
     layout(
