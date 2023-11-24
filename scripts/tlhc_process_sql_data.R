@@ -619,7 +619,7 @@ process_ldct <- function(df) {
   )
   
   # calculate the number of months since the previous scan
-  df_temp$calc_ldct_date_corrected_months_from_first = date_count_between(
+  df_temp$calc_ldct_date_corrected_months_from_previous = date_count_between(
     start = df_temp$temp_ldct_date_corrected_previous,
     end = df_temp$calc_ldct_date_corrected,
     precision = 'month'
