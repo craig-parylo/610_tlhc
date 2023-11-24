@@ -26,15 +26,52 @@ tic()
 
 # UDF --------------------------------------------------------------------------
 
+#' Convert string-formatted dates to date types
+#' 
+#' This is a controller function which determines what type of string-formatted
+#' date has been passed and calls on an appopriate function to parse and return
+#' the date value.
+#'
+#' @param str_date Character String formatted date to be parsed
+#'
+#' @return Date
+#' @examples 
+#' convert_string_to_date(str_date = '24/11/2023')
+convert_string_to_date <- function(str_date) {
+  
+  # decide which function to use when parsing this data
+  if_else(
+    nchar(str_date) == 5,
+    convert_string_to_date_excel(str_date = str_date),   # e.g. '45254'
+    convert_string_to_date_formatted(str_date = str_date)  # e.g. '24/11/2023'
+  )
+}
+
+#' Convert excel-formatted date strings to date types
+#'
+#' Takes a string consisting of five characters and tries to parse it as a date
+#' using Excel's origin date of 30/12/1899.
+#' 
+#' @param str_date Character String formatted date to be parsed
+#'
+#' @return Date
+#' @examples
+#' convert_string_to_date_excel(str_date = '45254')
+convert_string_to_date_excel <- function(str_date) {
+  date_output = as.Date(strtoi(str_date), origin = '1899-12-30')
+  
+  return(date_output)
+}
+
 #' Convert strings to dates
 #'
 #' Takes a string formatted date and attempts to parse to a date. Times 
 #' (if supplied) are ignored.
 #' 
-#' @param str_date 
+#' @param str_date Character String formatted date to be parsed
 #'
-#' @return datetype
-convert_string_to_date <- function(str_date) {
+#' @return Date
+convert_string_to_date_formatted <- function(str_date) {
   
   # define a list of date times to try
   orders = c(
@@ -46,8 +83,8 @@ convert_string_to_date <- function(str_date) {
     '%Y%m%d',                   #e.g. 20220101
     '%d-%b-%y'                  #e.g. 25-Aug-21
   )
-  
-  # convert the date
+
+  # convert the string-formatted date
   date_output = as_date( # convert to a date (ignore times)
     parse_date_time2( # parse the field
       x = str_date,
@@ -56,8 +93,8 @@ convert_string_to_date <- function(str_date) {
   )
   
   return(date_output)
-  
 }
+
 
 #' Process all tables ----------------------------------------------------------
 #'
@@ -190,7 +227,6 @@ process_demographics <- function(df) {
       # age
       calc_age = str_remove(Age, 'yrs'), # tidy up ages supplied as XXyrs
       calc_age = na_if(calc_age, 'NULL'), # explicitly cast string literal 'NULL' as NA
-      #calc_age = as.numeric(str_remove(Age, 'yrs')), # tidy up ages supplied as XXyrs
       calc_age = as.numeric(calc_age), # cast to numeric
       calc_age_tlhc_valid = case_when( # categorises ages which are valid for tlhc (55-74)
         (calc_age >= 55) & (calc_age <= 74) ~ 'Valid', 
@@ -250,8 +286,6 @@ process_demographics <- function(df) {
         f = fct_infreq(calc_language),
         level = 'Not known'
       )
-      
-      
     )
   
   return(df)
@@ -268,34 +302,35 @@ process_demographics <- function(df) {
 #' @return df
 process_lhc <- function(df) {
   
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  df$calc_date_stopped_smoking <- convert_string_to_date(df$Date_Stopped_Smoking)
+  df$calc_temp_lhc_date_v1 <- convert_string_to_date(df$LHC_Date)
+  df$calc_temp_lhc_date_v2 <- convert_string_to_date(df$LHC_Attendance)
+  df$calc_lhc_date <- coalesce(
+    df$calc_temp_lhc_date_v1,
+    df$calc_temp_lhc_date_v2
+  )
+  
+  # calculate month of key dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  df$calc_lhc_date_yearmon <- as.yearmon(df$calc_lhc_date)
+  df$calc_date_stopped_smoking_yearmon <- as.yearmon(df$calc_date_stopped_smoking)
+  
+  # tidy up attendance where dates and attendances were transposed ---
+  # where transposed (i.e. there was a date in LHC_Attendance) then take the attendance value from the date field
+  df$calc_temp_lhc_attendance_v1 <- case_when(
+    !is.na(df$calc_temp_lhc_date_v2) ~ df$LHC_Date
+  )
+  
+  # coalesce fields to get a single column of data
+  df$calc_lhc_attendance <- coalesce(
+    df$calc_temp_lhc_attendance_v1,
+    df$LHC_Attendance
+  )
+  
   df <- df |> 
     mutate(
-      # convert string dates to dates
-      #calc_lhc_date = convert_string_to_date(LHC_Date),
-      calc_date_stopped_smoking = convert_string_to_date(Date_Stopped_Smoking),
-      
-      # tidy up some data where dates and attendances were transposed
-      calc_temp_lhc_date_v1 = convert_string_to_date(LHC_Date),
-      calc_temp_lhc_date_v2 = convert_string_to_date(LHC_Attendance),                   # get dates recorded in the attendance column
-      calc_temp_lhc_date_v3 = as.Date(strtoi(LHC_Date), origin = '1899-12-30'),         # get dates recorded in Excel's date format
-      calc_lhc_date = coalesce(
-        calc_temp_lhc_date_v1, 
-        calc_temp_lhc_date_v2, 
-        calc_temp_lhc_date_v3
-      ),                                                                                # get the date
-      
-      # calculate month of key dates
-      calc_lhc_date_yearmon = as.yearmon(calc_lhc_date),
-      calc_date_stopped_smoking_yearmon = as.yearmon(calc_date_stopped_smoking),
-      
-      # tidy up attendance where dates and attendances were transposed
-      calc_temp_lhc_attendance_v1 = case_when(
-        !is.na(calc_temp_lhc_date_v2) ~ LHC_Date                                        # where transposed then take the value in the date field
-      ),
-      calc_lhc_attendance = coalesce(
-        calc_temp_lhc_attendance_v1,
-        LHC_Attendance
-      ),                                                                                # get the attendance
       
       # flag lhc attendances  
       calc_lhc_attendance_category = case_when(
@@ -335,9 +370,9 @@ process_lhc <- function(df) {
         is.na(LHC_Delivery_Mode) ~ 'NULL response',
         TRUE ~ 'NOT CODED'
       ),
-      
-      
-    )
+    ) |> 
+    # tidy up temp columns
+    select(-calc_temp_lhc_date_v1, -calc_temp_lhc_date_v2, -calc_temp_lhc_attendance_v1)
   
   return(df)
 }
@@ -348,11 +383,11 @@ process_lhc <- function(df) {
 #'
 #' @return df
 process_otherhistory <- function(df) {
-  df <- df |> 
-    mutate(
-      # convert string dates to dates
-      calc_cancer_date = convert_string_to_date(Cancer_Date)
-    )
+  
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  df$calc_cancer_date <- convert_string_to_date(df$Cancer_Date)
+  
   return(df)
 }
 
@@ -363,23 +398,21 @@ process_otherhistory <- function(df) {
 #' @return df
 process_diagnostics <- function(df) {
   
-  df <- df |> 
-    mutate(
-      # convert string dates to dates
-      calc_pet_ct_date = convert_string_to_date(`PET-CT_Date`),
-      calc_bronchoscopy_date = convert_string_to_date(Bronchoscopy_Date),
-      calc_ebus_date = convert_string_to_date(EBUS_Date),
-      calc_eus_date = convert_string_to_date(EUS_Date),
-      calc_mediastinoscopy_date = convert_string_to_date(Mediastinoscopy_Date),
-      calc_lung_biospy_date = convert_string_to_date(Lung_Biopsy_Date),
-      calc_diagnostic_complication_date = convert_string_to_date(Diagnostic_Complication_Date),
-      calc_pathology_report_date = convert_string_to_date(Pathology_Report_Date),
-      calc_cancer_diagnosis_date = convert_string_to_date(Cancer_Diagnosis_Date),
-      calc_treatment_start_date = convert_string_to_date(Treatment_Start_Date),
-      
-      # convert key dates to yearmon dimensions
-      calc_cancer_diagnosis_date_yearmon = as.yearmon(calc_cancer_diagnosis_date),
-    )
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  df$calc_pet_ct_date <- convert_string_to_date(df$`PET-CT_Date`)
+  df$calc_bronchoscopy_date <- convert_string_to_date(df$Bronchoscopy_Date)
+  df$calc_ebus_date <- convert_string_to_date(df$EBUS_Date)
+  df$calc_eus_date <- convert_string_to_date(df$EUS_Date)
+  df$calc_mediastinoscopy_date <- convert_string_to_date(df$Mediastinoscopy_Date)
+  df$calc_lung_biospy_date <- convert_string_to_date(df$Lung_Biopsy_Date)
+  df$calc_diagnostic_complication_date <- convert_string_to_date(df$Diagnostic_Complication_Date)
+  df$calc_pathology_report_date <- convert_string_to_date(df$Pathology_Report_Date)
+  df$calc_cancer_diagnosis_date <- convert_string_to_date(df$Cancer_Diagnosis_Date)
+  df$calc_treatment_start_date <- convert_string_to_date(df$Treatment_Start_Date)
+  
+  # convert key dates to yearmon ---
+  df$calc_cancer_diagnosis_date_yearmon <- as.yearmon(df$calc_cancer_diagnosis_date)
   
   return(df)
 }
@@ -390,19 +423,32 @@ process_diagnostics <- function(df) {
 #'
 #' @return df
 process_invites <- function(df) {
+  
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  df$calc_first_letter_date <- convert_string_to_date(df$First_Letter_Date)
+  df$calc_second_letter_date <- convert_string_to_date(df$Second_Letter_Date)
+  df$calc_follow_up_call_date <- convert_string_to_date(df$Follow_Up_Call_Date)
+  df$calc_contact_date <- convert_string_to_date(df$Contact_Date)
+  
+  # assume the outcome date is the maximum of these fields
+  df$calc_invite_outcome_date <- pmax(
+    df$calc_contact_date,
+    df$calc_follow_up_call_date,
+    df$calc_second_letter_date,
+    df$calc_first_letter_date,
+    na.rm = T
+  )
+  
+  # convert key dates to yearmon ---
+  df$calc_first_letter_date_yearmonth <- as.yearmon(df$calc_first_letter_date)
+  df$calc_second_letter_date_yearmonth <- as.yearmon(df$calc_second_letter_date)
+  df$calc_follow_up_call_date_yearmonth <- as.yearmon(df$calc_follow_up_call_date)
+  df$calc_invite_outcome_date_yearmon <- as.yearmon(df$calc_invite_outcome_date)
+  
   # convert string dates to date-types
   df <- df |> 
     mutate(
-      # convert string dates to dates
-      calc_first_letter_date = convert_string_to_date(First_Letter_Date),
-      calc_second_letter_date = convert_string_to_date(Second_Letter_Date),
-      calc_follow_up_call_date = convert_string_to_date(Follow_Up_Call_Date),
-      calc_contact_date = convert_string_to_date(Contact_Date),
-      
-      # calculate month of key dates
-      calc_first_letter_date_yearmonth = as.yearmon(calc_first_letter_date),
-      calc_second_letter_date_yearmonth = as.yearmon(calc_second_letter_date),
-      calc_follow_up_call_date_yearmonth = as.yearmon(calc_follow_up_call_date),
       
       # calculate eligibility for lhc
       calc_eligible = case_when(
@@ -423,29 +469,9 @@ process_invites <- function(df) {
           'PARTICIPANT_ACCEPTED_INVITATION',
           'TLHC ACCEPTED'
         ) ~ 'Accepted'
-      ),
-      
-      # work out when the invite was outcomed
-      calc_invite_outcome_date_old = coalesce(
-        calc_contact_date, 
-        calc_follow_up_call_date, 
-        calc_second_letter_date, 
-        calc_first_letter_date
-      ),
-      calc_invite_outcome_date_yearmon_old = as.yearmon(calc_invite_outcome_date_old),
-      
-      # work out when the invite was outcomed
-      # version 2 using the maximum date of these fields instead of coalescing
-      calc_invite_outcome_date = pmax(
-        calc_contact_date, 
-        calc_follow_up_call_date, 
-        calc_second_letter_date, 
-        calc_first_letter_date,
-        na.rm = T
-      ),
-      calc_invite_outcome_date_yearmon = as.yearmon(calc_invite_outcome_date)
-      
+      )
     )
+  
   return(df)
 }
 
@@ -455,33 +481,33 @@ process_invites <- function(df) {
 #'
 #' @return df
 process_ldct <- function(df) {
+  
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+
+  # correct ldct date for when dates and outcomes were recorded in the wrong columns
+  df$calc_ldct_date_corrected <- coalesce(
+    convert_string_to_date(df$LDCT_Date),
+    convert_string_to_date(df$LDCT_Outcome)
+  )
+  
+  df$calc_ldct_report_date <- convert_string_to_date(df$LDCT_ReportDate1)
+  df$calc_date_referral_lung_cancer <- convert_string_to_date(df$Date_Referral_Lung_Cancer)
+  df$calc_referral_date_to_tuberculosis <- convert_string_to_date(df$Referral_Date_To_Tuberculosis)
+  df$calc_referral_date_to_secondary_care_respiratory <- convert_string_to_date(df$Referral_Date_To_Secondary_Care_Respiratory)
+  df$calc_date_referralothercancer <- convert_string_to_date(df$Date_ReferralOtherCancer)
+  df$calc_referral_date_to_secondary_care_other_noncancer_team <- convert_string_to_date(df$`Referral_Date_To_Secondary_Care-Other_Non-Cancer_Team`)
+  df$calc_date_referralprimarycare <- convert_string_to_date(df$Date_ReferralPrimaryCare)
+  df$calc_date_lhc_letter_sent_to_patient <- convert_string_to_date(df$Date_LHC_Letter_Sent_To_Patient)
+  df$calc_date_lhc_results_letter_sent_to_gp <- convert_string_to_date(df$Date_LHC_Results_Letter_Sent_To_GP)
+  
+  # calculate month of key dates ---
+  df$calc_ldct_date_corrected_yearmon <- as.yearmon(df$calc_ldct_date_corrected)
+  df$calc_date_referral_lung_cancer_yearmon <- as.yearmon(df$calc_date_referral_lung_cancer)
+
   # convert string dates to date-types
   df <- df |>
     mutate(
-      # convert string dates to dates
-      calc_temp_ldct_date = convert_string_to_date(LDCT_Date), # this needs further processing to tidy up 
-      calc_ldct_report_date = convert_string_to_date(LDCT_ReportDate1),
-      calc_date_referral_lung_cancer = convert_string_to_date(Date_Referral_Lung_Cancer),
-      calc_referral_date_to_tuberculosis = convert_string_to_date(Referral_Date_To_Tuberculosis),
-      calc_referral_date_to_secondary_care_respiratory = convert_string_to_date(Referral_Date_To_Secondary_Care_Respiratory),
-      calc_date_referralothercancer = convert_string_to_date(Date_ReferralOtherCancer),
-      calc_referral_date_to_secondary_care_other_noncancer_team = convert_string_to_date(`Referral_Date_To_Secondary_Care-Other_Non-Cancer_Team`),
-      calc_date_referralprimarycare = convert_string_to_date(Date_ReferralPrimaryCare),
-      calc_date_lhc_letter_sent_to_patient = convert_string_to_date(Date_LHC_Letter_Sent_To_Patient),
-      calc_date_lhc_results_letter_sent_to_gp = convert_string_to_date(Date_LHC_Results_Letter_Sent_To_GP),
-      
-      # tidy up some Corby data where dates and outcome were transposed
-      calc_temp_ldct_date_v2 = convert_string_to_date(LDCT_Outcome),                      # get dates recorded in the outcome column
-      calc_temp_ldct_date_v3 = as.Date(strtoi(LDCT_Date), origin = '1899-12-30'),         # get dates recorded in Excel's date format
-      calc_ldct_date_corrected = coalesce(
-        calc_temp_ldct_date, 
-        calc_temp_ldct_date_v2, 
-        calc_temp_ldct_date_v3
-      ),                                                                                  # get the date
-      
-      # calculate month of key dates
-      calc_ldct_date_corrected_yearmon = as.yearmon(calc_ldct_date_corrected),
-      calc_date_referral_lung_cancer_yearmon = as.yearmon(calc_date_referral_lung_cancer),
       
       # calculate the scan outcome status
       calc_ldct_outcome_v2 = case_when(LDCT_Date == 'LDCT performed' ~ LDCT_Date),        # get outcomes recorded in the dates column
@@ -506,23 +532,15 @@ process_ldct <- function(df) {
           'LDCT NOT COMPLETED' = 'LDCT not completed (no reason recorded)',
           .default = 'Other'
         )
-      ),                                                                                   # classify outcomes into groups
-      
-      # flag incidental findings
-      calc_incidental_consolidation = str_detect(toupper(Other_Incidental_Findings), 'CONSOLIDATION'),
-      calc_incidental_tuberculosis = str_detect(toupper(Other_Incidental_Findings), 'TUBERCULOSIS'),
-      calc_incidental_mediastinalmass = str_detect(toupper(Other_Incidental_Findings), 'MEDIASTINAL MASS'),
-      calc_incidental_coronarycalcification = str_detect(toupper(Other_Incidental_Findings), 'CORONARY CALCIFICATION'),
-      calc_incidental_aorticvalvecalcification = str_detect(toupper(Other_Incidental_Findings), 'AORTIC VALVE CALCIFICATION'),
-      calc_incidental_thoracicaorticaneurysm = str_detect(toupper(Other_Incidental_Findings), 'THORACIC AORTIC ANEURYSM'),
-      calc_incidental_pleuraleffusions = str_detect(toupper(Other_Incidental_Findings), 'PLEURAL EFFUSIONS/THICKENING'),
+      )
     )
   
   # work out sequence of scans - requires a temp table calculating which to be joined to the main table afterwards
   # !! NB REQUIRES FILTER ON LDCT DATE, the following relies on at least one ldct date being non-NA
   ## NNB, this is also computationally expensive so using the dtplyr lazy_dt to handle processing and transforming back to tibble
   ## afterward.
-  df_temp <- lazy_dt(df) |> 
+  df_temp <- lazy_dt(df) |>
+    ungroup() |> 
     filter(
       !is.na(calc_ldct_date_corrected), # the following process requires dates
       #calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
@@ -552,29 +570,45 @@ process_ldct <- function(df) {
         )
       ),
       calc_ldct_date_corrected_sequence = row_number(), # whether the scan is the 1st, 2nd, 3rd, etc in the sequence
+      temp_ldct_date_corrected_previous = lag(x = calc_ldct_date_corrected, n = 1), # get the date of the previous scan (where appropriate)
       
-      # determine further intervals between scans
-      calc_ldct_date_corrected_months_from_first = date_count_between(
-        start = calc_temp_ldct_date_first,
-        end = calc_ldct_date_corrected,
-        precision = 'month'
-      ),
-      
-      calc_ldct_date_corrected_months_from_previous = date_count_between(
-        start = lag(x = calc_ldct_date_corrected, n = 1),
-        end = calc_ldct_date_corrected,
-        precision = 'month'
-      )
-      
-      
+      # # determine further intervals between scans
+      # calc_ldct_date_corrected_months_from_first = date_count_between(
+      #   start = calc_temp_ldct_date_first,
+      #   end = calc_ldct_date_corrected,
+      #   precision = 'month'
+      # ),
+      # 
+      # calc_ldct_date_corrected_months_from_previous = date_count_between(
+      #   start = lag(x = calc_ldct_date_corrected, n = 1),
+      #   end = calc_ldct_date_corrected,
+      #   precision = 'month'
+      # )
     ) |> 
     ungroup() |> 
     as_tibble()
   
+  # calculate month intervals ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  
+  # calculate the number of months since first scan
+  df_temp$calc_ldct_date_corrected_months_from_first = date_count_between(
+    start = df_temp$calc_temp_ldct_date_first,
+    end = df_temp$calc_ldct_date_corrected,
+    precision = 'month'
+  )
+  
+  # calculate the number of months since the previous scan
+  df_temp$calc_ldct_date_corrected_months_from_first = date_count_between(
+    start = df_temp$temp_ldct_date_corrected_previous,
+    end = df_temp$calc_ldct_date_corrected,
+    precision = 'month'
+  )
+  
   # add these details to the main table
   df <- left_join(
     x = df,
-    y = df_temp,
+    y = df_temp |> select(-temp_ldct_date_corrected_previous),
     by = c('ParticipantID', 'calc_ldct_date_corrected')
   )
   rm(df_temp) # housekeeping
@@ -588,7 +622,7 @@ process_ldct <- function(df) {
 #'
 #' @return df
 process_measurement <- function(df) {
-  # convert string dates to date-types
+
   df <- df |> 
     # Convert risk score fields to numeric values (NB, used in ldct referral eligibility metric)
     mutate(
@@ -644,18 +678,20 @@ process_measurement <- function(df) {
 #' @return df
 process_smoking <- function(df) {
   
+  # parse dates ---
+  # NB, using base-R vectors to do this as much MUCH faster than dplyr
+  # df$calc_field <- convert_string_to_date(df$Field)
+  df$calc_date_offered_smoking_cessation <- convert_string_to_date(df$Date_Offered_Smoking_Cessation)
+  df$calc_date_started_smoking_cessation <- convert_string_to_date(df$`Date_Started-Smoking_Cessation`)
+  df$calc_date_ended_smoking_cessation <- convert_string_to_date(df$Date_Ended_Smoking_Cessation)
+  
+  # convert key dates to yearmon ---
+  df$calc_date_offered_smoking_cessation_yearmon <- as.yearmon(df$calc_date_offered_smoking_cessation)
+  df$calc_date_started_smoking_cessation_yearmon <- as.yearmon(df$calc_date_started_smoking_cessation)
+  df$calc_date_ended_smoking_cessation_yearmon <- as.yearmon(df$calc_date_ended_smoking_cessation)
+  
   df <- df |> 
     mutate(
-      
-      # convert string dates to dates
-      calc_date_offered_smoking_cessation = convert_string_to_date(Date_Offered_Smoking_Cessation),
-      calc_date_started_smoking_cessation = convert_string_to_date(`Date_Started-Smoking_Cessation`),
-      calc_date_ended_smoking_cessation = convert_string_to_date(Date_Ended_Smoking_Cessation),
-      
-      # convert to yearmon dimensions
-      calc_date_offered_smoking_cessation_yearmon = as.yearmon(calc_date_offered_smoking_cessation),
-      calc_date_started_smoking_cessation_yearmon = as.yearmon(calc_date_started_smoking_cessation),
-      calc_date_ended_smoking_cessation_yearmon = as.yearmon(calc_date_ended_smoking_cessation),
       
       # convert smoking flag to valid options
       calc_smoking_cessation_completed_successfully = 
@@ -698,14 +734,14 @@ process_tlhc_table <- function(df, str_table = '') {
   df <- process_alltables(df = df)
   
   ## table-specific processing -------------------------------------------------
-  if(str_table == 'tbTLHCTLHC_Demographics') {df <- process_demographics(df = df)} 
-  else if(str_table == 'tbTLHCTLHC_LungHealthCheck') {df <- process_lhc(df = df)}
-  else if(str_table == 'tbTLHCTLHC_OtherHistory') {df <- process_otherhistory(df = df)}
-  else if(str_table == 'tbTLHCTLHC_Pathway_Invite') {df <- process_invites(df = df)} 
-  else if(str_table == 'tbTLHCTLHC_Pathway_LDCT') {df <- process_ldct(df = df)}
-  else if(str_table == 'tbTLHCTLHC_Measurements') {df <- process_measurement(df = df)}
-  else if(str_table == 'tbTLHCTLHC_SmokingCessation') {df <- process_smoking(df = df)}
-  else if(str_table == 'tbTLHCTLHC_Pathway_Diagnostics') {df <- process_diagnostics(df = df)}
+  if(str_table == 'tbTLHCTLHC_Demographics') {df <- process_demographics(df = df |> ungroup())} 
+  else if(str_table == 'tbTLHCTLHC_LungHealthCheck') {df <- process_lhc(df = df |> ungroup())}
+  else if(str_table == 'tbTLHCTLHC_OtherHistory') {df <- process_otherhistory(df = df |> ungroup())}
+  else if(str_table == 'tbTLHCTLHC_Pathway_Invite') {df <- process_invites(df = df |> ungroup())} 
+  else if(str_table == 'tbTLHCTLHC_Pathway_LDCT') {df <- process_ldct(df = df |> ungroup())}
+  else if(str_table == 'tbTLHCTLHC_Measurements') {df <- process_measurement(df = df |> ungroup())}
+  else if(str_table == 'tbTLHCTLHC_SmokingCessation') {df <- process_smoking(df = df |> ungroup())}
+  else if(str_table == 'tbTLHCTLHC_Pathway_Diagnostics') {df <- process_diagnostics(df = df |> ungroup())}
   
   return(df)
 }
