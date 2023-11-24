@@ -570,7 +570,6 @@ process_ldct <- function(df) {
     group_by(ParticipantID) |> 
     arrange(calc_ldct_date_corrected, .by_group = T) |> # sort by scan date for each participant
     mutate(
-      #calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T), # get the date of the first scan
       calc_ldct_date_corrected_days_from_first = (calc_ldct_date_corrected - calc_temp_ldct_date_first), # days since first scan
       calc_ldct_date_corrected_category = cut(
         x = as.numeric(calc_ldct_date_corrected_days_from_first),
@@ -591,19 +590,6 @@ process_ldct <- function(df) {
       ),
       calc_ldct_date_corrected_sequence = row_number(), # whether the scan is the 1st, 2nd, 3rd, etc in the sequence
       temp_ldct_date_corrected_previous = lag(x = calc_ldct_date_corrected, n = 1), # get the date of the previous scan (where appropriate)
-      
-      # # determine further intervals between scans
-      # calc_ldct_date_corrected_months_from_first = date_count_between(
-      #   start = calc_temp_ldct_date_first,
-      #   end = calc_ldct_date_corrected,
-      #   precision = 'month'
-      # ),
-      # 
-      # calc_ldct_date_corrected_months_from_previous = date_count_between(
-      #   start = lag(x = calc_ldct_date_corrected, n = 1),
-      #   end = calc_ldct_date_corrected,
-      #   precision = 'month'
-      # )
     ) |> 
     ungroup() |> 
     as_tibble()
