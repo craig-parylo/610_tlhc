@@ -20,7 +20,7 @@ file.edit(here('scripts', 'tlhc_download_sql_data.R')) # to update Southampton's
 source(here('scripts', 'tlhc_download_sql_data.R'))
 rm(list=ls())
 
-# Process the downloaded files (estimated time = 30 seconds)
+# Process the downloaded files (estimated time = 1 mins)
 source(here('scripts', 'tlhc_process_sql_data.R'))
 rm(list=ls())
 
