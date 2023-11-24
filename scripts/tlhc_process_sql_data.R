@@ -539,18 +539,38 @@ process_ldct <- function(df) {
   # !! NB REQUIRES FILTER ON LDCT DATE, the following relies on at least one ldct date being non-NA
   ## NNB, this is also computationally expensive so using the dtplyr lazy_dt to handle processing and transforming back to tibble
   ## afterward.
-  df_temp <- lazy_dt(df) |>
+  
+  # step 1 - work out date of first attended scan per participant
+  df_temp_firstattended <- lazy_dt(df) |> 
     ungroup() |> 
     filter(
       !is.na(calc_ldct_date_corrected), # the following process requires dates
-      #calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
+      calc_ldct_outcome_corrected_groups == 'LDCT performed' # limit to attended scans
     ) |> 
     select(ParticipantID, calc_ldct_date_corrected) |> # small subset
     unique() |> # handle cases where same dates have been uploaded in different formats (e.g.15/09/2021 and 2021-09-15 00:00:00)
     group_by(ParticipantID) |> 
+    summarise(calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T)) |>  # get the date of the first attended scan
+    ungroup() |> 
+    as_tibble()
+  
+  # step 2 - add first scan date and proceed
+  df_temp <- left_join(
+    x = df,
+    y = df_temp_firstattended,
+    by = 'ParticipantID'
+  )
+  
+  # step 3 - process the table
+  df_temp <- lazy_dt(df_temp) |> 
+    ungroup() |> 
+    filter(!is.na(calc_ldct_date_corrected)) |> # the following process requires dates
+    select(ParticipantID, calc_ldct_date_corrected, calc_temp_ldct_date_first) |> # small subset
+    unique() |> # handle cases where same dates have been uploaded in different formats (e.g.15/09/2021 and 2021-09-15 00:00:00)
+    group_by(ParticipantID) |> 
     arrange(calc_ldct_date_corrected, .by_group = T) |> # sort by scan date for each participant
     mutate(
-      calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T), # get the date of the first scan
+      #calc_temp_ldct_date_first = min(calc_ldct_date_corrected, na.rm = T), # get the date of the first scan
       calc_ldct_date_corrected_days_from_first = (calc_ldct_date_corrected - calc_temp_ldct_date_first), # days since first scan
       calc_ldct_date_corrected_category = cut(
         x = as.numeric(calc_ldct_date_corrected_days_from_first),
