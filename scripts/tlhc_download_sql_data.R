@@ -96,7 +96,10 @@ download_tlhc_table <- function(str_table = '') {
       144689, 142285, 136238, 134308, 131832,
       
       # 2023-03-27 Bradford and North Kirklees - agreed with Kerrie Massey and Graham Bowmer today to exclude all submissions before March 2023 as they confirm their recent re-submissions are the most up-to-date and accurate data
-      189740, 187617, 185024, 181645, 178639, 175549, 171166, 165345, 158882
+      189740, 187617, 185024, 181645, 178639, 175549, 171166, 165345, 158882,
+      
+      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+      227941
       
     )
     
@@ -122,7 +125,10 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
       193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
       166818, 159250, 156519, 154427, 150593, 148604, 146601, 144689,
-      142285, 136238, 134308, 131832
+      142285, 136238, 134308, 131832,
+      
+      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+      227941
       
     )
     
@@ -149,7 +155,10 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-03-15 Doncaster transactions leading to over-reported 8b (offered SC) agreed to be removed today
       130374, 131748, 134772, 137383, 140163, 142235, 142270, 144804,
       146557, 148934, 150726, 154626, 156928, 159567, 163913, 167075,
-      169080, 169267, 171092, 175619, 178824, 181324
+      169080, 169267, 171092, 175619, 178824, 181324,
+      
+      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+      227941
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_SmokingCessation')) |> # lazy load
@@ -175,7 +184,10 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-04-05 Southampton newer submissions overwrite First_Letter dates and need to be managed separately
       # NNB, this list will need adding to each month to exclude the latest submission (RHM00)
       228258, 224003, 217935, 214302, 210541, 210540, 209188, 206415, 201904,  
-      197086, 194098, 192749, 190354, 187373, 186011, 184105, 181295, 181294
+      197086, 194098, 192749, 190354, 187373, 186011, 184105, 181295, 181294,
+      
+      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+      227941
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
@@ -217,7 +229,10 @@ download_tlhc_table <- function(str_table = '') {
     # define transactions to ignore
     invalid_transid <- c(
       # Luton South Bedfordshire - contains invalid ParticipantIDs
-      194295
+      194295,
+      
+      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+      227941
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
