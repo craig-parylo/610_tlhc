@@ -99,7 +99,14 @@ download_tlhc_table <- function(str_table = '') {
       189740, 187617, 185024, 181645, 178639, 175549, 171166, 165345, 158882,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      # 2023-11-30 Luton South Bedfordshire - cancelling out previous ldct submissions as we have a more recent full resubmission
+      228893, 224675, 219030, 214625, 210196, 206768, 203130, 199980, 199915,
+      194296, 194294, 193531, 193311, 190117, 188038, 188037, 188036, 188027,
+      187314, 184291, 181436, 178659, 175824, 171780, 167021, 164032, 164031,
+      163970, 163969, 159609, 157274, 156987, 156986, 154628, 153946, 150441,
+      146728, 144819, 142388, 140174, 137385, 134553
       
     )
     
