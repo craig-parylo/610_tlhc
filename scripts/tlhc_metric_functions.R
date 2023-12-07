@@ -734,6 +734,7 @@ get_first_attended_lhc_per_participant <- function() {
   
   return(
     df_lhc |> 
+      lazy_dt() |> 
       # limit the dataframe for valid metric
       filter(
         calc_valid_transactionid == 'Valid', # valid transactions
@@ -743,10 +744,18 @@ get_first_attended_lhc_per_participant <- function() {
         calc_lhc_attendance_category == 'Attended', # participant is recorded as attending
         #!is.na(calc_first_letter_date) # exclude records without an invite date
       ) |> 
-      # take the first attended lhc for a given participant
+      # rank dates, so that we can prefer those that occur within the TLHC programme lifespan
+      mutate(
+        calc_rank_programme_dates = if_else(
+          calc_lhc_date > as.Date('2019-03-31'), 0, 1
+        )
+      ) |> 
+      # take the first attended lhc for a given participant (but prefer dates within TLHC programme lifespan)
       group_by(ParticipantID) |> 
-      slice_min(calc_lhc_date) |> 
-      ungroup()
+      arrange(calc_rank_programme_dates, calc_lhc_date) |> 
+      slice(1) |> 
+      ungroup() |> 
+      as_tibble()
   )
 }
 
