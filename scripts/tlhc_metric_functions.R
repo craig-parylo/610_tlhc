@@ -1170,7 +1170,6 @@ get_df_metric_5b_ldct_initial_dna <- function() {
       !is.na(calc_ldct_date_corrected_yearmon), # exclude records without a LDCT date
       # (calc_PLCOm2012_risk_group == 'High risk' | calc_LLPv2_risk_group == 'High risk'), # identified as high risk using either score in LHC
       calc_ldct_outcome_corrected_groups == 'LDCT did not attend', # we have confirmation the patient DNA'd
-      #calc_ldct_date_corrected_category == 'Initial scan' # we only want initial scans
       calc_ldct_date_corrected_days_from_first < 0 # count appointments before the initial scan
     ) 
   
