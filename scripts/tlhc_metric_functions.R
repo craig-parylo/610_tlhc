@@ -15,6 +15,7 @@
 # Libraries --------------------------------------------------------------------
 library(tidyverse)     # tidy data processing
 library(here)          # localise file references
+library(dtplyr)        # faster table processing
 library(lubridate)     # date functions
 library(zoo)           # date functions
 library(progressr)     # progress bar
