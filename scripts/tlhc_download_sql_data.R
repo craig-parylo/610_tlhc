@@ -106,7 +106,10 @@ download_tlhc_table <- function(str_table = '') {
       194296, 194294, 193531, 193311, 190117, 188038, 188037, 188036, 188027,
       187314, 184291, 181436, 178659, 175824, 171780, 167021, 164032, 164031,
       163970, 163969, 159609, 157274, 156987, 156986, 154628, 153946, 150441,
-      146728, 144819, 142388, 140174, 137385, 134553
+      146728, 144819, 142388, 140174, 137385, 134553,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      156613,158862,178204,182807
       
     )
     
@@ -135,7 +138,10 @@ download_tlhc_table <- function(str_table = '') {
       142285, 136238, 134308, 131832,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      204048,207752,211447,217873,221067
       
     )
     
@@ -165,7 +171,10 @@ download_tlhc_table <- function(str_table = '') {
       169080, 169267, 171092, 175619, 178824, 181324,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      141706,174023
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_SmokingCessation')) |> # lazy load
@@ -195,7 +204,10 @@ download_tlhc_table <- function(str_table = '') {
       181294,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      162770,182807,186013,221067
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
@@ -216,7 +228,10 @@ download_tlhc_table <- function(str_table = '') {
     # define transactions to ignore
     invalid_transid <- c(
       # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
-      213175, 213218
+      213175, 213218,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      166772,181011,182807,199753,217873,221067,227941
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
@@ -240,7 +255,10 @@ download_tlhc_table <- function(str_table = '') {
       194295,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      #2023-12-19 Hull - agreed to exclude older the transactionID
+      162770,182807,186013
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
