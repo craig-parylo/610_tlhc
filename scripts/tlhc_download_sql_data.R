@@ -171,9 +171,8 @@ download_tlhc_table <- function(str_table = '') {
       169080, 169267, 171092, 175619, 178824, 181324,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
+      227941
       
-     
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_SmokingCessation')) |> # lazy load
