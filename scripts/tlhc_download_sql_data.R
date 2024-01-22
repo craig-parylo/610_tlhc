@@ -111,7 +111,9 @@ download_tlhc_table <- function(str_table = '') {
       #2023-12-19 Hull - agreed to exclude older the transactionID
       156613,158862,178204,182807,
       154350,156613,162770,166772,171187,174474,181011,186013,188743,191715,194036,199747,199753,
-      201521,204048,207752,211447,217873,221067,227941
+      201521,204048,207752,211447,217873,221067,227941,
+      #2024-01-22 - Thurrock - agreed to exclude older the transactionID with no demographic record because it had already populated in the new submission on December 2023
+      207145
     )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
