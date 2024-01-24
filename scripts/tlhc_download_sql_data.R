@@ -113,7 +113,9 @@ download_tlhc_table <- function(str_table = '') {
       154350,156613,162770,166772,171187,174474,181011,186013,188743,191715,194036,199747,199753,
       201521,204048,207752,211447,217873,221067,227941,
       #2024-01-22 - Thurrock - agreed to exclude older the transactionID with no demographic record because it had already populated in the new submission on December 2023
-      207145
+      207145,
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
     )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
@@ -147,7 +149,10 @@ download_tlhc_table <- function(str_table = '') {
       204048,207752,211447,217873,221067,227941,
       145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,
       174474,178204,181011,182807,186013,188743,191715,194036,199747,199753,
-      201521,204048
+      201521,204048,
+      
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
     )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
@@ -176,7 +181,10 @@ download_tlhc_table <- function(str_table = '') {
       169080, 169267, 171092, 175619, 178824, 181324,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941
+      227941,
+      
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
       
     )
     
@@ -212,7 +220,10 @@ download_tlhc_table <- function(str_table = '') {
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,
       174474,178204,181011,182807,186013,188743,191715,194036,199747,199753,201521,
-      204048,207752,211447,217873,221067,227941
+      204048,207752,211447,217873,221067,227941,
+      
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
@@ -237,7 +248,10 @@ download_tlhc_table <- function(str_table = '') {
       
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,178204,181011,182807,186013,
-      188743,191715,182807,194036,199747,199753,201521,204048,207752,211447,217873,221067,227941
+      188743,191715,182807,194036,199747,199753,201521,204048,207752,211447,217873,221067,227941,
+      
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
@@ -266,7 +280,10 @@ download_tlhc_table <- function(str_table = '') {
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,
       178204,181011,188743,191715,194036,199747,199753,201521,204048,207752,211447,217873,221067,
-      182807,186013,227941
+      182807,186013,227941,
+      
+      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+      235983
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
