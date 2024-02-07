@@ -330,7 +330,7 @@ get_sankey_for_data <- function(df) {
       #title = 'Targeted Lung Health Checks',
       font = list(
         family = 'Arial, Helvetica, sans-serif',
-        size = 11
+        size = 14
       ),
       paper_bgcolor = 'rgba(0,0,0,0)'
     ) |> 
