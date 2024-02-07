@@ -132,3 +132,75 @@ get_southampton_invite_transaction_ids <- function() {
   # show the results
   view(df_southampton_new_invite_transactions)
 }
+
+
+# summarise a single df
+#' Describe a dataframe
+#' 
+#' Produces summary figures for a given dataframe including a list of the variables
+#' the class of these variables, the total number of rows, how many missing values
+#' each variable has and the rate, the level of unique values (cardinality) per 
+#' variable and the rate.
+#'
+#' @param df Tibble - the dataframe to be described
+#'
+#' @return Tibble with summary figures
+#' @examples describe_df(df_demo) |> clipr::write_clip()
+describe_df <- function(df) {
+  
+  # take a subset of the df, excluding calculated columns and specified cols from db
+  cols_ignore <- c(
+    'CSURowNumber',
+    'DatasetId',
+    'SubmittedZipFile',
+    'SubmittedFile',
+    'FileId',
+    'TransactionId',
+    'ReceivedDate',
+    'LoadDate',
+    'UserEmail'
+  )
+  
+  df <- df |> 
+    # ignore calculated columns
+    select(!contains('calc_') & !any_of(cols_ignore))
+  
+  # convert junk values to NA
+  df <- df |>
+    mutate(across(where(is.character), ~na_if(., ''))) |>
+    mutate(across(where(is.character), ~na_if(., 'NULL'))) |>
+    mutate(across(where(is.character), ~na_if(., 'null'))) |>
+    mutate(across(where(is.character), ~na_if(., 'Null')))
+  
+  # create an empty tibble to hold our results
+  df_return <- tibble(
+    variable = NA,
+    class = NA,
+    rows = NA,
+    missing = NA,
+    missing_rate = NA,
+    cardinality = NA,
+    cardinality_rate = NA
+  )
+  
+  # loop over each variable and work out some useful statistics
+  for (var in names(df)) {
+    df_return <- df_return |> 
+      add_row(
+        variable = var,
+        class = class(df[[var]])[1],
+        rows = length(df[[var]]),
+        missing = length(df[[var]][is.na(df[[var]])]),
+        missing_rate = missing / rows,
+        cardinality = length(unique(df[[var]][!is.na(df[[var]])])),
+        cardinality_rate = cardinality / rows
+      )
+  }
+  
+  # ignore the first row of NAs
+  df_return <- df_return |> 
+    filter(!is.na(variable))
+  
+  # return the result
+  return(df_return)
+}
