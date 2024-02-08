@@ -15,6 +15,28 @@ library(kableExtra)
 # setup
 base_out <- 'C:/Users/craig.parylo/Midlands and Lancashire CSU/Strategy Unit Team - Strategy Unit/Projects/Current/610 Targeted Lung Health Checks Evaluation/Reports/2024-01/sankey_charts'
 
+
+# temp - add in admin ----------------------------------------------------------
+# df_sankey <- readRDS(file = here('eval_sankey', 'df_sankey_preagg.Rds'))
+# 
+# # add the in-house / outsource details 
+# # NB, this is temporary and will be replaced by a proper process
+# df_project_ref <- readxl::read_excel(path = here('data', 'reference', 'project_reference.xlsx')) |> 
+#   select(project, admin)
+# 
+# df_sankey <- df_sankey |> 
+#   left_join(
+#     y = df_project_ref,
+#     by = 'project'
+#   )
+# 
+# # save this file
+# saveRDS(
+#   object = df_sankey,
+#   file = here('eval_sankey', 'df_sankey_preagg.Rds')
+# )
+
+
 # data -------------------------------------------------------------------------
 df_sankey <- readRDS(file = here('eval_sankey', 'df_sankey_preagg.Rds')) |> 
   # remove phase 3 projects
@@ -60,17 +82,8 @@ df_sankey <- readRDS(file = here('eval_sankey', 'df_sankey_preagg.Rds')) |>
       ff_label('Receive LDCT scan')
   )
 
-# add the in-house / outsource details 
-# NB, this is temporary and will be replaced by a proper process
-df_project_ref <- readxl::read_excel(path = here('data', 'reference', 'project_reference.xlsx')) |> 
-  select(project, admin)
 
-df_sankey <- df_sankey |> 
-  left_join(
-    y = df_project_ref,
-    by = 'project'
-  )
-  
+
 # UDF --------------------------------------------------------------------------
 
 #' Carry out the FinalFit logistic regression
@@ -447,3 +460,25 @@ do_ff_logistic_regression(df = df_sankey_temp, dependent = dependent, explanator
 dependent <- c('flag_ldct')
 do_ff_logistic_regression(df = df_sankey_temp, dependent = dependent, explanatory = explanatory)   
 
+# admin ------------------------------------------------------------------------
+df_sankey_temp <- df_sankey |> 
+  filter(
+    admin %in% c('In-house', 'Outsourced')
+  ) |> 
+  # define independent variables
+  mutate(
+    var_admin = admin |> 
+      as.character() |> 
+      fct(levels = c('In-house', 'Outsourced')) |> 
+      ff_label('Admin')
+  )
+
+dependent <- c('flag_lhc')
+explanatory <- c('var_admin')
+
+# LHC
+do_ff_logistic_regression(df = df_sankey_temp, dependent = dependent, explanatory = explanatory)
+
+# LDCT
+dependent <- c('flag_ldct')
+do_ff_logistic_regression(df = df_sankey_temp, dependent = dependent, explanatory = explanatory)   
