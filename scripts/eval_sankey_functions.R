@@ -137,7 +137,8 @@ get_data_for_sankey <- function() {
           CAName,
           invite_mode,
           lhc_delivery,
-          triage_before_risk_assessment
+          triage_before_risk_assessment,
+          admin
         ) |> 
         unique(),
       by = 'project'
