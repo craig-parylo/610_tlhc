@@ -302,6 +302,52 @@ load_pulmonary_incidental_findings <- function() {
   return(df_pif)
 }
 
+#' Load cancer tumour data
+#' 
+#' Load an df of cancer tumour
+#' 
+#' @return df Tibble of cancer tumour data
+load_df_cancer_tumour <- function() {
+  
+  p('loading cancer tumour')
+  
+  return(
+    df <- readRDS(here('data', 'tlhc', 'NCRAS_Cancer_Tumour_Data_TLHC.Rds')) |> 
+      ungroup()
+  )
+}
+
+#' Load cancer pathway data
+#' 
+#' Load an df of cancer pathways
+#' 
+#' @return df Tibble of cancer pathway data
+load_df_cancer_pathway <- function() {
+  
+  p('loading cancer pathways')
+  
+  return(
+    df <- readRDS(here('data', 'tlhc', 'NCRAS_National_Cancer_Pathway_Data_TLHC.Rds')) |> 
+      ungroup()
+  )
+}
+
+#' Load cancer rapid registration data
+#' 
+#' Load an df of cancer rapid registration
+#' 
+#' @return df Tibble of cancer rapid registration data
+load_df_cancer_reg <- function() {
+  
+  p('loading cancer rapid registration')
+  
+  return(
+    df <- readRDS(here('data', 'tlhc', 'NCRAS_National_Cancer_Rapid_Registration_TLHC.Rds')) |> 
+      ungroup()
+  )
+}
+
+
 ## helper functions ------------------------------------------------------------
 # These functions process data to add additional details required for
 # metric calculations
