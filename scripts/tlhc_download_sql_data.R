@@ -296,6 +296,27 @@ download_tlhc_table <- function(str_table = '') {
       collect() # download the data
     
     rm(invalid_transid)
+  
+  } else if (str_table == 'NCRAS_Cancer_Tumour_Data_TLHC'){
+    
+    # Tumour data table
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
+  
+  } else if (str_table == 'NCRAS_National_Cancer_Pathway_Data_TLHC'){
+    
+    # Cancer pathway data
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
+    
+  } else if (str_table == 'NCRAS_National_Cancer_Rapid_Registration_TLHC'){
+    
+    # Rapid Registration data
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
     
   } else {
     ## All other tables ----
@@ -380,7 +401,10 @@ df_table_details <- tibble(
     'tbTLHCTLHC_Pathway_Diagnostics',
     'tbTLHCTLHC_Pathway_Invite',
     'tbTLHCTLHC_Pathway_LDCT',
-    'tbTLHCTLHC_SmokingCessation'
+    'tbTLHCTLHC_SmokingCessation',
+    'NCRAS_Cancer_Tumour_Data_TLHC',
+    'NCRAS_National_Cancer_Pathway_Data_TLHC',
+    'NCRAS_National_Cancer_Rapid_Registration_TLHC'
   )
 )
 
