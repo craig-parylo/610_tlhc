@@ -36,7 +36,7 @@ handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the 
 with_progress({
   
   update_user(message = 'Loading base tables', icon = '⏱️')
-  p <- progressor(steps = 9)
+  p <- progressor(steps = 13)
   
   df_demo <- load_df_demo()
   df_demo_join <- load_df_demo_join()
@@ -48,6 +48,9 @@ with_progress({
   df_ldct_incid_pulm <- extract_pulmonary_incidental_data()
   df_smoking <- load_df_smoking()
   df_diag <- load_df_diagnostics()
+  df_canc_tumour <- load_df_cancer_tumour()
+  df_canc_pathway <- load_df_cancer_pathway()
+  df_canc_reg <- load_df_cancer_reg()
   
 })
 
