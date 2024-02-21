@@ -421,7 +421,7 @@ with_progress({
   p <- progressor(steps = length(df_table_details$table))
   
   # call function to download table data
-  # this works but it quite slow ------------------------
+  # this works but its quite slow ------------------------
   lapply(
     X = df_table_details$table,
     FUN = download_tlhc_table
