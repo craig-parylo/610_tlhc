@@ -48,9 +48,9 @@ with_progress({
   df_ldct_incid_pulm <- extract_pulmonary_incidental_data()
   df_smoking <- load_df_smoking()
   df_diag <- load_df_diagnostics()
-  df_canc_tumour <- load_df_cancer_tumour()
-  df_canc_pathway <- load_df_cancer_pathway()
-  df_canc_reg <- load_df_cancer_reg()
+  df_canc_registry <- load_df_cancer_tumour()
+  df_canc_rr_pathway <- load_df_cancer_pathway()
+  df_canc_rr_tumour <- load_df_cancer_reg()
   
 })
 
