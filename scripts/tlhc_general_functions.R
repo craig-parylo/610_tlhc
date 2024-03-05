@@ -55,7 +55,7 @@ archive_current_data_files <- function() {
 #' @export
 #'
 #' @examples
-update_user <- function(message = '', stage = '', icon = '☑️') {
+update_user <- function(message = '', stage = '', icon = '✔️️') {
   
   # tidy the input
   stage <- trimws(tolower(stage))
@@ -66,8 +66,8 @@ update_user <- function(message = '', stage = '', icon = '☑️') {
   # update the icon if end of script
   icon <- case_when(
     stage == 'end' ~ '🔚', # if end of script then use this
-    !icon == '☑️' ~ icon,  # if non-standard icon then use that
-    .default = '☑️'        # default to check
+    !icon == '✔️️' ~ icon,  # if non-standard icon then use that
+    .default = '✔️️'        # default to check
   )
 
   # add blank lines if start of script
