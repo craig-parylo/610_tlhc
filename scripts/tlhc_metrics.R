@@ -51,6 +51,7 @@ with_progress({
   df_canc_registry <- load_df_cancer_tumour()
   df_canc_rr_pathway <- load_df_cancer_pathway()
   df_canc_rr_tumour <- load_df_cancer_reg()
+  df_cancer <- get_df_cancer()
   
 })
 
