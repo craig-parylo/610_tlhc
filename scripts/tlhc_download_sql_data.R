@@ -210,9 +210,9 @@ download_tlhc_table <- function(str_table = '') {
       
       # 2023-04-05 Southampton newer submissions overwrite First_Letter dates and need to be managed separately
       # NNB, this list will need adding to each month to exclude the latest submission (RHM00)
-      241097, 236620, 232593, 228258, 224003, 217935, 214302, 210541, 210540,    
-      209188, 206415, 201904, 197086, 194098, 192749, 190354, 187373, 186011,   
-      184105, 181295, 181294,
+      244394, 241097, 236620, 232593, 228258, 224003, 217935, 214302, 210541,     
+      210540, 209188, 206415, 201904, 197086, 194098, 192749, 190354, 187373,    
+      186011, 184105, 181295, 181294,
       
       # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
       227941,
@@ -296,6 +296,27 @@ download_tlhc_table <- function(str_table = '') {
       collect() # download the data
     
     rm(invalid_transid)
+  
+  } else if (str_table == 'NCRAS_Cancer_Tumour_Data_TLHC'){
+    
+    # Tumour data table
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
+  
+  } else if (str_table == 'NCRAS_National_Cancer_Pathway_Data_TLHC'){
+    
+    # Cancer pathway data
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
+    
+  } else if (str_table == 'NCRAS_National_Cancer_Rapid_Registration_TLHC'){
+    
+    # Rapid Registration data
+    # downloading all data - been filtered by DSCRO team already
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      collect()
     
   } else {
     ## All other tables ----
@@ -380,7 +401,10 @@ df_table_details <- tibble(
     'tbTLHCTLHC_Pathway_Diagnostics',
     'tbTLHCTLHC_Pathway_Invite',
     'tbTLHCTLHC_Pathway_LDCT',
-    'tbTLHCTLHC_SmokingCessation'
+    'tbTLHCTLHC_SmokingCessation',
+    'NCRAS_Cancer_Tumour_Data_TLHC',
+    'NCRAS_National_Cancer_Pathway_Data_TLHC',
+    'NCRAS_National_Cancer_Rapid_Registration_TLHC'
   )
 )
 
@@ -421,7 +445,7 @@ with_progress({
   p <- progressor(steps = length(df_table_details$table))
   
   # call function to download table data
-  # this works but it quite slow ------------------------
+  # this works but its quite slow ------------------------
   lapply(
     X = df_table_details$table,
     FUN = download_tlhc_table
