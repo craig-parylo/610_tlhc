@@ -2410,7 +2410,7 @@ get_df_icd_group <- function() {
 
   return(
     vroom::vroom(
-      file = here('data', 'secret', 'tumour_groups.csv'),
+      file = here('data', 'reference', 'tumour_groups.csv'),
       show_col_types = F # don't include any console output when reading file
     ) |>
       mutate(
