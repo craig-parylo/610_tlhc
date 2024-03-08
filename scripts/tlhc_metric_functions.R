@@ -2674,6 +2674,7 @@ get_df_cancer <- function() {
           'A' ~ 'British', 
           'B' ~ 'Irish', 
           'C' ~ 'Any other White background', 
+          '0' ~ 'Any other White background', # this is empirical from Cancer Registry data
           'D' ~ 'White and Black Caribbean', 
           'E' ~ 'White and Black African', 
           'F' ~ 'White and Asian', 
@@ -2688,17 +2689,19 @@ get_df_cancer <- function() {
           'R' ~ 'Chinese', 
           'S' ~ 'Any other ethnic group', 
           'Z' ~ 'Not stated', 
-          'X' ~ 'Not Known'
+          'X' ~ 'Not Known',
+          .default = '<blank>'
         ),
         ethnicity_group = case_match(
           ethnicity_code,
-          c('0', 'A', 'B', 'C') ~ 'White',
+          c('0', 'A', 'B', 'C') ~ 'White', # '0' is empirical from Cancer Registry data
           c('D', 'E', 'F', 'G') ~ 'Mixed',
           c('H', 'J', 'K', 'L') ~ 'Asian',
           c('M', 'N', 'P') ~ 'Black',
           c('R', 'S') ~ 'Other',
-          c('Z') ~ 'Not stated',
-          c(99, '99', 'X') ~ 'Not known'
+          #c('Z') ~ 'Not stated',
+          #c(99, '99', 'X') ~ 'Not known',
+          .default = 'Unknown'
         )
       )
   )
