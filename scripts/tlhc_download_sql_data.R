@@ -58,6 +58,14 @@ df_participants_exclude_list <- df_participants_exclude |>
   unique() |> 
   as_vector()
 
+# prepare a list of transaction ids that should be excluded for all tables
+invalid_transid_all <- c(
+  # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
+  227941,
+  
+  # 2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
+  235983
+)
 
 # UDF --------------------------------------------------------------------------
 
@@ -90,6 +98,9 @@ download_tlhc_table <- function(str_table = '') {
     # define transactions to ignore
     invalid_transid <- c(
       
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
       193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
       166818, 162700, 159250, 156519, 154427, 150593, 148604, 146601,
@@ -98,9 +109,6 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-03-27 Bradford and North Kirklees - agreed with Kerrie Massey and Graham Bowmer today to exclude all submissions before March 2023 as they confirm their recent re-submissions are the most up-to-date and accurate data
       189740, 187617, 185024, 181645, 178639, 175549, 171166, 165345, 158882,
       
-      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
-      
       # 2023-11-30 Luton South Bedfordshire - cancelling out previous ldct submissions as we have a more recent full resubmission
       228893, 224675, 219030, 214625, 210196, 206768, 203130, 199980, 199915,
       194296, 194294, 193531, 193311, 190117, 188038, 188037, 188036, 188027,
@@ -108,14 +116,13 @@ download_tlhc_table <- function(str_table = '') {
       163970, 163969, 159609, 157274, 156987, 156986, 154628, 153946, 150441,
       146728, 144819, 142388, 140174, 137385, 134553,
       
-      #2023-12-19 Hull - agreed to exclude older the transactionID
+      # 2023-12-19 Hull - agreed to exclude older the transactionID
       156613,158862,178204,182807,
       154350,156613,162770,166772,171187,174474,181011,186013,188743,191715,194036,199747,199753,
       201521,204048,207752,211447,217873,221067,227941,
-      #2024-01-22 - Thurrock - agreed to exclude older the transactionID with no demographic record because it had already populated in the new submission on December 2023
-      207145,
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      
+      # 2024-01-22 - Thurrock - agreed to exclude older the transactionID with no demographic record because it had already populated in the new submission on December 2023
+      207145
     )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
@@ -137,22 +144,20 @@ download_tlhc_table <- function(str_table = '') {
     # define transactions to ignore
     invalid_transid <- c(
       
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
       193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
       166818, 159250, 156519, 154427, 150593, 148604, 146601, 144689,
       142285, 136238, 134308, 131832,
       
-      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
-      
       #2023-12-19 Hull - agreed to exclude older the transactionID
       204048,207752,211447,217873,221067,227941,
       145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,
       174474,178204,181011,182807,186013,188743,191715,194036,199747,199753,
-      201521,204048,
-      
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      201521,204048
+
     )
     
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
@@ -172,19 +177,17 @@ download_tlhc_table <- function(str_table = '') {
 
     # define transactions to ignore
     invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
       213175, 213218,
       
       # 2023-03-15 Doncaster transactions leading to over-reported 8b (offered SC) agreed to be removed today
       130374, 131748, 134772, 137383, 140163, 142235, 142270, 144804,
       146557, 148934, 150726, 154626, 156928, 159567, 163913, 167075,
-      169080, 169267, 171092, 175619, 178824, 181324,
-      
-      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
-      
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      169080, 169267, 171092, 175619, 178824, 181324
       
     )
     
@@ -205,6 +208,10 @@ download_tlhc_table <- function(str_table = '') {
     
     # define transactions to ignore
     invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
       213175, 213218,
       
@@ -214,16 +221,11 @@ download_tlhc_table <- function(str_table = '') {
       210540, 209188, 206415, 201904, 197086, 194098, 192749, 190354, 187373,    
       186011, 184105, 181295, 181294,
       
-      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
-      
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,
       174474,178204,181011,182807,186013,188743,191715,194036,199747,199753,201521,
-      204048,207752,211447,217873,221067,227941,
-      
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      204048,207752,211447,217873,221067,227941
+
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Pathway_Invite')) |> # lazy load
@@ -243,15 +245,17 @@ download_tlhc_table <- function(str_table = '') {
     
     # define transactions to ignore
     invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
       213175, 213218,
       
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,178204,181011,182807,186013,
-      188743,191715,182807,194036,199747,199753,201521,204048,207752,211447,217873,221067,227941,
-      
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      188743,191715,182807,194036,199747,199753,201521,204048,207752,211447,217873,221067,227941
+
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_LungHealthCheck')) |> # lazy load
@@ -271,19 +275,18 @@ download_tlhc_table <- function(str_table = '') {
     
     # define transactions to ignore
     invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
       # Luton South Bedfordshire - contains invalid ParticipantIDs
       194295,
-      
-      # 2023-11-29 Hull - agreed to cancel this submission as contains East Riding patients and may have been pseudonymised using the wrong salt key
-      227941,
       
       #2023-12-19 Hull - agreed to exclude older the transactionID
       140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,
       178204,181011,188743,191715,194036,199747,199753,201521,204048,207752,211447,217873,221067,
-      182807,186013,227941,
-      
-      #2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-      235983
+      182807,186013,227941
+
     )
     
     df <- tbl(con, in_schema('dbo', 'tbTLHCTLHC_Demographics')) |> # lazy load
@@ -322,13 +325,23 @@ download_tlhc_table <- function(str_table = '') {
     ## All other tables ----
     # We need a record per patient
     
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all
+    )
+    
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
       filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
       group_by(ParticipantID) |> # get one record for each participant:
       slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
       slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
       filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
       collect() # download the data
+    
+    rm(invalid_transid)
   }
   
   # signal progress - update the user
