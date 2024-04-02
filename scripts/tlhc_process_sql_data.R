@@ -534,6 +534,71 @@ process_ldct <- function(df) {
         )
       )
     )
+}
+
+#' Post-process LDCT table
+#' 
+#' Takes the tibble of LDCT data which has been processed to convert strings to dates
+#' and calculate outcome groups, and adds additional processing to:
+#' 
+#' 1. correct the LDCT dates
+#'    Where the provided LDCT date occurs before the person was first invited.
+#'    This was picked up in the review of TLHC data where scan dates often preceeded
+#'    the date of invite - which should not happen. Visual inspection of these found
+#'    LDCT report date is often a better fit for date sequence.
+#'    
+#' 2. sequence LDCT scans
+#'    order the scans by date and work out which is the baseline and work out the
+#'    follow-up period of any subsequent scans.
+#' 
+#' @param df Tibble of LDCT data which has been processed
+#'
+#' @return Tibble of post-processed LDCT data
+post_process_ldct <- function() {
+  
+  # load the processed data 
+  df <- readRDS(file = here('data', 'tlhc', 'calc_tbTLHCTLHC_Pathway_LDCT.Rds'))
+  df_invites <- readRDS(file = here('data', 'tlhc', 'calc_tbTLHCTLHC_Pathway_Invite.Rds'))
+  
+  # correct the LDCT dates
+  # step 1 - add in the first invite date
+  # create a lookup between participant id and eligibility and initial invite date (for metric 10)
+  temp_first_letter_date <- df_invites |> 
+    select(ParticipantID, calc_first_letter_date) |> 
+    unique()
+  
+  # add eligiblity to the supplied df
+  df <- left_join(
+    x = df,
+    y = temp_first_letter_date,
+    by = "ParticipantID"
+  )
+  
+  # housekeeping
+  rm(temp_first_letter_date)
+  
+  # step 2 - correct ldct dates for cases where the report date is a better fit
+  df <- df |> 
+    mutate(
+      # flag records where this phenomena is true so we can track them later on
+      flag_reportdate_better_than_ldctdate = case_when(
+        !is.na(calc_ldct_date_corrected) & # we need an ldct date
+          !is.na(calc_ldct_report_date) & # we need a report date
+          !is.na(calc_first_letter_date) & # we need a first letter date
+          calc_ldct_date_corrected < calc_first_letter_date & # current ldct date is earlier than the invite (the issue we are trying to fix)
+          calc_ldct_report_date >= calc_first_letter_date # but the report date occurs after the invite 
+          ~ TRUE,
+        .default = FALSE
+      ),
+      
+      # change the ldct date to report date for cases where this makes sense, otherwise keep the existing date
+      calc_ldct_date_corrected = case_when(
+        flag_reportdate_better_than_ldctdate == T ~ calc_ldct_report_date,
+        .default = calc_ldct_date_corrected
+      )
+    ) |> 
+    # remove the calc_first_letter_date field - this is added in the TLHC metrics functions and we don't want to cause issues
+    select(-calc_first_letter_date)
   
   # work out sequence of scans - requires a temp table calculating which to be joined to the main table afterwards
   # !! NB REQUIRES FILTER ON LDCT DATE, the following relies on at least one ldct date being non-NA
@@ -619,7 +684,12 @@ process_ldct <- function(df) {
   )
   rm(df_temp) # housekeeping
   
-  return(df)
+  # save the ldct table
+  saveRDS(
+    object = df,
+    file = here('data', 'tlhc', 'calc_tbTLHCTLHC_Pathway_LDCT.Rds'),
+    compress = F # don't compress to make metric calculation quicker
+  )
 }
 
 #' Process the Measurements table ----------------------------------------------
@@ -800,7 +870,7 @@ update_user(message = 'Setup complete and UDFs loaded')
 # load tables and run them through the processing function
 
 # initiate tlhc file read process with progress indicator
-update_user(message = 'Processing SQL tables, please wait ...', icon = '⏱️')
+update_user(message = 'Processing downloaded tables, please wait ...', icon = '⏱️')
 
 ## project lookups (used as reference) ----
 df_projectlu <- readRDS(file = here('data', 'tlhc', 'dboProjectLookup.Rds')) |> ungroup()
@@ -835,7 +905,7 @@ with_progress({
   # set up progress bar  
   p <- progressor(steps = length(df_table_details$table))
   
-  # call function to download table data
+  # call function to process table data
   df_table_details <- df_table_details |>
     mutate(
       data = future_pmap(
@@ -847,6 +917,9 @@ with_progress({
   
 })
 
+# post-process the ldct table
+update_user(message = 'Post-processing the LDCT table', icon = '⏱️')
+post_process_ldct()
 
 
 # manual processing - development only ----
