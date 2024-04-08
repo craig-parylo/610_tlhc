@@ -13,7 +13,7 @@ source(here('scripts', 'tlhc_general_functions.R'))
 archive_current_data_files()
 rm(list=ls())
 
-# Download tables from SQL server (estimated time = 30 mins)
+# Download tables from SQL server (estimated time = 1 hour)
 source(here('scripts', 'tlhc_general_functions.R'))
 get_southampton_invite_transaction_ids() # list out Southampton's newer transaction IDs
 file.edit(here('scripts', 'tlhc_download_sql_data.R')) # to update Southampton's transactionIDs (line #157)

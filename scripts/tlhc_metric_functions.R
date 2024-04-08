@@ -2540,13 +2540,13 @@ identify_registry_tumourid <- function(df, df_events) {
         abs()
     ) |> 
     # remove large outliers
-    filter(days_difference <= 40) |> 
+    filter(days_difference <= 15) |> 
     # keep best match per tumour
     group_by(TUMOUR_AVP_ID) |> 
     slice_min(n = 1, order_by = days_difference) |> 
     ungroup() |>
     # simplify output
-    select(TUMOUR_AVP_ID, TUMOUR_ID) |> 
+    select(TUMOUR_AVP_ID, TUMOUR_ID, days_difference) |> 
     unique()
     
   # step 2 - return the rr tumour table with identified TUMOUR_IDs
@@ -2558,6 +2558,47 @@ identify_registry_tumourid <- function(df, df_events) {
       )
   )
 
+}
+
+
+#' Remove duplicate diagnoses based on fingerprint
+#' 
+#' Create a list of diagnoses which are duplicated based on a fingerprinting
+#' process.
+#' 
+#' @return Tibble
+remove_duplicate_fingerprint_diagnoses <- function(df) {
+  
+  # create a subset of diagnoses which duplicate characteristics
+  df_duplicate <- df |> 
+    arrange(ParticipantID, diagnosis_date) |> 
+    mutate(
+      # create a fingerprint for each diagnosis - will help to check for duplicates
+      fingerprint = paste(
+        ParticipantID,
+        diagnosis_icd10_3c,
+        stage_group_temp = stage_group |> na_if('?') |> na_if('U'),
+        trust_code,
+        sep = '|'
+      ),
+      # flag records for the same participant, changed source and same fingerprint
+      flag_participant_same = (ParticipantID == lag(ParticipantID)) |> replace_na(replace = F),
+      flag_source_change = (!source == lag(source)) |> replace_na(replace = F),
+      flag_fingerprint_same = (fingerprint == lag(fingerprint)) |> replace_na(replace = F),
+      # flag days difference
+      days_diff = (as.Date(diagnosis_date) - lag(as.Date(diagnosis_date))) |> as.integer()
+    ) |> 
+    # limit to records of interest
+    filter(
+      flag_participant_same == T, # same participant
+      flag_source_change == T, # record from different source
+      flag_fingerprint_same == T, # similar diagnosis
+      days_diff < 100
+    )
+  
+  # return records from df which are not in the list of duplicated records
+  return(df |> filter(!pk %in% df_duplicate$pk))
+  
 }
 
 
@@ -2602,106 +2643,114 @@ get_df_cancer <- function() {
     identify_registry_tumourid(df_events = df_events)
   
   
-  # return a consolidated dataset
-  return(
-    bind_rows(
-      df_canc_registry |> 
-        select(
-          # keys
-          pk = TUMOUR_ID,      # native key
-          ParticipantID,       # TLHC key
-          
-          # tumour
-          diagnosis_date = DIAGNOSISDATEBEST,
-          diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
-          stage = STAGE_BEST,
-          tumour_site_group = tumour_site_group,
-          stage_group = stage_group,
-          
-          # patient demographics
-          gender_code = GENDER,
-          ethnicity_code = ETHNICITY,
-          age = AGE,
-          imd_quintile = IMD_QUINTILE,
-          
-          # geography
-          trust_code = DIAG_TRUST,
-          cancer_alliance = CANALLIANCE_2021_NAME
-        ) |> 
-        mutate(source = 'NCRAS Cancer Registry'),
-      
-      df_canc_rr_tumour |>
-        filter(
-          !TUMOUR_ID %in% df_canc_registry$TUMOUR_ID, # exclude records covered in cancer registry
-          DIAGNOSISDATE |> as.Date() > max(df_canc_registry$DIAGNOSISDATEBEST) # only include diagnoses after registry ends
-        ) |> 
-        select(
-          # keys
-          pk = TUMOUR_AVP_ID,
-          ParticipantID,
-          
-          # tumour
-          diagnosis_date = DIAGNOSISDATE,
-          diagnosis_icd10_3c = TUMOUR_SITE,
-          stage = STAGE,
-          tumour_site_group = tumour_site_group,
-          stage_group = stage_group,
-          
-          # patient demographics
-          gender_code = GENDER,
-          ethnicity_code = ETHNICCATEGORY,
-          age = PatientAge,
-          imd_quintile = QUINTILE_2019,
-          
-          # geography
-          trust_code = TRUST_CODE,
-          cancer_alliance = CANALLIANCE_2021_NAME
-        ) |> 
-        mutate(source = 'NCRAS RR Tumour'),
-    ) |> 
-      # look up coded values and convenience fields
-      mutate(
-        diagnosis_date_ym = diagnosis_date |> as.yearmon(),
-        gender = case_match(
-          gender_code,
-          0 ~ 'Not known',
-          1 ~ 'Male',
-          2 ~ 'Female',
-          9 ~ 'Not specified'
-        ),
-        ethnicity = case_match(
-          ethnicity_code,
-          'A' ~ 'British', 
-          'B' ~ 'Irish', 
-          'C' ~ 'Any other White background', 
-          'D' ~ 'White and Black Caribbean', 
-          'E' ~ 'White and Black African', 
-          'F' ~ 'White and Asian', 
-          'G' ~ 'Any other mixed background', 
-          'H' ~ 'Indian', 
-          'J' ~ 'Pakistani', 
-          'K' ~ 'Bangladeshi', 
-          'L' ~ 'Any other Asian background', 
-          'M' ~ 'Caribbean', 
-          'N' ~ 'African', 
-          'P' ~ 'Any other Black background', 
-          'R' ~ 'Chinese', 
-          'S' ~ 'Any other ethnic group', 
-          'Z' ~ 'Not stated', 
-          'X' ~ 'Not Known'
-        ),
-        ethnicity_group = case_match(
-          ethnicity_code,
-          c('0', 'A', 'B', 'C') ~ 'White',
-          c('D', 'E', 'F', 'G') ~ 'Mixed',
-          c('H', 'J', 'K', 'L') ~ 'Asian',
-          c('M', 'N', 'P') ~ 'Black',
-          c('R', 'S') ~ 'Other',
-          c('Z') ~ 'Not stated',
-          c(99, '99', 'X') ~ 'Not known'
-        )
+  # produce a consolidated dataset
+  df_cancer_1 <- bind_rows(
+    df_canc_registry |> 
+      select(
+        # keys
+        pk = TUMOUR_ID,      # native key
+        ParticipantID,       # TLHC key
+        
+        # tumour
+        diagnosis_date = DIAGNOSISDATEBEST,
+        diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
+        stage = STAGE_BEST,
+        tumour_site_group = tumour_site_group,
+        stage_group = stage_group,
+        
+        # patient demographics
+        gender_code = GENDER,
+        ethnicity_code = ETHNICITY,
+        age = AGE,
+        imd_quintile = IMD_QUINTILE,
+        
+        # geography
+        trust_code = DIAG_TRUST,
+        cancer_alliance = CANALLIANCE_2021_NAME
+      ) |> 
+      mutate(source = 'NCRAS Cancer Registry'),
+    
+    df_canc_rr_tumour |>
+      filter(
+        !TUMOUR_ID %in% df_canc_registry$TUMOUR_ID, # exclude records covered in cancer registry
+        DIAGNOSISDATE |> as.Date() > max(df_canc_registry$DIAGNOSISDATEBEST) # only include diagnoses after registry ends
+        #DIAGNOSISDATE |> as.Date() >= as.Date('2021-12-01')
+      ) |> 
+      select(
+        # keys
+        pk = TUMOUR_AVP_ID,
+        ParticipantID,
+        
+        # tumour
+        diagnosis_date = DIAGNOSISDATE,
+        diagnosis_icd10_3c = TUMOUR_SITE,
+        stage = STAGE,
+        tumour_site_group = tumour_site_group,
+        stage_group = stage_group,
+        
+        # patient demographics
+        gender_code = GENDER,
+        ethnicity_code = ETHNICCATEGORY,
+        age = PatientAge,
+        imd_quintile = QUINTILE_2019,
+        
+        # geography
+        trust_code = TRUST_CODE,
+        cancer_alliance = CANALLIANCE_2021_NAME
+      ) |> 
+      mutate(source = 'NCRAS RR Tumour'),
+  ) |> 
+    # look up coded values and convenience fields
+    mutate(
+      diagnosis_date_ym = diagnosis_date |> as.yearmon(),
+      gender = case_match(
+        gender_code,
+        0 ~ 'Not known',
+        1 ~ 'Male',
+        2 ~ 'Female',
+        9 ~ 'Not specified'
+      ),
+      ethnicity = case_match(
+        ethnicity_code,
+        'A' ~ 'British', 
+        'B' ~ 'Irish', 
+        'C' ~ 'Any other White background', 
+        '0' ~ 'Any other White background', # this is empirical from Cancer Registry data
+        'D' ~ 'White and Black Caribbean', 
+        'E' ~ 'White and Black African', 
+        'F' ~ 'White and Asian', 
+        'G' ~ 'Any other mixed background', 
+        'H' ~ 'Indian', 
+        'J' ~ 'Pakistani', 
+        'K' ~ 'Bangladeshi', 
+        'L' ~ 'Any other Asian background', 
+        'M' ~ 'Caribbean', 
+        'N' ~ 'African', 
+        'P' ~ 'Any other Black background', 
+        'R' ~ 'Chinese', 
+        'S' ~ 'Any other ethnic group', 
+        'Z' ~ 'Not stated', 
+        'X' ~ 'Not Known',
+        .default = '<blank>'
+      ),
+      ethnicity_group = case_match(
+        ethnicity_code,
+        c('0', 'A', 'B', 'C') ~ 'White', # '0' is empirical from Cancer Registry data
+        c('D', 'E', 'F', 'G') ~ 'Mixed',
+        c('H', 'J', 'K', 'L') ~ 'Asian',
+        c('M', 'N', 'P') ~ 'Black',
+        c('R', 'S') ~ 'Other',
+        #c('Z') ~ 'Not stated',
+        #c(99, '99', 'X') ~ 'Not known',
+        .default = 'Unknown'
       )
-  )
+    )
+  
+  # remove any further duplicates within 15 to 100 days date difference
+  df_cancer <- remove_duplicate_fingerprint_diagnoses(df = df_cancer_1)
+  
+  # return the result
+  return(df_cancer)
 }
 
 ## calculate aggregate metrics -------------------------------------------------
