@@ -67,7 +67,10 @@ invalid_transid_all <- c(
   235983,
   
   # 2024-04-08 - Doncaster - combined data with Blackburn Darwen and Blackpool - data will be resubmitted
-  245570, 244465, 250372, 250370
+  245570, 244465, 250372, 250370,
+  
+  # 2024-04-011 - Doncaster - agreed to exclude 27th Nov submission
+  232385
 )
 
 # UDF --------------------------------------------------------------------------
