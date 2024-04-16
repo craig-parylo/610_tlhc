@@ -64,7 +64,7 @@ invalid_transid_all <- c(
   227941,
   
   # 2024-01-24 - Tameside and Glossop to exclude TransactionID due to error submission. 
-  235983,
+  235983, 236096, 241449, 245029,
   
   # 2024-04-08 - Doncaster - combined data with Blackburn Darwen and Blackpool - data will be resubmitted
   245570, 244465, 250372, 250370,
