@@ -454,6 +454,7 @@ process_invites <- function(df) {
       calc_eligible = case_when(
         toupper(Invite_Outcome) %in% c(
           'PARTICIPANT DOES NOT MEET AGE CRITERIAA',
+          'PARTICIPANT DOES NOT MEET AGE CRITERIA',
           'PARTICIPANT DOES NOT MEET SMOKING CRITERIA',
           'PARTICIPANT REMOVED FROM GP LIST',
           'PARTICIPANT_REMOVED_FROM_GP_LIST'
@@ -582,6 +583,7 @@ post_process_ldct <- function() {
     mutate(
       # flag records where this phenomena is true so we can track them later on
       flag_reportdate_better_than_ldctdate = case_when(
+        # where the report date is a better fit for the sequence of events
         !is.na(calc_ldct_date_corrected) & # we need an ldct date
           !is.na(calc_ldct_report_date) & # we need a report date
           !is.na(calc_first_letter_date) & # we need a first letter date
