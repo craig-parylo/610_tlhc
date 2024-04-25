@@ -58,7 +58,7 @@ df_data_dictionary <- read_excel(path = 'sankey_data_dictionary.xlsx', sheet = '
 
 # Define UI for application
 ui <- page_sidebar(
-  title = 'Targeted Lung Health Checks',
+  title = 'Targeted Lung Health Checks (including provisional cancer outcomes)',
   #theme = bs_theme(bootswatch = 'bootstrap', version = 5),
   fillable = T,
   
@@ -84,13 +84,17 @@ ui <- page_sidebar(
             phase = list(inputId = 'phase', label = 'Phase'),
             invite_mode = list(inputId = 'invite_mode', label = 'Invite mode'),
             triage = list(inputId = 'triage_before_risk_assessment', label = 'Triage before risk assessment'),
+            lhc_delivery = list(inputId = 'lhc_delivery', label = 'LHC delivery model'),
+            admin = list(inputId = 'admin', label = 'Administrative delivery'),
             
             # demographic filters
             deprivation = list(inputId = 'calc_lsoa_imd_decile', label = 'Deprivation decile'),
             rurality = list(inputId = 'calc_lsoa_rurality_group_category', label = 'Rural / Urban'),
             ethnicity = list(inputId = 'calc_ethnic_group', label = 'Broad ethnic group'),
             gender = list(inputId = 'calc_sex', label = 'Gender'),
-            age_group = list(inputId = 'calc_age_group_ipsos', label = 'Age group')
+            age_group = list(inputId = 'calc_age_group_ipsos', label = 'Age group'),
+            smoking = list(inputId = 'smoking_status', label = 'Smoking status')
+            
           )
         )
       ),
@@ -117,15 +121,52 @@ ui <- page_sidebar(
       ),
       
       accordion_panel(
+        title = 'Changelog',
+        icon = bs_icon('list-ul') |> tooltip('Changes in this version of the app'),
+        
+        card(
+          full_screen = F,
+          card_header('April 2024 (Current version)'),
+          card_body(
+            tags$p('This version includes:'),
+            tags$ul(
+              tags$li('Activity up to February 2024,'),
+              tags$li(markdown('Cancer outcomes provided by [NCRAS](https://digital.nhs.uk/ndrs/about/ncras), including cancer type and staging.')),
+              tags$li(markdown('Additional filters for *LHC delivery*, *Administrative delivery* based on updated project delivery model survey.')),
+              tags$li(markdown('Additional filter for *Smoking status* calculated from Smoking Cessation, Measurement and LHC submissions.'))
+            ),
+            tags$p('Cancer outcome caveats:'),
+            tags$ul(
+              tags$li(markdown('Cancer diagnoses are <b>provisional</b> only.')),
+              tags$li('Diagnoses go up to April 2023 (latest available from NCRAS),'),
+              tags$li(markdown('Lung cancers are considered TLHC-associated if they are made within 147 days of a LHC or LDCT scan (provisional process).')),
+            )
+          )
+        ),
+        card(
+          full_screen = F,
+          card_header('December 2023'),
+          card_body(
+            tags$p('The pilot version of this app.'),
+            tags$ul(
+              tags$li('Activity up to September 2023.'),
+              tags$li('Added Sankey chart showing unfiltered data as a comparator.'),
+              tags$li('Pop-up labels modified to include percent of GP eligible population in each node and flow.')
+            )
+          )
+        )
+      ),
+      
+      accordion_panel(
         title = 'About',
         icon = bs_icon('link') |> tooltip('Details about this application'),
         markdown(
           'This resource has been produced by [The Strategy Unit](https://www.strategyunitwm.nhs.uk/) and [Ipsos](https://www.ipsos.com/en-uk) as part of the evaluation of the [Targeted Lung Health Check](https://www.england.nhs.uk/contact-us/privacy-notice/how-we-use-your-information/our-services/evaluation-of-the-targeted-lung-health-check-programme/) programme by NHS England.'
         ),
-        tags$p(paste0('This app includes activity up to ', as.character(dt_sankey), '.')),
+        #tags$p(paste0('This app includes activity up to ', as.character(dt_sankey), '.')),
         tags$br(),
-        img(src = 'TLHC Graphic.png', alt = 'Logo for the Targeted Lung Health Check Programme')
-      ),
+        img(src = 'TLHC Graphic.png', alt = 'Logo for the Targeted Lung Health Check Programme'),
+      )
     )
   ),
   
@@ -183,7 +224,7 @@ ui <- page_sidebar(
       # shorter plots
       layout_column_wrap(
         width = 2/12,
-        height = '300px',
+        height = '600px',
         
         card(
           full_screen = T,
@@ -214,6 +255,21 @@ ui <- page_sidebar(
           full_screen = T,
           card_header('Age group'),
           card_body(plotlyOutput('bar_age'))
+        ),
+        card(
+          full_screen = T,
+          card_header('Smoking status'),
+          card_body(plotlyOutput('bar_smoking'))
+        ),
+        card(
+          full_screen = T,
+          card_header('LHC delivery model'),
+          card_body(plotlyOutput('bar_lhc_delivery'))
+        ),
+        card(
+          full_screen = T,
+          card_header('Admin. delivery model'),
+          card_body(plotlyOutput('bar_admin'))
         )
       )
     ),
@@ -276,11 +332,11 @@ server <- function(input, output, session) {
     vars = reactive(c(
       # organisational filters
       'CAName', 'project', 'phase', 'invite_mode', 
-      'triage_before_risk_assessment',
+      'triage_before_risk_assessment', 'lhc_delivery', 'admin',
       
       # demographic filters
       'calc_lsoa_imd_decile', 'calc_lsoa_rurality_group_category', 
-      'calc_ethnic_group', 'calc_sex', 'calc_age_group_ipsos'
+      'calc_ethnic_group', 'calc_sex', 'calc_age_group_ipsos', 'smoking_status'
       )
     )
   )
@@ -776,6 +832,51 @@ server <- function(input, output, session) {
     plot <- create_breakdown_barchart(df_all = df_sankey |> mutate(calc_age_group_ipsos = fct_rev(calc_age_group_ipsos)), 
                                       df_prep = df_sankey_prep(), 
                                       variable = calc_age_group_ipsos, str_var = 'calc_age_group_ipsos')
+    
+    # customise the plot
+    plot |> 
+      layout(
+        font = list(family = 'system-ui')
+      )
+  })
+  
+  #### smoking ----
+  output$bar_smoking <- renderPlotly({
+    
+    # create a plot for our data
+    plot <- create_breakdown_barchart(df_all = df_sankey, 
+                                      df_prep = df_sankey_prep(), 
+                                      variable = smoking_status, str_var = 'smoking_status')
+    
+    # customise the plot
+    plot |> 
+      layout(
+        font = list(family = 'system-ui')
+      )
+  })
+  
+  #### lhc delivery ----
+  output$bar_lhc_delivery <- renderPlotly({
+    
+    # create a plot for our data
+    plot <- create_breakdown_barchart(df_all = df_sankey, 
+                                      df_prep = df_sankey_prep(), 
+                                      variable = lhc_delivery, str_var = 'lhc_delivery')
+    
+    # customise the plot
+    plot |> 
+      layout(
+        font = list(family = 'system-ui')
+      )
+  })
+  
+  #### admin ----
+  output$bar_admin <- renderPlotly({
+    
+    # create a plot for our data
+    plot <- create_breakdown_barchart(df_all = df_sankey, 
+                                      df_prep = df_sankey_prep(), 
+                                      variable = admin, str_var = 'admin')
     
     # customise the plot
     plot |> 

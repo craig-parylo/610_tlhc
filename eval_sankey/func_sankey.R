@@ -11,13 +11,11 @@ library(scales)
 get_flows_for_data_aggregate <- function(df, from, to, outcome) {
   
   # where 'from' and 'to' are not NA
-  df_from_to <- df |> 
+  df_from_to <- df |>
     select(participants, origin = !!from, destination = !!to) |> # select relevant fields
     mutate(participants, origin = as.character(origin), destination = as.character(destination)) |> # convert all to character
     filter(!is.na(origin), !is.na(destination)) |> # limit to where we have values in both
-    group_by(origin, destination) |> # group
-    summarise(flow = sum(participants, na.rm = T), .groups = 'drop_last') |> # sum participants
-    ungroup() # ungroup
+    summarise(flow = sum(participants, na.rm = T), .by = c(origin, destination)) # sum participants 
   
   # where 'to' is NA so flow is to outcome
   df_from_outcome <- df |>
@@ -25,10 +23,8 @@ get_flows_for_data_aggregate <- function(df, from, to, outcome) {
     filter(!is.na(origin), is.na(destination)) |> # limit to where we have an origin but not destination values
     select(participants, origin, destination = outcome) |> # set the destination as the overall outcome
     mutate(participants, origin = as.character(origin), destination = as.character(destination)) |> # convert all to character
-    group_by(origin, destination) |> # group
-    summarise(flow = sum(participants, na.rm = T), .groups = 'drop_last') |> # sum participants
-    ungroup()
-  
+    summarise(flow = sum(participants, na.rm = T), .by = c(origin, destination)) # sum participants
+
   # bind rows together
   return(
     bind_rows(
@@ -92,6 +88,7 @@ get_sankey_for_data <- function(df) {
       from = 'calc_invite_outcome',
       to = 'calc_lhc_delivery_methods_all',
       outcome = 'calc_lhc_attendance_category_overall'
+      #outcome = 'calc_ldct_count_groups'
     ),
     
     # LHC 2 - lhc delivery methods to contact count
@@ -100,6 +97,7 @@ get_sankey_for_data <- function(df) {
       from = 'calc_lhc_delivery_methods_all',
       to = 'calc_lhc_sequence_max_group',
       outcome = 'calc_lhc_attendance_category_overall'
+      #outcome = 'calc_ldct_count_groups'
     ),
     
     # LHC 3 - contact count to lhc attendance status
@@ -108,6 +106,7 @@ get_sankey_for_data <- function(df) {
       from = 'calc_lhc_sequence_max_group',
       to = 'calc_lhc_attendance_category_overall',
       outcome = 'calc_lhc_attendance_category_overall'
+      #outcome = 'calc_ldct_count_groups'
     ),
     
     # meas - lhc attendance status to risk score
@@ -116,6 +115,7 @@ get_sankey_for_data <- function(df) {
       from = 'calc_lhc_attendance_category_overall',
       to = 'calc_risk_assessment',
       outcome = 'calc_ineligible_status'
+      #outcome = 'calc_ldct_count_groups'
     ),
     
     # meas - risk score to eligible for scan
@@ -124,6 +124,7 @@ get_sankey_for_data <- function(df) {
       from = 'calc_risk_assessment',
       to = 'calc_ineligible_status',
       outcome = 'calc_ineligible_status'
+      #outcome = 'calc_ldct_count_groups'
     ),
     
     # ldct - scans
@@ -132,14 +133,35 @@ get_sankey_for_data <- function(df) {
       from = 'calc_ineligible_status',
       to = 'calc_ldct_count_groups',
       outcome = 'calc_ldct_count_groups'
-    ),
-    
-    
+    )
   ) |> 
     # convert NAs to a string
     mutate(
-      destination = replace_na(data = destination, replace = 'Loss to follow up')
-    )
+      #destination = replace_na(data = destination, replace = 'Loss to follow up')
+      destination = replace_na(data = destination, replace = 'Not scanned')
+    ) 
+  
+  # add in lc outcomes
+  df_summary <- bind_rows(
+    df_summary,
+    
+    # cancer diagnoses
+    get_flows_for_data_aggregate(
+      df = df |> mutate(calc_ldct_count_groups = calc_ldct_count_groups |> fct_na_value_to_level('Not scanned')),
+      from = 'calc_ldct_count_groups',
+      to = 'cancer_outcome',
+      outcome = 'cancer_outcome'
+    ),
+    
+    # cancer staging
+    get_flows_for_data_aggregate(
+      #df = df |> mutate(cancer_stage = cancer_stage |> fct_na_value_to_level('Stage NA')),
+      df = df |> filter(!is.na(cancer_stage)),
+      from = 'cancer_outcome',
+      to = 'cancer_stage',
+      outcome = 'cancer_stage'
+    ),
+  )
   
   # get the total eligible population
   temp_eligible_pop <- df_summary |> 
@@ -167,7 +189,10 @@ get_sankey_for_data <- function(df) {
             str_detect(name, 'GP eligible population') |
             str_detect(name, 'Loss to follow up') |
             str_detect(name, 'not applicable') |
-            str_detect(name, 'Low risk')
+            str_detect(name, 'Low risk') |
+            str_detect(name, 'Not scanned') |
+            str_detect(name, 'No lung cancer') |
+            str_detect(name, 'Stage NA')
         ) ~ '#7f8fa6',
         
         # green
@@ -175,7 +200,9 @@ get_sankey_for_data <- function(df) {
             str_detect(name, 'Attended') |
             str_detect(name, 'referred') |
             str_detect(name, 'High risk') |
-            str_detect(name, 'scan')
+            str_detect(name, 'scan') |
+            str_detect(name, 'Lung: TLHC') |
+            str_detect(name, 'TLHC:')
         ) ~ '#44bd32',
         
         # red
@@ -195,7 +222,10 @@ get_sankey_for_data <- function(df) {
         # blue
         ( str_detect(name, 'Virtual') |
             str_detect(name, 'F2F') |
-            str_detect(name, 'contacts')
+            str_detect(name, 'contacts') |
+            str_detect(name, 'Lung: Counterfactual') |
+            str_detect(name, 'Counterfactual:') |
+            str_detect(name, 'C: S')
         ) ~ '#0097e6'
       ),
       
@@ -212,58 +242,90 @@ get_sankey_for_data <- function(df) {
         name %in% c('Virtual', 'Virtual, F2F', 'F2F', 'F2F, Virtual') ~ 6,
         name %in% c('1 x contacts', '2 x contacts', '3+ contacts') ~ 7,
         name %in% c('LHC Attended', 'LHC DNA', 'LHC Incomplete', 'No attendance') ~ 8,
-        name %in% c('High risk', 'Low risk', 'No risk score') ~ 9,
+        name %in% c('High risk', 'Low risk', 'No risk score') ~ 9.1,
         name %in% c('LDCT: referred', 'LDCT: ineligible', 'LDCT: unknown') ~ 10,
-        name %in% c('1 x scan', '2 x scans', '3+ scans', 'Loss to follow up') ~ 11
+        name %in% c('1 x scan', '2 x scans', '3+ scans', 'Loss to follow up', 'Not scanned') ~ 11,
+        name %in% c('Lung: Counterfactual', 'Lung: TLHC', 'No lung cancer', 'Scanned: No lung cancer', 'TLHC: lung cancer', 'Counterfactual: lung cancer') ~ 12,
+        name %in% c('Counterfactual: Stage 1', 'Counterfactual: Stage 2', 'Counterfactual: Stage 3', 'Counterfactual: Stage 4', 'Counterfactual: Unknown stage', 'TLHC: Stage 1', 'TLHC: Stage 2', 'TLHC: Stage 3', 'TLHC: Stage 4', 'TLHC: Unknown stage', 'TLHC: S 1-2', 'TLHC: S 3-4', 'TLHC: S ?', 'C: S 1-2', 'C: S 3-4', 'C: S ?') ~ 13.5
       ),
       x = rescale(x, to = c(1e-09, 0.99)),
       
       # define vertical positions (1 = bottom, 0 = top)
-      y = case_when(
-        name %in% c(
-          'Invite 1 Accepted', 'Invite Accepted', 'Virtual', '1 x contacts', 
-          'LHC Attended', 'High risk', 'LDCT: referred', 'Initial scan', 
-          '3 month follow-up scan', '1 x scan'
-        ) ~ 0.0001,
+      y = case_match(
+        name,
+        'GP eligible population' ~ 0.5,
         
-        name %in% c(
-          '2 x scans', '3+ scans'
-        ) ~ 0.1,
+        # Invite 1
+        'Invite 1 Accepted' ~ 0.0001,
+        'Invite 1 No response' ~ 0.5,
+        'Invite 1 Declined' ~ 0.86,
+        'Invite 1 Ineligible' ~ 0.95,
         
-        name %in% c('LDCT: unknown', 'Invite 2 Accepted') ~ 0.15,
+        # Invite 2
+        'Invite 2 Accepted' ~ 0.135,
+        'Invite 2 No response' ~ 0.5,
+        'Invite 2 Declined' ~ 0.822,
+        'Invite 2 Ineligible' ~ 0.935,
         
-        name %in% c(
-          '2 x contacts', 'LHC Incomplete', 
-          'LDCT: ineligible', 'No risk score'
-        ) ~ 0.2,
+        # Invite 3
+        'Invite 3 Accepted' ~ 0.221,
+        'Invite 3 No response' ~ 0.58,
+        'Invite 3 Declined' ~ 0.76,
+        'Invite 3 Ineligible' ~ 0.928,
         
-        name %in% c(
-          'Invite 3 Accepted'
-        ) ~ 0.3,
+        # Invite outcome
+        'Invite Accepted' ~ 0.0001,
+        'Invite No response' ~ 0.5,
+        'Invite Declined' ~ 0.8,
+        'Invite Ineligible' ~ 0.92,
         
-        name %in% c(
-          'F2F', 'Virtual, F2F', 'F2F, Virtual', '3+ contacts', 'LHC DNA'
-        ) ~ 0.33,
+        # Attendance method
+        'Virtual' ~ 0.0001,
+        'F2F' ~ 0.1,
+        'F2F, Virtual' ~ 0.4,
         
-        name %in% c('LDCT: unknown', 'No attendance', 'Invite No response') ~ 0.4,
+        # Contact attempts
+        '1 x contacts' ~ 0.0001,
+        '2 x contacts' ~ 0.2,
+        '3+ contacts' ~ 0.4,
         
-        name %in% c('Low risk') ~ 0.45,
+        # Attendance status
+        'LHC Attended' ~ 0.0001,
+        'LHC DNA' ~ 0.1,
+        'LHC Incomplete' ~ 0.4,
+        'No attendance' ~ 0.5,
         
-        name %in% c('GP eligible population', 'Invite 1 No response') ~ 0.5,
+        # Risk status
+        'High risk' ~ 0.0001,
+        'Low risk' ~ 0.2,
+        'No risk score' ~ 0.3,
         
-        name %in% c('Loss to follow up') ~ 0.65,
+        # Scan referral
+        'LDCT: referred' ~ 0.0001,
+        'LDCT: unknown' ~ 0.25,
+        'LDCT: ineligible' ~ 0.4,
         
-        name %in% c('Invite 1 Declined') ~ 0.7,
+        # Scan count
+        '1 x scan' ~ 0.0001,
+        '2 x scans' ~ 0.1,
+        '3+ scans' ~ 0.2,
+        'Not scanned' ~ 0.7,
         
-        name %in% c('Invite 3 No response') ~ 0.61,
+        # Cancer outcomes
+        'Scanned: No lung cancer' ~ 0.0001,
+        'TLHC: lung cancer' ~ 0.21,
+        'Counterfactual: lung cancer' ~ 0.35,
+        'No lung cancer' ~ 0.7,
         
-        name %in% c('Invite 3 Declined') ~ 0.7,
+        # Staging
+        'TLHC: S 1-2' ~ 0.1,
+        'TLHC: S 3-4' ~ 0.2,
+        'TLHC: S ?' ~ 0.3,
+        'C: S 1-2' ~ 0.5,
+        'C: S 3-4' ~ 0.6,
+        'C: S ?' ~ 0.7,
         
-        name %in% c('Invite 1 Ineligible', 'Invite Declined') ~ 0.75,
-        
-        name %in% c('Invite 2 Declined', 'Invite 2 Declined') ~ 0.8,
-        
-        name %in% c('Invite 2 Ineligible', 'Invite 3 Ineligible', 'Invite Ineligible') ~ 0.99
+        .default = 0.5
       )
     ) |>
     left_join(
@@ -308,7 +370,7 @@ get_sankey_for_data <- function(df) {
     arrangement = 'snap',
     
     node = list(
-      label = nodes$name,
+      label = str_wrap(nodes$name, width = 11),
       color = nodes$colour,
       x = nodes$x,
       y = nodes$y,
