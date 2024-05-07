@@ -146,7 +146,7 @@ get_southampton_invite_transaction_ids <- function() {
 #'
 #' @return Tibble with summary figures
 #' @examples describe_df(df_demo) |> clipr::write_clip()
-describe_df <- function(df) {
+describe_df <- function(df, ignore_calc = T) {
   
   # take a subset of the df, excluding calculated columns and specified cols from db
   cols_ignore <- c(
@@ -161,9 +161,11 @@ describe_df <- function(df) {
     'UserEmail'
   )
   
-  df <- df |> 
-    # ignore calculated columns
-    select(!contains('calc_') & !any_of(cols_ignore))
+  if(ignore_calc){
+    df <- df |> 
+      # ignore calculated columns
+      select(!contains('calc_') & !any_of(cols_ignore))
+  }
   
   # convert junk values to NA
   df <- df |>
