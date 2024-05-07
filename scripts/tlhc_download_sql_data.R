@@ -162,7 +162,7 @@ download_tlhc_table <- function(str_table = '') {
       # 2023-03-15 Mansfield and Ashfield - conflicting submissions from John Taylor (M&A analyst) when they've agreed to use InHealth
       193337, 190088, 187407, 184381, 181572, 178642, 174358, 171666,
       166818, 159250, 156519, 154427, 150593, 148604, 146601, 144689,
-      142285, 136238, 134308, 131832,
+      142285, 136238, 134308, 131832
       
       #2023-12-19 Hull - agreed to exclude older the transactionID (now covered in all transactions excluded)
       # 204048,207752,211447,217873,221067,227941,
@@ -231,7 +231,7 @@ download_tlhc_table <- function(str_table = '') {
       # NNB, this list will need adding to each month to exclude the latest submission (RHM00)
       252978, 249663, 244394, 241097, 236620, 232593, 228258, 224003, 217935,  
       214302, 210541, 210540, 209188, 206415, 201904, 197086, 194098, 192749,  
-      190354, 187373, 186011, 184105, 181295, 181294,
+      190354, 187373, 186011, 184105, 181295, 181294
       
       # #2023-12-19 Hull - agreed to exclude older the transactionID (now covered in all transactions excluded)
       # 140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,
@@ -262,7 +262,7 @@ download_tlhc_table <- function(str_table = '') {
       invalid_transid_all,
       
       # 2023-07-31 Doncaster and Blackburn Darwen Blackpool submissions with date formatting issues
-      213175, 213218,
+      213175, 213218
       
       # #2023-12-19 Hull - agreed to exclude older the transactionID (now covered in all transactions excluded)
       # 140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,178204,181011,182807,186013,
@@ -292,7 +292,7 @@ download_tlhc_table <- function(str_table = '') {
       invalid_transid_all,
       
       # Luton South Bedfordshire - contains invalid ParticipantIDs
-      194295,
+      194295
       
       # #2023-12-19 Hull - agreed to exclude older the transactionID (now covered in all transactions excluded)
       # 140089,142110,145405,146378,148303,150483,154350,156613,158862,162770,166772,171187,174474,
@@ -332,6 +332,34 @@ download_tlhc_table <- function(str_table = '') {
     # downloading all data - been filtered by DSCRO team already
     df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
       collect()
+  
+  } else if (str_table == 'tbTLHCTLHC_Pathway_Diagnostics') {
+    
+    # We need a record per patient
+    
+    # define transactions to ignore
+    invalid_transid <- c(
+      
+      # transactions to be removed from all tables
+      invalid_transid_all,
+      
+      # 2024-05-07 Tameside and Glossop - received verbal instruction to remove
+      # all previous diagnostic records except the latest one. This is because
+      # their records have been QA'd by their clinical fellow
+      249670,245029,241449,236096,235983,232766,228835,225049,219135,214380,
+      211456,210479,207251,206698,203157,194310,181549,181508,175851,172001,
+      167589,167101,164057,159561,159196,159181,153945,148984,148884
+      
+    )
+    
+    df <- tbl(con, in_schema('dbo', str_table)) |> # lazy load
+      filter(!TransactionId %in% invalid_transid) |> # ignore invalid transactions
+      filter(!ParticipantID %in% df_participants_exclude_list) |> # ignore invalid participantIDs
+      group_by(ParticipantID) |> # get one record for each participant:
+      slice_max(ReceivedDate) |> # get record(s) with the latest datetime received
+      slice_max(CSURowNumber) |> # get record(s) with the highest CSU row number
+      filter(row_number(ParticipantID)==1) |>  # get the first row where multiples still exist
+      collect() # download the data
     
   } else {
     ## All other tables ----
