@@ -313,7 +313,8 @@ load_df_cancer_tumour <- function() {
   
   return(
     df <- readRDS(here('data', 'tlhc', 'NCRAS_Cancer_Tumour_Data_TLHC.Rds')) |> 
-      ungroup()
+      ungroup() |> 
+      filter(DatasetId == max(DatasetId)) # only include the latest DatasetId to ensure no duplicate records returned
   )
 }
 
@@ -328,7 +329,8 @@ load_df_cancer_pathway <- function() {
   
   return(
     df <- readRDS(here('data', 'tlhc', 'NCRAS_National_Cancer_Pathway_Data_TLHC.Rds')) |> 
-      ungroup()
+      ungroup() |> 
+      filter(DatasetId == max(DatasetId)) # only include the latest DatasetId to ensure no duplicate records returned
   )
 }
 
@@ -343,7 +345,8 @@ load_df_cancer_reg <- function() {
   
   return(
     df <- readRDS(here('data', 'tlhc', 'NCRAS_National_Cancer_Rapid_Registration_TLHC.Rds')) |> 
-      ungroup()
+      ungroup() |> 
+      filter(DatasetId == max(DatasetId)) # only include the latest DatasetId to ensure no duplicate records returned
   )
 }
 
