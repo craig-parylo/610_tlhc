@@ -227,6 +227,7 @@ process_demographics <- function(df) {
       # age
       calc_age = str_remove(Age, 'yrs'), # tidy up ages supplied as XXyrs
       calc_age = na_if(calc_age, 'NULL'), # explicitly cast string literal 'NULL' as NA
+      calc_age = na_if(calc_age, 'IA2'), # set as NA a spurious value that cannot be coerced to an age
       calc_age = as.numeric(calc_age), # cast to numeric
       calc_age_tlhc_valid = case_when( # categorises ages which are valid for tlhc (55-74)
         (calc_age >= 55) & (calc_age <= 74) ~ 'Valid', 
