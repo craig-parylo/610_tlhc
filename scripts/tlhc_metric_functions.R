@@ -2472,21 +2472,25 @@ group_cancers <- function(df, df_icd_group, type = 'registry') {
         left_join(
           y = icd_group_lu |>
             select(
-              SITE_ICD10R4_O2_FROM2013 = icd_10,
+              #SITE_ICD10R4_O2_FROM2013 = icd_10,
+              SITE_ICD10_3CHAR = icd_10, # to reflect variable in updated cancer data
               tumour_site_group_1 = tumour_site_group
             ) |>
             unique(),
-          by = 'SITE_ICD10R4_O2_FROM2013'
+          #by = 'SITE_ICD10R4_O2_FROM2013'
+          by = 'SITE_ICD10_3CHAR'
         ) |>
         # add in 3-char codes lookup
         left_join(
           y = icd_group_lu_3c |>
             select(
-              SITE_ICD10R4_O2_3CHAR_FROM2013 = icd10_3c,
+              #SITE_ICD10R4_O2_3CHAR_FROM2013 = icd10_3c,
+              SITE_ICD10_3CHAR = icd10_3c, # to reflect variable in updated cancer data
               tumour_site_group_2 = tumour_site_group_3c
             ) |>
             unique(),
-          by = 'SITE_ICD10R4_O2_3CHAR_FROM2013'
+          #by = 'SITE_ICD10R4_O2_3CHAR_FROM2013'
+          by = 'SITE_ICD10_3CHAR'
         ) |>
         # coalesce these to get the best response
         mutate(tumour_site_group = coalesce(tumour_site_group_1, tumour_site_group_2)) |>
@@ -2706,7 +2710,8 @@ get_df_cancer <- function() {
         
         # tumour
         diagnosis_date = DIAGNOSISDATEBEST,
-        diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
+        #diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
+        diagnosis_icd10_3c = SITE_ICD10_3CHAR, # to reflect variable in updated cancer data
         stage = STAGE_BEST,
         tumour_site_group = tumour_site_group,
         stage_group = stage_group,
@@ -2719,7 +2724,8 @@ get_df_cancer <- function() {
         
         # geography
         trust_code = DIAG_TRUST,
-        cancer_alliance = CANALLIANCE_2021_NAME
+        #cancer_alliance = CANALLIANCE_2021_NAME
+        cancer_alliance = CANALLIANCE_NAME # reflect the variable name in updated cancer table
       ) |> 
       mutate(source = 'NCRAS Cancer Registry'),
     
@@ -2745,11 +2751,13 @@ get_df_cancer <- function() {
         gender_code = GENDER,
         ethnicity_code = ETHNICCATEGORY,
         age = PatientAge,
-        imd_quintile = QUINTILE_2019,
+        #imd_quintile = QUINTILE_2019,
+        imd_quintile = IMD_QUINTILE, # to reflect the variable name in the updated cancer data
         
         # geography
         trust_code = TRUST_CODE,
-        cancer_alliance = CANALLIANCE_2021_NAME
+        #cancer_alliance = CANALLIANCE_2021_NAME
+        cancer_alliance = CANALLIANCE_NAME # to reflect the variable name in the updated cancer data
       ) |> 
       mutate(source = 'NCRAS RR Tumour'),
   ) |> 
@@ -2848,7 +2856,8 @@ get_df_cancer_v2 <- function() {
         
         # tumour
         diagnosis_date = DIAGNOSISDATEBEST,
-        diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
+        #diagnosis_icd10_3c = SITE_ICD10R4_O2_3CHAR_FROM2013,
+        diagnosis_icd10_3c = SITE_ICD10_3CHAR, # to reflect variable in updated cancer data
         stage = STAGE_BEST,
         tumour_site_group = tumour_site_group,
         stage_group = stage_group,
@@ -2861,7 +2870,8 @@ get_df_cancer_v2 <- function() {
         
         # geography
         trust_code = DIAG_TRUST,
-        cancer_alliance = CANALLIANCE_2021_NAME
+        #cancer_alliance = CANALLIANCE_2021_NAME
+        cancer_alliance = CANALLIANCE_NAME # reflects the variable name in the updated cancer data
       ) |> 
       mutate(source = 'NCRAS Cancer Registry'),
     
@@ -2887,11 +2897,13 @@ get_df_cancer_v2 <- function() {
         gender_code = GENDER,
         ethnicity_code = ETHNICCATEGORY,
         age = PatientAge,
-        imd_quintile = QUINTILE_2019,
+        #imd_quintile = QUINTILE_2019,
+        imd_quintile = IMD_QUINTILE, # to reflect the variable name in the updated cancer data
         
         # geography
         trust_code = TRUST_CODE,
-        cancer_alliance = CANALLIANCE_2021_NAME
+        #cancer_alliance = CANALLIANCE_2021_NAME
+        cancer_alliance = CANALLIANCE_NAME # to reflect the variable name in the updated cancer data
       ) |> 
       mutate(source = 'NCRAS RR Tumour'),
   ) |> 
