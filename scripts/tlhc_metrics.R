@@ -36,7 +36,7 @@ handlers(handler_progress(format='[:bar] :percent :eta :message')) # set up the 
 with_progress({
   
   update_user(message = 'Loading base tables', icon = '⏱️')
-  p <- progressor(steps = 13)
+  p <- progressor(steps = 14)
   
   df_demo <- load_df_demo()
   df_demo_join <- load_df_demo_join()
