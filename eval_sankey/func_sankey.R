@@ -192,7 +192,8 @@ get_sankey_for_data <- function(df) {
             str_detect(name, 'Low risk') |
             str_detect(name, 'Not scanned') |
             str_detect(name, 'No lung cancer') |
-            str_detect(name, 'Stage NA')
+            str_detect(name, 'Scanned: ') |
+            str_detect(name, 'Stage NA') 
         ) ~ '#7f8fa6',
         
         # green
@@ -245,7 +246,7 @@ get_sankey_for_data <- function(df) {
         name %in% c('High risk', 'Low risk', 'No risk score') ~ 9.1,
         name %in% c('LDCT: referred', 'LDCT: ineligible', 'LDCT: unknown') ~ 10,
         name %in% c('1 x scan', '2 x scans', '3+ scans', 'Loss to follow up', 'Not scanned') ~ 11,
-        name %in% c('Lung: Counterfactual', 'Lung: TLHC', 'No lung cancer', 'Scanned: No lung cancer', 'TLHC: lung cancer', 'Counterfactual: lung cancer') ~ 12,
+        name %in% c('Lung: Counterfactual', 'Lung: TLHC', 'No lung cancer', 'Scanned: No lung cancer', 'Scanned: Awaiting results', 'TLHC: lung cancer', 'Counterfactual: lung cancer') ~ 12,
         name %in% c('Counterfactual: Stage 1', 'Counterfactual: Stage 2', 'Counterfactual: Stage 3', 'Counterfactual: Stage 4', 'Counterfactual: Unknown stage', 'TLHC: Stage 1', 'TLHC: Stage 2', 'TLHC: Stage 3', 'TLHC: Stage 4', 'TLHC: Unknown stage', 'TLHC: S 1-2', 'TLHC: S 3-4', 'TLHC: S ?', 'C: S 1-2', 'C: S 3-4', 'C: S ?') ~ 13.5
       ),
       x = rescale(x, to = c(1e-09, 0.99)),
@@ -309,13 +310,14 @@ get_sankey_for_data <- function(df) {
         '1 x scan' ~ 0.0001,
         '2 x scans' ~ 0.1,
         '3+ scans' ~ 0.2,
-        'Not scanned' ~ 0.7,
+        'Not scanned' ~ 0.75,
         
         # Cancer outcomes
         'Scanned: No lung cancer' ~ 0.0001,
-        'TLHC: lung cancer' ~ 0.21,
-        'Counterfactual: lung cancer' ~ 0.35,
-        'No lung cancer' ~ 0.7,
+        'Scanned: Awaiting results' ~ 0.16,
+        'TLHC: lung cancer' ~ 0.31,
+        'Counterfactual: lung cancer' ~ 0.42,
+        'No lung cancer' ~ 0.75,
         
         # Staging
         'TLHC: S 1-2' ~ 0.1,
