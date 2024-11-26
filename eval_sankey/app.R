@@ -21,9 +21,12 @@ library(bsicons)                          # UI icons
 library(datamods)                         # use of select_group_x to filter data based on user-selections
 library(readxl)                           # reading the data dictionary in Excel format
 library(reactable)                        # presenting the data dictionary
+#library(rclipboard)                       # copying data to the clipboard
 
 # data -------------------------------------------------------------------------
-df_sankey <- readRDS(file ='df_sankey_preagg.Rds') |> 
+df_sankey <- 
+  readRDS(file ='df_sankey_preagg.Rds') |> 
+  #readRDS(file = here('eval_sankey', 'df_sankey_preagg.Rds')) |> 
   # remove phase 3 projects
   filter(!phase == 'Phase 3') |> 
   # tidy up data to ensure they are presented as sensible options in the pickers
@@ -47,18 +50,118 @@ df_sankey <- readRDS(file ='df_sankey_preagg.Rds') |>
     # NB, already a factor, just relevelling and coding NAs as a level
     calc_age_group_ipsos = fct_collapse(.f = calc_age_group_ipsos, Other = c('Other', 'Age below zero')), # group age<0 with other
     calc_age_group_ipsos = fct_relevel(.f = calc_age_group_ipsos, '55-64', '65-74', '75', 'Other'), # move other to end
-    calc_age_group_ipsos = fct_na_value_to_level(f = calc_age_group_ipsos, level = 'Not known')
+    calc_age_group_ipsos = fct_na_value_to_level(f = calc_age_group_ipsos, level = 'Not known'),
+    
+    # report breakdowns
+    rpt_total = 'Total',
+    
+    rpt_imd_quintile = calc_lsoa_imd_decile |> 
+      as.character() |> 
+      case_match(
+        c('1', '2') ~ 'Q1',
+        c('3', '4', '5', '6', '7', '8', '9', '10') ~ 'Q2-5',
+        'Not known' ~ 'Not known'
+      ) |> 
+      fct(levels = c('Q1', 'Q2-5', 'Not known')),
+    
+    rpt_age_group = calc_age_group_ipsos |> 
+      as.character() |> 
+      case_match(
+        c('55-64') ~ '55-64yrs',
+        c('65-74') ~ '65-74yrs',
+        c('75') ~ '75yrs',
+        c('Other') ~ 'Other',
+        'Not known' ~ 'Not known'
+      ) |> 
+      fct(levels = c('55-64yrs', '65-74yrs', '75yrs', 'Other', 'Not known')),
+    
+    rpt_gender = calc_sex,
+    
+    rpt_ethnicity = calc_ethnic_group |> 
+      as.character() |> 
+      case_match(
+        c('White') ~ 'White',
+        c('Not known') ~ 'Not known',
+        c('Asian or Asian British', 'Black or Black British', 'Mixed', 'Other Ethnic Group') ~ 'Other ethnicities'
+      ) |> 
+      fct(levels = c('White', 'Other ethnicities', 'Not known')),
+    
+    rpt_invite_model = invite_mode,
+    
+    rpt_lhc_model = lhc_delivery,
+    
+    rpt_triage = triage_before_risk_assessment |> fct_recode('Not known' = 'Unknown'),
+    
+    rpt_admin = admin |> fct_recode('Not known' = 'Unknown')
   )
 
 dt_sankey <- 'September 2023'
 
 df_data_dictionary <- read_excel(path = 'sankey_data_dictionary.xlsx', sheet = 'data_dictionary')
 
+calculate_sankey_metrics_per_group <- function(df = df_sankey, group_var = 'rpt_total') {
+  
+  # convert group_var to a symbol
+  group_var <- as.symbol(group_var)
+  
+  
+  df |> 
+    # remove any NA rows from the data
+    filter(!is.na({{ group_var }})) |> 
+    
+    # limit to cohort based on lhc date
+    #filter(flag_lhc_before_sep23 == T) |> 
+    #filter(flag_lhc_before_sep23minus45d == T) |> 
+    filter(flag_lhc_before_sep23minus185d == T) |> 
+    
+    # calculate metrics
+    summarise(
+      # invitations
+      'Invites sent (first invite)' = sum(participants[!is.na(calc_invite_1)], na.rm = T),
+      'Invites sent (second invite)' = sum(participants[!is.na(calc_invite_2)], na.rm = T),
+      'Invites sent (third invite)' = sum(participants[!is.na(calc_invite_3)], na.rm = T),
+      'Invites sent (follow-up)' = `Invites sent (second invite)` + `Invites sent (third invite)`,
+      'Invites sent (total)' = `Invites sent (first invite)` + `Invites sent (follow-up)`,
+      
+      # lhc
+      'Attended LHC (F2F)' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended')) & (calc_lhc_delivery_methods_all %in% c('F2F'))], na.rm = T),
+      'Attended LHC (Virtual)' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended')) & (calc_lhc_delivery_methods_all %in% c('Virtual'))], na.rm = T),
+      'Attended LHC (Hybrid)' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended')) & (calc_lhc_delivery_methods_all %in% c('F2F, Virtual'))], na.rm = T),
+      'Attended LHC (total)' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended'))], na.rm = T),
+      
+      # lhc alternatives
+      #'Attended LHC (total) to Aug 2023' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended')) & (flag_lhc_before_sep23 == T)], na.rm = T),
+      #'Attended LHC (total) to Aug 2023 less 45d' = sum(participants[(calc_lhc_attendance_category_overall %in% c('LHC Attended')) & (flag_lhc_before_sep23minus45d == T)], na.rm = T),
+      
+      # lhc outcomes
+      'LHC uptake (total)' = `Attended LHC (total)` / `Invites sent (first invite)`,
+      'Eligible & referred to LDCT' = sum(participants[calc_risk_assessment %in% c('High risk')], na.rm = T),
+      
+      # ldct outcomes
+      'Attended baseline LDCT' = sum(participants[!is.na(calc_ldct_count_groups)], na.rm = T),
+      'CT scan conversion (eligible)' = `Eligible & referred to LDCT` / `Attended LHC (total)`,
+      'CT scan conversion (realised)' = `Attended baseline LDCT` / `Attended LHC (total)`,
+      
+      # outcomes
+      'TLHC: lung cancer' = sum(participants[cancer_outcome %in% c('TLHC: lung cancer')], na.rm = T),
+      'Counterfactual: lung cancer' = sum(participants[cancer_outcome %in% c('Counterfactual: lung cancer')], na.rm = T),
+      'Scanned: no lung cancer' = sum(participants[cancer_outcome %in% c('Scanned: No lung cancer')], na.rm = T),
+      'TLHC: S1-2' = sum(participants[cancer_stage %in% c('TLHC: S 1-2')], na.rm = T),
+      'TLHC: S3-4' = sum(participants[cancer_stage %in% c('TLHC: S 3-4')], na.rm = T),
+      'TLHC: S?' = sum(participants[cancer_stage %in% c('TLHC: S ?')], na.rm = T),
+      
+      # grouping
+      .by = {{ group_var }}
+      
+    ) |> 
+    arrange({{ group_var }})
+}
+
 # ui ---------------------------------------------------------------------------
 
 # Define UI for application
 ui <- page_sidebar(
-  title = 'Targeted Lung Health Checks (including provisional cancer outcomes)',
+  title = 'Targeted Lung Health Checks (including cancer outcomes to Aug 2023)',
   #theme = bs_theme(bootswatch = 'bootstrap', version = 5),
   fillable = T,
   
@@ -70,6 +173,7 @@ ui <- page_sidebar(
     accordion(
       open = F, # ensure all panels are closed by default
       
+      ### filters ----
       accordion_panel(
         title = 'Filters',
         icon = bs_icon('filter') |> tooltip('Use these controls to filter the data and see the resulting Sankey chart'),
@@ -93,12 +197,14 @@ ui <- page_sidebar(
             ethnicity = list(inputId = 'calc_ethnic_group', label = 'Broad ethnic group'),
             gender = list(inputId = 'calc_sex', label = 'Gender'),
             age_group = list(inputId = 'calc_age_group_ipsos', label = 'Age group'),
-            smoking = list(inputId = 'smoking_status', label = 'Smoking status')
+            smoking = list(inputId = 'smoking_status', label = 'Smoking status*')
             
           )
-        )
+        ),
+        tags$footer('* Smoking status is identified at LHC so is unknown for many people, especially those who did not engage with the programme.')
       ),
       
+      ### interpretation ----
       accordion_panel(
         title = 'Interpreting Sankey charts',
         icon = bs_icon('info-circle') |> tooltip('A short guide to what Sankey charts show and how they are applied to the TLHC data'),
@@ -120,13 +226,30 @@ ui <- page_sidebar(
         )
       ),
       
+      ### changelog ----
       accordion_panel(
         title = 'Changelog',
         icon = bs_icon('list-ul') |> tooltip('Changes in this version of the app'),
         
         card(
           full_screen = F,
-          card_header('April 2024 (Current version)'),
+          card_header('May 2024 (Current version)'),
+          tags$p('Metric tables have been removed, as included in error.')
+        ),
+        card(
+          full_screen = F,
+          card_header('May 2024'),
+          tags$p('This version includes:'),
+          tags$ul(
+            tags$li('Activity up to March 2024,'),
+            tags$li('Cancer diagnoses up to August 2023,'),
+            tags$li('Lung cancers are considered TLHC-associated if they are made within 185 days of a LHC or LDCT scan (approved process).'),
+            tags$li('A new section containing a table of metrics explorable by a range of health inequalities and implementation methods, designed for inclusion in the final evaluation report.')
+          )
+        ),
+        card(
+          full_screen = F,
+          card_header('April 2024'),
           card_body(
             tags$p('This version includes:'),
             tags$ul(
@@ -157,6 +280,7 @@ ui <- page_sidebar(
         )
       ),
       
+      ### about ----
       accordion_panel(
         title = 'About',
         icon = bs_icon('link') |> tooltip('Details about this application'),
@@ -306,9 +430,40 @@ ui <- page_sidebar(
     ### data dictionary --------------------------------------------------------
     accordion_panel(
       title = 'Data dictionary',
-      icon = bs_icon('info') |> tooltip('Shows the data dictionary'),
+      icon = bs_icon('info') |> tooltip('Shows the data dictionary for the Sankey plots'),
       reactableOutput('data_dictionary')
-    )
+    ),
+    
+    ### report metrics  --------------------------------------------------------
+    accordion_panel(
+      title = 'Report metrics',
+      icon = bs_icon('info') |> tooltip('Metrics for inclusion within the final evaluation report'),
+      selectInput(
+        inputId = 'report_metrics_breakdown',
+        label = 'Breakdown',
+        choices = list(
+          'All' = list('Total' = 'rpt_total'),
+
+          'Health inequalities' = list(
+            'Deprivation' = 'rpt_imd_quintile',
+            'Age' = 'rpt_age_group',
+            'Gender' = 'rpt_gender',
+            'Ethnicity' = 'rpt_ethnicity'
+          ),
+
+          'Implementation methods' = list(
+            'Invite model' = 'rpt_invite_model',
+            'LHC model' = 'rpt_lhc_model',
+            #'CT scan model' = 'rpt_scan_model',
+            'Triage' = 'rpt_triage',
+            'Administration' = 'rpt_admin'
+          )
+        ),
+        selected = 'rpt_total'
+      ),
+      gt_output('report_metrics'),
+      gt_output('report_metrics_definitions')
+    ),
   )
 )
 
@@ -903,6 +1058,81 @@ server <- function(input, output, session) {
       )
   })
   
+  ## report metrics -----
+  output$report_metrics <- render_gt({
+    
+    # get a friendly version of the breakdown provided
+    breakdown = case_match(
+      input$report_metrics_breakdown,
+      'rpt_total' ~ 'All',
+      'rpt_imd_quintile' ~ 'Deprivation',
+      'rpt_age_group' ~ 'Age group',
+      'rpt_gender' ~ 'Gender',
+      'rpt_ethnicity' ~ 'Ethnicity',
+      'rpt_invite_model' ~ 'Invite model',
+      'rpt_lhc_model' ~ 'LHC model',
+      'rpt_triage' ~ 'Triage',
+      'rpt_admin' ~ 'Admin model',
+      .default = 'Breakdown'
+    )
+    
+    # update the metrics based on selected breakdown
+    calculate_sankey_metrics_per_group(df = df_sankey, group_var = input$report_metrics_breakdown) |> 
+      gt(
+        rowname_col = input$report_metrics_breakdown
+      ) |> 
+      tab_header(
+        title = md(glue::glue('Report metrics: *{breakdown}*')),
+        subtitle = 'These figures are required for the patient-level analysis to be included in the main body of the final report'
+      ) |> 
+      tab_stubhead(label = breakdown) |> 
+      fmt_number(
+        columns = c(everything(), -c('LHC uptake (total)', 'CT scan conversion (eligible)', 'CT scan conversion (realised)')),
+        decimals = 0
+      ) |> 
+      fmt_percent(
+        columns = c('LHC uptake (total)', 'CT scan conversion (eligible)', 'CT scan conversion (realised)')
+      ) |> 
+      sub_small_vals(
+        columns = c(everything(), -c('LHC uptake (total)', 'CT scan conversion (eligible)', 'CT scan conversion (realised)')),
+        threshold = 10,
+        small_pattern = '<{x}'
+      )
+
+  })
+  
+  ## report metric definitions ----
+  output$report_metrics_definitions <- render_gt({
+    dplyr::tribble(
+      ~'Metric', ~'Definition',
+      'Invites sent (first invite)', '# first invites sent',
+      'Invites sent (second invite)', '# second invites sent',
+      'Invites sent (third invite)', '# third invites sent',
+      'Invites sent (follow-up)', '# follow-up invites sent (i.e, second AND third invites)',
+      'Invites sent (total)', '# total invites sent (i.e. first invites AND follow-up invites)',
+      'Attended LHC (F2F)', '# F2f LHCs attended',
+      'Attended LHC (Virtual)', '# Virtual LHCs attended',
+      'Attended LHC (Total)', '# Total LHCs attended',
+      'LHC uptake (total)', '# attended a Lung Health Check appt / # first invites sent',
+      'Eligible & referred to LDCT', '# Eligible & referred to LDCT',
+      'Attended baseline LDCT', '# attended baseline LDCT',
+      'CT scan conversion (eligible)', '# eligible & referred for a CT scan / # attended a Lung Health Check appt',
+      'CT scan conversion (realised)', '# attended a baseline CT scan / # attended a Lung Health Check appt',
+      'TLHC: lung cancer', '# participants with a low-dose CT scan or were assessed as high risk at LHC and a lung cancer diagnosed within 185 days of their TLHC contact.',
+      'Counterfactual: lung cancer', '# participants who have a lung cancer diagnosis which is not associated with TLHC activity because i) they did not take up the offer of a LHC, or ii) attended LHC but were assessed as low risk, or iii) had a scan but the diagnosis was made over 185 days following their scan.',
+      'Scanned: No lung cancer', '# participants who were scanned as part of the TLHC programme and do not have a lung cancer diagnosis.',
+      'TLHC: S1-2', '# participants diagnosed with a stage 1 or 2 cancer, who received a low-dose CT scan or were assessed as high risk at LHC and a lung cancer diagnosed within 185 days of their TLHC contact.',
+      'TLHC: S3-4', '# participants diagnosed with a stage 3 or 4 cancer, who received a low-dose CT scan or were assessed as high risk at LHC and a lung cancer diagnosed within 185 days of their TLHC contact.',
+      'TLHC: S?', '# participants diagnosed with a stage unknown cancer, who received a low-dose CT scan or were assessed as high risk at LHC and a lung cancer diagnosed within 185 days of their TLHC contact.',
+    ) |> 
+      gt() |> 
+      tab_header(title = '', subtitle = 'Metric definitions') |> 
+      tab_style(
+        style = cell_text(color = '#596275', size = '9pt'),
+        locations = cells_body()
+      )
+  })
+
 }
 
 # Run the application 
