@@ -2706,6 +2706,25 @@ get_df_cancer <- function() {
   # produce a consolidated dataset
   df_cancer_1 <- bind_rows(
     df_canc_registry |> 
+      # fix the imd_quintile reporting
+      mutate(
+        # If get weird message then use QUINTILE value
+        IMD_DECILE_FIXED = case_match(
+          IMD_DECILE,
+          'Diagnosed in 2013 is 2015 quintile otherwise 2019 quintile' ~ IMD_QUINTILE,
+          .default = IMD_DECILE
+        ),
+        
+        # now convert deciles to quintiles
+        IMD_QUINTILE_FIXED = case_match(
+          IMD_DECILE_FIXED,
+          c('1 - most deprived', '2') ~ '1 - most deprived',
+          c('3', '4') ~ '2',
+          c('5', '6') ~ '3',
+          c('7', '8') ~ '4',
+          c('9', '10 - least deprived') ~ '5 - least deprived'
+        ) 
+      ) |> 
       select(
         # keys
         pk = TUMOUR_ID,      # native key
@@ -2723,12 +2742,15 @@ get_df_cancer <- function() {
         gender_code = GENDER,
         ethnicity_code = ETHNICITY,
         age = AGE,
-        imd_quintile = IMD_QUINTILE,
+        imd_quintile = IMD_QUINTILE_FIXED,
         
         # geography
         trust_code = DIAG_TRUST,
         #cancer_alliance = CANALLIANCE_2021_NAME
-        cancer_alliance = CANALLIANCE_NAME # reflect the variable name in updated cancer table
+        cancer_alliance = CANALLIANCE_NAME, # reflect the variable name in updated cancer table
+        
+        # referral details
+        diag_route = FINAL_ROUTE
       ) |> 
       mutate(source = 'NCRAS Cancer Registry'),
     
@@ -2760,7 +2782,10 @@ get_df_cancer <- function() {
         # geography
         trust_code = TRUST_CODE,
         #cancer_alliance = CANALLIANCE_2021_NAME
-        cancer_alliance = CANALLIANCE_NAME # to reflect the variable name in the updated cancer data
+        cancer_alliance = CANALLIANCE_NAME, # to reflect the variable name in the updated cancer data
+        
+        # referral details
+        diag_route = FINAL_ROUTE
       ) |> 
       mutate(source = 'NCRAS RR Tumour'),
   ) |> 
@@ -2807,7 +2832,24 @@ get_df_cancer <- function() {
         #c('Z') ~ 'Not stated',
         #c(99, '99', 'X') ~ 'Not known',
         .default = 'Unknown'
-      )
+      ),
+      
+      # convert deprivation to ordered factor
+      imd_quintile = imd_quintile |> fct(
+        levels = c(
+          '1 - most deprived', '2', '3', '4', '5 - least deprived'
+        )
+      ),
+      
+      # convert age to age group
+      age_group = fct_na_value_to_level(
+          f = cut(
+            x = age,
+            breaks = c(-Inf, -1, 54, 64, 74, 75, Inf),
+            labels = c('Age below zero', 'Other', '55-64', '65-74', '75', 'Other')
+          ),
+          level = 'Not known'
+        )
     )
   
   # remove any further duplicates within 15 to 100 days date difference
